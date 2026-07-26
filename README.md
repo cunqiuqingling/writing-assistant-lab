@@ -8,7 +8,19 @@ A local-first English writing practice studio. It helps learners move from sente
 
 [中文说明](README.zh-CN.md)
 
-![Writing Assistant interface](assets/screenshot.png)
+## Interface
+
+### Sentence Lab
+
+![Sentence Lab](assets/sentence-lab.png)
+
+### Paragraph Lab
+
+![Paragraph Lab](assets/paragraph-lab.png)
+
+### Practice Library
+
+![Practice Library](assets/practice-library.png)
 
 ## Why this project
 
