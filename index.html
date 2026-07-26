@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light" />
+  <meta name="description" content="A local-first English writing practice studio for sentence imitation, paragraph development and independent writing." />
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="assets/styles.css" />
+  <title>Writing Assistant</title>
+  
+</head>
+<body data-lab-active="sentence">
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">W</div>
+        <div>
+          <div class="brand-title-row">
+            <div class="brand-title">Writing Assistant</div>
+            <span class="version-badge">0.5.0</span>
+          </div>
+          <div class="brand-sub">Sentence → Paragraph → Independent Writing</div>
+        </div>
+      </div>
+
+      <nav class="lab-tabs" aria-label="练习功能">
+        <button class="lab-tab active" data-lab="sentence">Sentence Lab</button>
+        <button class="lab-tab" data-lab="paragraph">Paragraph Lab</button>
+        <button class="lab-tab" data-lab="library">Practice Library</button>
+      </nav>
+
+      <div class="top-actions">
+        <span class="local-status" title="练习默认保存在当前浏览器，不会上传">
+          <span class="status-dot"></span> Local-only
+        </span>
+        <div class="data-menu-wrap">
+          <button class="btn data-menu-trigger" id="dataMenuBtn" aria-haspopup="true" aria-expanded="false">Data &amp; Backup</button>
+          <div class="data-menu" id="dataMenu" role="menu" hidden>
+            <div class="data-menu-head">
+              <strong>数据与备份</strong>
+              <span id="dataMenuStatus">浏览器实时保存已开启</span>
+            </div>
+            <button class="menu-action" id="addMaterialBtn" role="menuitem"><span>＋</span><span><strong>添加本地材料</strong><small>保存到这台设备的练习库</small></span></button>
+            <button class="menu-action" id="chooseFolderBtn" role="menuitem"><span>⌁</span><span><strong>选择备份文件夹</strong><small>支持的浏览器可直接写入文件夹</small></span></button>
+            <button class="menu-action" id="saveBackupBtn" role="menuitem"><span>↓</span><span><strong>保存备份</strong><small>导出练习、笔记和自建材料</small></span></button>
+            <button class="menu-action" id="importBackupBtn" role="menuitem"><span>↺</span><span><strong>恢复备份</strong><small>从 Writing Assistant JSON 恢复</small></span></button>
+            <div class="menu-divider"></div>
+            <button class="menu-action danger-text" id="clearLocalDataBtn" role="menuitem"><span>×</span><span><strong>清空本地练习数据</strong><small>不会删除内置练习材料</small></span></button>
+          </div>
+        </div>
+        <input type="file" id="backupFileInput" accept=".json,application/json" hidden />
+      </div>
+    </header>
+
+    <main class="workspace">
+      <aside class="panel left-panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title" id="leftTitle">句子练习目录</div>
+            <div class="panel-note">浏览器实时保存</div>
+          </div>
+          <button class="btn small" id="openLibraryBtn">选材</button>
+        </div>
+        <div class="source-meta">
+          <div class="source-name" id="sourceName">尚未选择材料</div>
+          <div class="source-info" id="sourceInfo">从练习库选择或添加一篇文本。</div>
+        </div>
+        <div class="progress-wrap" id="progressWrap">
+          <div class="progress-line"><div class="progress-bar" id="progressBar"></div></div>
+          <div class="progress-text" id="progressText">尚未开始</div>
+        </div>
+        <div class="unit-list" id="unitList"></div>
+      </aside>
+
+      <section class="panel main-panel">
+        <section class="view active" id="sentenceView">
+          <div class="empty" id="sentenceEmpty">
+            <div class="empty-box">
+              <div class="empty-icon">Aa</div>
+              <h1>Sentence Lab</h1>
+              <p>从练习库选择材料，按句子、段落或智能短段拆分。你可以精准跟写，也可以参考结构完成自己的仿写。</p>
+              <button class="btn primary" id="sentenceChooseBtn">选择练习材料</button>
+            </div>
+          </div>
+          <div id="sentencePractice" style="display:none">
+            <div class="view-top">
+              <div>
+                <div class="eyebrow" id="sentenceUnitLabel">Sentence Practice</div>
+                <h1 id="sentenceHeading">结构仿写</h1>
+              </div>
+              <div class="controls">
+                <select id="sentenceModeSelect" aria-label="句子练习模式">
+                  <option value="imitate">结构仿写</option>
+                  <option value="copy">精准跟写</option>
+                </select>
+                <select id="splitModeSelect" aria-label="拆分方式">
+                  <option value="sentence">按句子</option>
+                  <option value="paragraph">按段落</option>
+                  <option value="smart">智能短段</option>
+                </select>
+                <button class="btn small" id="resplitBtn">重新拆分</button>
+                <select id="fontSizeSelect" aria-label="字号">
+                  <option value="16">小字号</option>
+                  <option value="18" selected>中字号</option>
+                  <option value="20">大字号</option>
+                </select>
+              </div>
+            </div>
+            <div class="target-card">
+              <div class="card-label"><span>原文 · TARGET</span><button class="btn small" id="copySentenceOriginalBtn">复制原文</button></div>
+              <div class="target-text" id="sentenceTarget"></div>
+            </div>
+            <div class="writer-wrap">
+              <textarea class="writer" id="sentenceWriter" spellcheck="true" placeholder="参考原文结构和搭配，写出自己的句子……"></textarea>
+              <div class="autosave" id="sentenceAutosave">已自动保存</div>
+            </div>
+            <div class="stats">
+              <div class="stat"><div class="stat-value" id="sentenceWordStat">0</div><div class="stat-label">输入词数</div></div>
+              <div class="stat"><div class="stat-value" id="sentenceCharStat">0</div><div class="stat-label">输入字符</div></div>
+              <div class="stat"><div class="stat-value" id="sentenceAccuracyStat">—</div><div class="stat-label">跟写准确率</div></div>
+              <div class="stat"><div class="stat-value" id="sentenceCompletionStat">0%</div><div class="stat-label">长度进度</div></div>
+            </div>
+            <div class="actions">
+              <div><button class="btn" id="sentencePrevBtn">← 上一单元</button><button class="btn" id="sentenceNextBtn">下一单元 →</button></div>
+              <div><button class="btn soft" id="copySentenceCurrentBtn">复制本单元</button><button class="btn primary" id="copySentenceAllBtn">复制全部已练习</button></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" id="paragraphView">
+          <div class="empty" id="paragraphEmpty">
+            <div class="empty-box">
+              <div class="empty-icon">¶</div>
+              <h1>Paragraph Lab</h1>
+              <p>段落训练不再只看单句是否正确，而是训练观点、原因、机制、例子、限定与回扣之间的推进关系。</p>
+              <button class="btn primary" id="paragraphChooseBtn">选择段落材料</button>
+            </div>
+          </div>
+          <div id="paragraphPractice" style="display:none">
+            <div class="view-top">
+              <div>
+                <div class="eyebrow" id="paragraphUnitLabel">Paragraph Practice</div>
+                <h1 id="paragraphHeading">段落拆解</h1>
+              </div>
+              <div class="controls"><button class="btn small" id="copySourceParagraphBtn">复制原段落</button></div>
+            </div>
+            <div class="mode-tabs">
+              <button class="mode-tab active" data-paragraph-mode="breakdown">段落拆解</button>
+              <button class="mode-tab" data-paragraph-mode="guided">引导式搭建</button>
+              <button class="mode-tab" data-paragraph-mode="transfer">骨架迁移</button>
+              <button class="mode-tab" data-paragraph-mode="independent">独立段落</button>
+            </div>
+
+            <div class="paragraph-mode active" id="paragraphBreakdownMode">
+              <div class="sub-card">
+                <div class="card-label"><span>逐句标注功能</span><span>不要先看答案，先判断每句为什么存在</span></div>
+                <div id="roleRows"></div>
+              </div>
+              <div class="writer-wrap">
+                <textarea class="field-area" id="breakdownNote" placeholder="写下这一段的推进路径、最值得模仿的地方，以及哪里出现了转折或限定……"></textarea>
+                <div class="autosave">已自动保存</div>
+              </div>
+            </div>
+
+            <div class="paragraph-mode" id="paragraphGuidedMode">
+              <div class="form-grid" id="guidedFields">
+                <div class="form-field"><label>1. 中心观点 · Claim</label><textarea class="field-area" data-guided="claim" placeholder="这一段真正想证明什么？"></textarea></div>
+                <div class="form-field"><label>2. 直接原因 · Reason</label><textarea class="field-area" data-guided="reason" placeholder="为什么这个观点成立？"></textarea></div>
+                <div class="form-field"><label>3. 机制解释 · Mechanism</label><textarea class="field-area" data-guided="mechanism" placeholder="这个原因通过什么过程产生结果？"></textarea></div>
+                <div class="form-field"><label>4. 具体例子 · Example</label><textarea class="field-area" data-guided="example" placeholder="什么具体情境能支持观点？"></textarea></div>
+                <div class="form-field"><label>5. 限定让步 · Qualification</label><textarea class="field-area" data-guided="qualification" placeholder="观点在哪些情况下需要收窄？"></textarea></div>
+                <div class="form-field"><label>6. 回扣中心 · Link back</label><textarea class="field-area" data-guided="conclusion" placeholder="怎样回到本段中心？"></textarea></div>
+              </div>
+              <div class="preview-box" id="guidedPreview">填写上方内容后，这里会按顺序组合显示。网页不会替你自动润色。</div>
+            </div>
+
+            <div class="paragraph-mode" id="paragraphTransferMode">
+              <div class="hint-box" id="skeletonBox">默认骨架：提出主张 → 解释原因 → 展开机制 → 举例 → 限定 → 回扣</div>
+              <div class="field"><label for="transferTopic">新的写作主题</label><input class="text-input" id="transferTopic" style="width:100%" placeholder="例如：Long-acting treatment and adherence" /></div>
+              <div class="writer-wrap"><textarea class="writer" id="transferWriter" spellcheck="true" placeholder="保留原段落的逻辑骨架，但用全新的主题和内容写一段……"></textarea><div class="autosave">已自动保存</div></div>
+            </div>
+
+            <div class="paragraph-mode" id="paragraphIndependentMode">
+              <div class="split-row">
+                <div class="field"><label for="independentPrompt">写作题目或任务</label><input class="text-input" id="independentPrompt" style="width:100%" placeholder="粘贴 IELTS 题目，或自己写一个论题" /></div>
+                <div class="field"><label for="hintLevelSelect">辅助程度</label><select id="hintLevelSelect" style="width:100%"><option value="full">显示完整问题</option><option value="skeleton">只显示骨架</option><option value="hidden">隐藏辅助</option></select></div>
+              </div>
+              <div class="hint-box" id="independentHint"></div>
+              <div class="writer-wrap"><textarea class="writer" id="independentWriter" spellcheck="true" placeholder="独立写出一个完整主体段……"></textarea><div class="autosave">已自动保存</div></div>
+            </div>
+
+            <div class="actions">
+              <div><button class="btn" id="paragraphPrevBtn">← 上一段</button><button class="btn" id="paragraphNextBtn">下一段 →</button></div>
+              <div><button class="btn soft" id="copyParagraphCurrentBtn">复制当前训练</button><button class="btn primary" id="copyParagraphAllBtn">复制全部已练习</button></div>
+            </div>
+          </div>
+        </section>
+        <section class="view" id="libraryView">
+          <div class="library-hero">
+            <div>
+              <div class="eyebrow">Local Practice Library</div>
+              <h1>选择一份材料，立即开始练习</h1>
+              <p>内置材料与自建材料都只在当前浏览器中使用。句子训练关注表达，段落训练关注论证推进。</p>
+            </div>
+            <div class="controls">
+              <button class="btn" id="importLibraryBtn">导入练习库 JSON</button>
+              <input type="file" id="libraryFileInput" accept=".json,application/json" hidden />
+              <button class="btn primary" id="libraryAddBtn">添加本地材料</button>
+            </div>
+          </div>
+
+          <div class="library-notice-grid">
+            <div class="notice-card">
+              <span class="notice-icon">◉</span>
+              <div><strong>本地优先</strong><p>别人打开同一网址，只会得到自己的浏览器存储，不会看到你的练习。</p></div>
+            </div>
+            <div class="notice-card">
+              <span class="notice-icon">§</span>
+              <div><strong>素材边界</strong><p>内置 IELTS 内容是原创风格练习；官方范文建议由你本人导入用于个人学习。</p></div>
+            </div>
+          </div>
+
+          <div class="library-toolbar">
+            <input class="text-input" id="librarySearch" placeholder="搜索标题、标签、来源……" />
+            <select id="libraryCategory"><option value="all">全部类别</option><option value="IELTS">IELTS</option><option value="Academic">Academic</option><option value="Literature">Literature</option><option value="Custom">Custom</option></select>
+            <span class="chip neutral" id="libraryCount">0 items</span>
+          </div>
+          <div class="library-grid" id="libraryGrid"></div>
+
+          <details class="library-about">
+            <summary>公开资源、版权与隐私说明</summary>
+            <div class="library-about-grid">
+              <div>
+                <h3>版权使用原则</h3>
+                <ul class="analysis-list">
+                  <li>内置 IELTS 材料是原创风格练习，不是官方范文。</li>
+                  <li>官方样例建议由你本人粘贴到本地库，不在公开网页中重新发布全文。</li>
+                  <li>公版作品仍应查看具体作品及所在地的版权状态。</li>
+                </ul>
+              </div>
+              <div>
+                <h3>公开资源入口</h3>
+                <div class="resource-links compact">
+                  <a class="resource-link" href="https://www.gutenberg.org/" target="_blank" rel="noopener noreferrer"><strong>Project Gutenberg</strong><br />公版英文电子书</a>
+                  <a class="resource-link" href="https://standardebooks.org/" target="_blank" rel="noopener noreferrer"><strong>Standard Ebooks</strong><br />整理良好的公版电子书</a>
+                  <a class="resource-link" href="https://en.wikisource.org/" target="_blank" rel="noopener noreferrer"><strong>Wikisource</strong><br />查看具体页面版权标签</a>
+                  <a class="resource-link" href="https://ielts.org/take-a-test/preparation-resources/sample-test-questions" target="_blank" rel="noopener noreferrer"><strong>IELTS Sample Questions</strong><br />官方样题入口</a>
+                </div>
+              </div>
+            </div>
+          </details>
+        </section>
+      </section>
+
+      <aside class="panel right-panel">
+        <div id="sentenceCoach">
+          <div class="panel-head"><div><div class="panel-title">Sentence Coach</div><div class="panel-note">纯前端规则分析 · 无 AI</div></div></div>
+          <div class="right-section"><h3>文本概览</h3><div class="metric-grid"><div class="metric"><strong id="analysisWords">0</strong><span>Words</span></div><div class="metric"><strong id="analysisSentences">0</strong><span>Sentences</span></div><div class="metric"><strong id="analysisAvg">0</strong><span>Avg. words</span></div><div class="metric"><strong id="analysisLevel">—</strong><span>Length level</span></div></div></div>
+          <div class="right-section"><h3>连接与推进</h3><div class="chips" id="connectorChips"></div></div>
+          <div class="right-section"><h3>可观察的句法</h3><ul class="analysis-list" id="patternList"></ul></div>
+          <div class="right-section"><h3>常见表达块</h3><div class="chips" id="phraseChips"></div><p class="disclaimer">只做规则匹配，不判断表达是否地道。</p></div>
+          <div class="right-section"><h3>我的拆解笔记</h3><textarea class="note-area" id="sentenceNote" placeholder="主干、从句、搭配、可迁移结构……"></textarea><p class="disclaimer">保存在本浏览器；不会上传。</p></div>
+        </div>
+
+        <div id="paragraphCoach" style="display:none">
+          <div class="panel-head"><div><div class="panel-title">Paragraph Coach</div><div class="panel-note">检查结构，不假装替代教师</div></div></div>
+          <div class="right-section"><h3>当前训练概览</h3><div class="metric-grid"><div class="metric"><strong id="paragraphSourceWords">0</strong><span>Source words</span></div><div class="metric"><strong id="paragraphWritingWords">0</strong><span>Your words</span></div><div class="metric"><strong id="paragraphSentences">0</strong><span>Sentences</span></div><div class="metric"><strong id="paragraphCoverage">0%</strong><span>Plan coverage</span></div></div></div>
+          <div class="right-section"><h3>检查清单</h3><ul class="check-list" id="paragraphChecklist"></ul></div>
+          <div class="right-section"><h3>原段落信息</h3><div class="chips" id="paragraphMetaChips"></div><p class="disclaimer" id="paragraphSourceNote"></p></div>
+        </div>
+
+        <div id="libraryCoach" style="display:none"></div>
+      </aside>
+    </main>
+  </div>
+
+  <div class="modal-backdrop" id="materialModal" role="dialog" aria-modal="true">
+    <div class="modal">
+      <div class="modal-head"><h2>添加本地练习材料</h2><button class="btn small" id="closeMaterialModalBtn">关闭</button></div>
+      <div class="modal-body">
+        <div class="split-row">
+          <div class="field"><label for="materialTitle">标题</label><input class="text-input" id="materialTitle" style="width:100%" placeholder="例如：IELTS Health Paragraph" /></div>
+          <div class="field"><label for="materialCategory">类别</label><select id="materialCategory" style="width:100%"><option value="Custom">Custom</option><option value="IELTS">IELTS</option><option value="Academic">Academic</option><option value="Literature">Literature</option></select></div>
+        </div>
+        <div class="split-row">
+          <div class="field"><label for="materialSource">来源</label><input class="text-input" id="materialSource" style="width:100%" placeholder="例如：Personal notes / Project Gutenberg" /></div>
+          <div class="field"><label for="materialLicense">许可或用途</label><input class="text-input" id="materialLicense" style="width:100%" placeholder="例如：Personal study / Public domain" /></div>
+        </div>
+        <div class="field"><label for="materialTags">标签（逗号分隔）</label><input class="text-input" id="materialTags" style="width:100%" placeholder="health, argument, long-acting treatment" /></div>
+        <div class="field"><label>从 TXT / Markdown 文件读取</label><div class="file-row"><input type="file" id="materialTextFile" accept=".txt,.md,.text,text/plain,text/markdown" /><span class="file-help">文件仅在本地读取，不会上传。</span></div></div>
+        <div class="field"><label for="materialText">正文</label><textarea class="source-input" id="materialText" placeholder="Paste an essay, paragraph, article, or public-domain excerpt here..."></textarea></div>
+        <div class="modal-actions"><button class="btn" id="fillOriginalSampleBtn">载入原创示例</button><button class="btn primary" id="saveMaterialBtn">保存到练习库</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="data/starter-library.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

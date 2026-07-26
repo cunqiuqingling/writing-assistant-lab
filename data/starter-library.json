@@ -1,0 +1,87 @@
+[
+  {
+    "id": "builtin-ielts-ai-learning",
+    "builtin": true,
+    "title": "AI and Independent Learning",
+    "category": "IELTS",
+    "source": "Writing Assistant original",
+    "license": "Original practice material; not official IELTS content",
+    "tags": [
+      "technology",
+      "education",
+      "argument"
+    ],
+    "text": "Artificial intelligence can make independent learning more efficient, but it should not replace the learner’s own judgment. Digital tools are useful because they can identify repeated language errors and provide immediate examples. This feedback allows students to revise while their reasoning process is still fresh. For instance, a learner may compare two versions of the same paragraph and discover that the weaker version merely repeats its main claim. However, students who accept every automated suggestion without reflection may become less capable of evaluating their own work. Therefore, AI is most valuable when it supports a cycle of writing, feedback and deliberate rewriting.\n\nSchools should teach students how to question automated feedback rather than simply how to obtain it. Such training would help learners distinguish corrections based on grammar from suggestions that merely reflect stylistic preference. It would also encourage them to verify factual claims before including them in academic work. Although this approach requires more classroom time, it may prevent students from becoming passive users of increasingly powerful tools. In this sense, AI literacy is not only a technical skill but also a form of intellectual discipline."
+  },
+  {
+    "id": "builtin-ielts-health",
+    "builtin": true,
+    "title": "Preventive Healthcare",
+    "category": "IELTS",
+    "source": "Writing Assistant original",
+    "license": "Original practice material; not official IELTS content",
+    "tags": [
+      "health",
+      "government",
+      "cause-effect"
+    ],
+    "text": "Governments should invest more heavily in preventive healthcare because many chronic diseases develop long before patients require hospital treatment. Public screening, vaccination and health education can identify risks at an earlier stage, when intervention is often less expensive and more effective. For example, programmes that help people control blood pressure may reduce the later need for emergency cardiac care. Preventive policies cannot eliminate every illness, especially those influenced by age or genetics. Nevertheless, they can reduce avoidable suffering and allow hospitals to concentrate resources on conditions that cannot be prevented."
+  },
+  {
+    "id": "builtin-academic-hiv",
+    "builtin": true,
+    "title": "Long-acting HIV Therapy",
+    "category": "Academic",
+    "source": "Writing Assistant original",
+    "license": "Original educational paragraph",
+    "tags": [
+      "HIV",
+      "pharmacy",
+      "academic",
+      "mechanism"
+    ],
+    "text": "Long-acting antiretroviral formulations may improve treatment adherence by reducing the frequency with which patients must remember to take medication. This advantage is particularly relevant when daily dosing creates practical burdens or unwanted disclosure of HIV status. Extended dosing intervals, however, also introduce new clinical challenges. Drug concentrations may decline slowly after a missed injection, potentially leaving a prolonged period in which viral replication and resistance can occur. Consequently, the value of a long-acting regimen depends not only on pharmacological duration but also on reliable follow-up, accessible clinics and clear plans for managing delayed doses."
+  },
+  {
+    "id": "builtin-academic-limitations",
+    "builtin": true,
+    "title": "Writing Research Limitations",
+    "category": "Academic",
+    "source": "Writing Assistant original",
+    "license": "Original educational paragraph",
+    "tags": [
+      "research",
+      "limitations",
+      "discussion"
+    ],
+    "text": "The present findings should be interpreted with caution because the study was conducted in a single centre and included a relatively small sample. These features may limit the extent to which the results can be generalised to patients from different clinical settings. In addition, the observational design does not establish that the reported exposure directly caused the outcome. Nevertheless, the consistency of the association across sensitivity analyses suggests that the finding warrants further investigation. Larger prospective studies are therefore needed to examine causality and identify the patient groups most likely to benefit."
+  },
+  {
+    "id": "builtin-literature-reflection",
+    "builtin": true,
+    "title": "A Quiet Departure",
+    "category": "Literature",
+    "source": "Writing Assistant original",
+    "license": "Original literary practice material",
+    "tags": [
+      "reflection",
+      "description",
+      "narrative"
+    ],
+    "text": "The station was almost empty when the first train arrived. A pale line of morning light rested on the rails, and the departure board clicked with unnecessary confidence. Daniel had imagined that leaving would feel dramatic, yet the moment itself was quiet enough to be mistaken for any ordinary commute. He lifted his suitcase, looked once at the road behind him, and understood that courage was sometimes nothing more than continuing to move before certainty had appeared."
+  },
+  {
+    "id": "builtin-public-domain-austen",
+    "builtin": true,
+    "title": "Pride and Prejudice · Opening Sentence",
+    "category": "Literature",
+    "source": "Jane Austen, Pride and Prejudice (1813)",
+    "license": "Public domain; verify local law before redistribution",
+    "tags": [
+      "public-domain",
+      "classic",
+      "syntax"
+    ],
+    "text": "It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife."
+  }
+]
