@@ -10,15 +10,15 @@
 
 ## Interface
 
-### Sentence Lab
+### 句子练习
 
 ![Sentence Lab](assets/sentence-lab.png)
 
-### Paragraph Lab
+### 段落练习
 
 ![Paragraph Lab](assets/paragraph-lab.png)
 
-### Practice Library
+### 练习库
 
 ![Practice Library](assets/practice-library.png)
 
