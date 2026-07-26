@@ -8,7 +8,19 @@
 
 [English README](README.md)
 
-![Writing Assistant 界面](assets/screenshot.png)
+## Interface
+
+### Sentence Lab
+
+![Sentence Lab](assets/sentence-lab.png)
+
+### Paragraph Lab
+
+![Paragraph Lab](assets/paragraph-lab.png)
+
+### Practice Library
+
+![Practice Library](assets/practice-library.png)
 
 ## 为什么做这个项目
 
