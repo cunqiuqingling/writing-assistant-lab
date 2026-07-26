@@ -64,15 +64,7 @@ python3 -m http.server 8080
 
 然后访问 `http://localhost:8080`。
 
-## 发布到 GitHub Pages
 
-1. 将本项目上传到 GitHub 仓库。
-2. 打开 **Settings → Pages**。
-3. Source 选择 **Deploy from a branch**。
-4. 选择 `main` 分支和 `/ (root)`。
-5. 保存后访问 GitHub Pages 生成的网址。
-
-GitHub Pages 不是必须的。仓库完全可以继续把现有 Cloudflare 网站作为主要在线演示。
 
 ## 继续部署到 Cloudflare Worker
 
