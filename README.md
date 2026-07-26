@@ -64,15 +64,7 @@ python3 -m http.server 8080
 
 Then open `http://localhost:8080`.
 
-## Deploy to GitHub Pages
 
-1. Upload this project to a GitHub repository.
-2. Open **Settings → Pages**.
-3. Choose **Deploy from a branch**.
-4. Select the `main` branch and `/ (root)`.
-5. Save and open the generated Pages URL.
-
-GitHub Pages is optional. The repository can also use the Cloudflare deployment above as its main live demo.
 
 ## Deploy as a Cloudflare Worker
 
