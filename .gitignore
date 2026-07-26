@@ -1,0 +1,7 @@
+.DS_Store
+*.log
+node_modules/
+writing-assistant-backup-*.json
+*-backup-*.json
+.env
+.env.*
