@@ -4,7 +4,7 @@
 
 A local-first English writing practice studio. Core practice works without an account, backend database or AI. Optional BYOK analysis processes only reference text selected by the visitor.
 
-**Core practice features will remain free to use: no account, subscription, advertising or AI setup is required.** Optional BYOK AI calls may incur charges from the provider selected by the visitor.
+**Core practice features will remain free to use: no account, subscription, advertising or AI setup is required.** Optional BYOK users may choose a provider offering a free API, free tier or free model, or use a paid API. Availability, quotas, regional access and pricing are controlled by the selected provider and may change.
 
 **Live demo:** https://writing-assistant.ccwu.cc/
 
@@ -59,19 +59,21 @@ Writing Assistant therefore encourages observation, breakdown, imitation, transf
 
 Writing Assistant does not provide a shared AI account or a project-owned API key. The optional feature uses **BYOK — Bring Your Own Key**. Visitors obtain an API key from a provider they choose and connect to that provider directly from their browser.
 
+Users are not required to purchase an API. They may choose a provider that offers a free API, free quota, free tier or free model, or connect a paid API when they prefer. Free plans may have request limits, model restrictions, regional restrictions or changing availability, so the provider's current console and documentation remain the source of truth.
+
 AI analysis is designed for the **reference sentence or paragraph currently being studied**. It can explain meaning, grammatical structure, clauses, collocations, register, paragraph development, cohesion and transferable writing patterns. It does not read, send or evaluate learner imitation, notes, plans, labels or progress.
 
 ### Quick setup
 
 1. Open the website and click **AI Settings** in the top bar.
-2. Choose a provider preset: OpenAI, DeepSeek, SiliconFlow, Google Gemini, Anthropic Claude, or a custom OpenAI-compatible service.
+2. Choose a provider preset: OpenAI, DeepSeek, SiliconFlow, Google Gemini, Anthropic Claude, or a custom OpenAI-compatible service. A free API, free-tier account or free model can be used when the provider supports browser access.
 3. Paste a dedicated, low-limit and revocable API key obtained from that provider.
-4. Check the automatically filled **Base URL**, endpoint and model name against the provider's current documentation. Presets only fill the request format; model availability and pricing may change.
+4. Check the automatically filled **Base URL**, endpoint and model name against the provider's current documentation. Presets only fill the request format; model availability, free quotas and pricing may change.
 5. Keep **Session only** for the safest default, or choose encrypted local storage and create a local password of at least eight characters.
 6. Choose the analysis language, click **Test connection**, and then click **Save settings**.
 7. Open a sentence or paragraph exercise and click **AI解析原文 / Analyse reference text** in the right-side coach panel.
 
-The key is excluded from ordinary Writing Assistant backup files. Session-only keys disappear when the browser tab session ends. Encrypted local storage uses a password that the project cannot recover. Some providers may block direct browser requests through CORS, and API usage may incur charges from the selected provider.
+The key is excluded from ordinary Writing Assistant backup files. Session-only keys disappear when the browser tab session ends. Encrypted local storage uses a password that the project cannot recover. Some providers may block direct browser requests through CORS. Depending on the selected provider and plan, API usage may be free within its quota or may incur provider charges.
 
 [Full AI configuration and troubleshooting guide](docs/AI_CONFIGURATION.md)
 
