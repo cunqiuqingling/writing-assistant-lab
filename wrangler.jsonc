@@ -2,6 +2,12 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "writing-assistant-lab",
   "compatibility_date": "2026-07-27",
+  "routes": [
+    {
+      "pattern": "writing-assistant.ccwu.cc",
+      "custom_domain": true
+    }
+  ],
   "assets": {
     "directory": "./dist/site",
     "html_handling": "auto-trailing-slash",
