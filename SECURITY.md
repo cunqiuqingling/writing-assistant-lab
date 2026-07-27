@@ -2,7 +2,7 @@
 
 ## Supported version
 
-The current public release is `0.5.x`.
+The current development release is `0.8.0`; the production site should be updated only after the full 0.8.0 acceptance checklist passes.
 
 ## Data model
 
@@ -53,3 +53,16 @@ Document and card editors validate non-empty titles, cap title length, render im
 ## M3 remote-content controls
 
 The online-resource client uses two fixed HTTPS MediaWiki endpoints, omits credentials, adds `origin=*`, applies request timeouts and cancellation, caps response sizes, removes executable and navigational HTML, converts retained content to plain text, and routes it through the existing local import preview. Arbitrary user-supplied remote endpoints and direct remote-HTML rendering are not supported.
+
+## Loopback OCR companion
+
+The optional M4 companion binds only to `127.0.0.1`, permits the official production origin and explicit local-test origins, and requires a random bearer pairing token for OCR jobs and results. It enforces image-body, queue and result limits, serialises model execution, and removes temporary page images after completion or failure. Recognised text and image bodies are not written to request logs.
+
+The web client uses a fixed loopback URL; arbitrary OCR endpoints are not accepted. A user action is required to detect, pair and start OCR. Pairing credentials are separate from normal application backups. Do not change the companion to listen on `0.0.0.0`, expose it through port forwarding, disable origin checks, or commit a pairing token.
+
+The generated macOS app is local and unsigned. Users should obtain it from this repository/release, review the installer script, and avoid repackaged third-party installers. PaddleOCR and model files remain third-party dependencies subject to their own security updates.
+
+
+## Browser OCR worker
+
+M4-R1 runs lightweight text OCR in a dedicated Web Worker with device-based page limits and explicit cancellation. The advanced loopback service remains optional and token-authenticated.

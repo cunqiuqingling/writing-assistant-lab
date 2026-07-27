@@ -1,4 +1,23 @@
+# 0.8.0 M4-R1 — Browser-first text OCR
+
+- Added on-demand PP-OCRv5 browser text recognition in a Web Worker.
+- Made the PaddleOCR-VL companion optional, experimental and gated by an installation warning.
+- Added device-based page limits, cancellation and lower-resolution browser rendering.
+- Fixed the zsh read-only `status` installer failure, rejected Python 3.13 and added retries, logs, source selection and cleanup.
+- Kept OCR focused on editable text rather than tables, formulae or publication layout.
+
 # Changelog
+
+## 0.8.0 M4 — Optional loopback PaddleOCR-VL for scanned PDFs
+
+- Kept scan-like PDFs in the import preview instead of rejecting files with no usable text layer.
+- Added explicit low-text page selection, browser page rendering and sequential local OCR progress.
+- Added a fixed `127.0.0.1:8765` client with loopback request annotation, cancellation and error recovery.
+- Added user-confirmed pairing with a random token excluded from normal backups.
+- Added a loopback-only Python companion with strict origin checks, bearer authentication, request/queue limits and temporary-image deletion.
+- Added a macOS Apple Silicon installer for PaddlePaddle 3.2.1 and PaddleOCR 3.7.0 document-parser dependencies.
+- Added mock mode, protocol documentation, a scan-only PDF fixture and an M4 acceptance plan.
+- Added deployment permissions-policy headers for modern browser loopback access.
 
 ## 0.8.0 M3 — Public resources and collapsible folder navigation
 

@@ -14,3 +14,17 @@ Do not remove those notices when redistributing a production build that includes
 ## Wikimedia content and APIs
 
 M3 can retrieve user-selected pages from English Wikipedia and English Wikisource through the MediaWiki Action API. Retrieved page content is not bundled with this repository. Page-specific attribution, licence and public-domain status remain governed by the source page and applicable jurisdiction.
+
+## Optional local OCR dependencies
+
+The M4 companion installer can install PaddlePaddle 3.2.1 and PaddleOCR 3.7.0 with the `doc-parser` extra into an isolated local virtual environment. These packages, their transitive dependencies and downloaded model weights are not embedded in the Writing Assistant web bundle and remain governed by their respective licenses and notices. Review the PaddleOCR/PaddlePaddle project documentation before redistribution.
+
+
+## PaddleOCR.js
+
+- Package: `@paddleocr/paddleocr-js` 0.4.2
+- Purpose: optional, on-demand PP-OCRv5 browser text recognition
+- License: Apache License 2.0
+- Runtime: Web Worker with ONNX Runtime Web and OpenCV.js managed by the SDK
+
+The SDK and model resources are not loaded when the site first opens. M4-R1 requests them only after the user explicitly starts browser OCR.

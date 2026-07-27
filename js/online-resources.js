@@ -7,7 +7,7 @@
   var actions = core.actions;
   var workspace = window.WritingAssistantWorkspace;
   var catalog = Array.isArray(window.WRITING_ASSISTANT_ONLINE_RESOURCE_CATALOG) ? window.WRITING_ASSISTANT_ONLINE_RESOURCE_CATALOG : [];
-  var VERSION = '0.8.0-m3';
+  var VERSION = '0.8.0-m4';
   var MAX_RESULTS = 10;
   var MAX_HTML_CHARS = 5000000;
   var MAX_TEXT_CHARS = 350000;

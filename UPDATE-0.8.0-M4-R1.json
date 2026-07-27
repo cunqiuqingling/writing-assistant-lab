@@ -1,0 +1,25 @@
+{
+  "version": "0.8.0-m4-r1",
+  "title": "Browser-first text OCR and repaired optional advanced installer",
+  "base": [
+    "0.8.0-m4",
+    "0.8.0-m4-r1"
+  ],
+  "privacy": "PDF pages remain in the browser unless the user explicitly selects the optional loopback connector.",
+  "browserOcr": {
+    "engine": "PP-OCRv5 mobile through PaddleOCR.js",
+    "load": "on-demand",
+    "worker": true,
+    "maxPagesPerBatch": [
+      1,
+      3,
+      5
+    ]
+  },
+  "advancedOcr": {
+    "optional": true,
+    "experimental": true,
+    "warningRequired": true,
+    "python": "3.10-3.12"
+  }
+}

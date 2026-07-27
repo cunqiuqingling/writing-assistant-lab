@@ -1,0 +1,3 @@
+# PaddlePaddle uses the official Apple Silicon CPU index in the installer.
+paddlepaddle==3.2.1
+paddleocr[doc-parser]==3.7.0

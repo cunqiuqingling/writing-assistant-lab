@@ -10,7 +10,7 @@
   var actions = core.actions;
   var stores = core.stores;
 
-  var IMPORT_VERSION = '0.8.0-m3';
+  var IMPORT_VERSION = '0.8.0-m4-r1';
   var MAX_TEXT_BYTES = 8 * 1024 * 1024;
   var MAX_DOCX_BYTES = 45 * 1024 * 1024;
   var MAX_EPUB_BYTES = 70 * 1024 * 1024;
@@ -23,6 +23,10 @@
   var editingOriginal = null;
   var chapterHistory = [];
   var currentChapterEditorIndex = -1;
+  var activePdfBytes = null;
+  var activePdfPages = [];
+  var activePdfFileName = '';
+  var activePdfRenderDocument = null;
 
   var LIBRARIES = {
     jszip: {
@@ -226,7 +230,7 @@
       '        <span class="document-drop-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3v11m0-11L7.8 7.2M12 3l4.2 4.2M5 14.5v3.2A2.3 2.3 0 0 0 7.3 20h9.4a2.3 2.3 0 0 0 2.3-2.3v-3.2"/></svg></span>',
       '        <strong>选择文件，或拖到这里</strong>',
       '        <span>支持 EPUB、DOCX、带文字层的 PDF、TXT 和 Markdown</span>',
-      '        <small>文件只在当前浏览器中解析，不会上传。扫描 PDF 将在 M4 通过可选本地 OCR 处理。</small>',
+      '        <small>文件只在当前浏览器中解析，不会上传。扫描 PDF 可选用本机 PaddleOCR-VL 连接器。</small>',
       '      </button>',
       '      <div class="import-limit-chips"><span>TXT / MD ≤ 8 MB</span><span>DOCX ≤ 45 MB</span><span>EPUB ≤ 70 MB</span><span>PDF ≤ 90 MB · 600页</span></div>',
       '    </section>',
@@ -242,6 +246,7 @@
       '        <div class="import-section-heading"><div><span class="section-kicker">DOCUMENT OVERVIEW</span><h3>文档概览</h3></div><span class="local-processing-badge">仅本地处理</span></div>',
       '        <div class="import-summary" id="documentImportSummary"></div>',
       '        <div class="import-warning-list" id="documentImportWarnings"></div>',
+      '        <div id="localOcrPanel" hidden></div>',
       '      </section>',
       '      <section class="import-meta-panel">',
       '        <div class="import-section-heading"><div><span class="section-kicker">LIBRARY DETAILS</span><h3>材料信息</h3></div></div>',
@@ -288,10 +293,24 @@
     if (byId('documentImportProgressTitle')) byId('documentImportProgressTitle').textContent = title;
     if (byId('documentImportProgressText')) byId('documentImportProgressText').textContent = detail || '';
   }
+  function releasePdfRenderDocument() {
+    if (activePdfRenderDocument) {
+      try { activePdfRenderDocument.destroy(); } catch (error) {}
+    }
+    activePdfRenderDocument = null;
+  }
+  function resetPdfContext() {
+    releasePdfRenderDocument();
+    activePdfBytes = null;
+    activePdfPages = [];
+    activePdfFileName = '';
+    if (window.WritingAssistantLocalOCR && typeof window.WritingAssistantLocalOCR.reset === 'function') window.WritingAssistantLocalOCR.reset();
+  }
   function resetImportMode() {
     editingOriginal = null;
     chapterHistory = [];
     currentChapterEditorIndex = -1;
+    resetPdfContext();
     if (byId('documentImportModalTitle')) byId('documentImportModalTitle').textContent = '导入文档';
     if (byId('documentImportModalSub')) byId('documentImportModalSub').textContent = '文件在当前浏览器中解析，不会上传到 Writing Assistant 服务器。';
     if (byId('chooseAnotherDocumentBtn')) byId('chooseAnotherDocumentBtn').hidden = false;
@@ -350,6 +369,7 @@
   async function openExistingItem(itemId) {
     if (currentJob) currentJob.cancelled = true;
     currentJob = null;
+    resetPdfContext();
     var item = await db.get(stores.library, itemId);
     if (!item) { actions.showToast('只能编辑保存在本地的材料'); return; }
     var chapters = Array.isArray(item.chapters) && item.chapters.length
@@ -378,6 +398,7 @@
   function closeImportModal() {
     if (currentJob) currentJob.cancelled = true;
     currentJob = null;
+    releasePdfRenderDocument();
     byId('documentImportModal').classList.remove('show');
     byId('chapterEditorModal').classList.remove('show');
   }
@@ -731,14 +752,39 @@
   }
   function pageItemsToText(items, pageWidth) { return analysePageItems(items, pageWidth).text; }
 
+  function groupPdfPagesToChapters(pages, title, warnings) {
+    var totalText = cleanText((pages || []).map(function (page) { return page.text; }).filter(Boolean).join('\n\n'));
+    if (!totalText) return [];
+    var chapters = chaptersFromText(totalText, title);
+    if (chapters.length <= 1 && pages.length > 12) {
+      chapters = [];
+      for (var start = 0; start < pages.length; start += 10) {
+        var group = pages.slice(start, start + 10);
+        var groupText = cleanText(group.map(function (page) { return page.text; }).filter(Boolean).join('\n\n'));
+        if (groupText) chapters.push({
+          id: safeChapterId(chapters.length),
+          title: 'Pages ' + (start + 1) + '–' + Math.min(pages.length, start + 10),
+          text: groupText,
+          selected: true
+        });
+      }
+    }
+    return capChapters(chapters, warnings || []);
+  }
+
   async function parsePdf(file, job) {
     setProgress('正在载入 PDF.js', '首次使用时需要载入 PDF 解析模块。');
     var loaded = await loadPdfJs();
     var pdfjs = loaded.lib;
     assertNotCancelled(job);
     setProgress('正在打开 PDF', file.name);
+    var sourceBytes = new Uint8Array(await file.arrayBuffer());
+    activePdfBytes = sourceBytes.slice();
+    activePdfFileName = file.name;
+    activePdfPages = [];
+    releasePdfRenderDocument();
     var loadingTask = pdfjs.getDocument({
-      data: new Uint8Array(await file.arrayBuffer()),
+      data: sourceBytes,
       isEvalSupported: false,
       useSystemFonts: true,
       stopAtErrors: false
@@ -747,6 +793,7 @@
     assertNotCancelled(job);
     if (pdf.numPages > MAX_PDF_PAGES) {
       try { await pdf.destroy(); } catch (error) {}
+      resetPdfContext();
       throw new Error('PDF 共 ' + pdf.numPages + ' 页，超过当前 ' + MAX_PDF_PAGES + ' 页上限');
     }
     var metadata = {};
@@ -766,38 +813,25 @@
       var viewport = page.getViewport({ scale: 1 });
       var pageAnalysis = analysePageItems(content.items || [], viewport.width);
       var pageText = pageAnalysis.text;
-      if (pageText.length < 20) lowTextPages++;
+      var lowText = pageText.length < 20;
+      if (lowText) lowTextPages++;
       if (pageAnalysis.isTwoColumn) twoColumnPages++;
       pageCharCounts.push(pageText.length);
-      pages.push({ page: i, text: pageText, twoColumn: pageAnalysis.isTwoColumn, lineCount: pageAnalysis.lineCount });
+      pages.push({ page: i, text: pageText, lowText: lowText, twoColumn: pageAnalysis.isTwoColumn, lineCount: pageAnalysis.lineCount });
       try { page.cleanup(); } catch (error) {}
     }
     try { await pdf.destroy(); } catch (error) {}
+    activePdfPages = pages.map(function (page) { return Object.assign({}, page); });
     var warnings = [];
     if (loaded.source === 'cdn') warnings.push('本地 PDF.js 资源尚未安装，本次从固定版本 CDN 载入了解析器；PDF 文件本身没有发送到 CDN。');
     var nonEmpty = pages.filter(function (page) { return page.text.length >= 20; });
-    var totalText = pages.map(function (page) { return page.text; }).join('\n\n');
+    var totalText = cleanText(pages.map(function (page) { return page.text; }).join('\n\n'));
     var averageChars = pdf.numPages ? totalText.length / pdf.numPages : 0;
     var scannedLikely = !nonEmpty.length || averageChars < 35 || lowTextPages / Math.max(1, pdf.numPages) > 0.65;
-    if (scannedLikely) warnings.push('该 PDF 很可能是扫描件或缺少可用文字层。0.8.0 M1 暂不执行 OCR，后续将提供 PaddleOCR-VL 本地连接器。');
-    else if (lowTextPages) warnings.push(lowTextPages + ' 页提取到的文字很少，可能包含扫描页、图片页或复杂排版。');
+    if (scannedLikely) warnings.push('该 PDF 很可能是扫描件或缺少可用文字层。可在下方连接本机 PaddleOCR-VL，对需要的页面执行本地 OCR。');
+    else if (lowTextPages) warnings.push(lowTextPages + ' 页提取到的文字很少，可能包含扫描页、图片页或复杂排版；可选择这些页面补充本地 OCR。');
     if (twoColumnPages) warnings.push('检测到 ' + twoColumnPages + ' 页可能采用双栏排版；已尝试按左栏后右栏排序，但保存前仍应抽查正文。');
-    if (!trimmed(totalText)) throw new Error('PDF 中没有提取到文字。扫描版 PDF 请等待后续本地 OCR 连接器。');
-    var chapters = chaptersFromText(totalText, removeExtension(file.name));
-    if (chapters.length <= 1 && pages.length > 12) {
-      chapters = [];
-      for (var start = 0; start < pages.length; start += 10) {
-        var group = pages.slice(start, start + 10);
-        var groupText = cleanText(group.map(function (page) { return page.text; }).join('\n\n'));
-        if (groupText) chapters.push({
-          id: safeChapterId(chapters.length),
-          title: 'Pages ' + (start + 1) + '–' + Math.min(pages.length, start + 10),
-          text: groupText,
-          selected: true
-        });
-      }
-    }
-    chapters = capChapters(chapters, warnings);
+    var chapters = groupPdfPagesToChapters(pages, removeExtension(file.name), warnings);
     return {
       format: 'pdf',
       title: cleanTitle(metadata.Title, removeExtension(file.name)),
@@ -809,14 +843,134 @@
       pdfStatus: {
         pages: pages.length,
         lowTextPages: lowTextPages,
+        lowTextPageNumbers: pages.filter(function (page) { return page.lowText; }).map(function (page) { return page.page; }),
         lowTextRatio: Number((lowTextPages / Math.max(1, pages.length)).toFixed(3)),
         averageChars: Math.round(averageChars),
         medianChars: Math.round(median(pageCharCounts)),
         twoColumnPages: twoColumnPages,
         scannedLikely: scannedLikely,
-        quality: scannedLikely ? 'scan-likely' : (twoColumnPages ? 'complex-layout' : (lowTextPages ? 'mixed' : 'text-layer'))
+        quality: scannedLikely ? 'scan-likely' : (twoColumnPages ? 'complex-layout' : (lowTextPages ? 'mixed' : 'text-layer')),
+        localOcr: null
       },
       stats: { bytes: file.size, characters: totalText.length, pages: pages.length }
+    };
+  }
+
+  async function ensurePdfRenderDocument() {
+    if (activePdfRenderDocument) return activePdfRenderDocument;
+    if (!activePdfBytes || !activePdfBytes.length) throw new Error('原始 PDF 已不在当前导入会话中，请重新选择文件');
+    var loaded = await loadPdfJs();
+    var loadingTask = loaded.lib.getDocument({
+      data: activePdfBytes.slice(),
+      isEvalSupported: false,
+      useSystemFonts: true,
+      stopAtErrors: false
+    });
+    activePdfRenderDocument = await loadingTask.promise;
+    return activePdfRenderDocument;
+  }
+
+  function arrayBufferToBase64(buffer) {
+    var bytes = new Uint8Array(buffer);
+    var binary = '';
+    var size = 0x8000;
+    for (var offset = 0; offset < bytes.length; offset += size) binary += String.fromCharCode.apply(null, bytes.subarray(offset, Math.min(bytes.length, offset + size)));
+    return window.btoa(binary);
+  }
+
+  function canvasBlob(canvas, type, quality) {
+    return new Promise(function (resolve, reject) {
+      canvas.toBlob(function (blob) { if (blob) resolve(blob); else reject(new Error('无法生成 OCR 页面图像')); }, type, quality);
+    });
+  }
+
+  async function renderPdfPageForOcr(pageNumber, options) {
+    options = options || {};
+    var pdf = await ensurePdfRenderDocument();
+    pageNumber = Number(pageNumber);
+    if (!Number.isInteger(pageNumber) || pageNumber < 1 || pageNumber > pdf.numPages) throw new Error('OCR 页码超出范围');
+    var page = await pdf.getPage(pageNumber);
+    var baseViewport = page.getViewport({ scale: 1 });
+    var profile = options.profile === 'browser' ? 'browser' : 'advanced';
+    var scale = Number(options.scale) || (profile === 'browser' ? 1.7 : 2.25);
+    var maxDimension = Number(options.maxDimension) || (profile === 'browser' ? 2200 : 3000);
+    var maxPixels = Number(options.maxPixels) || (profile === 'browser' ? 4_200_000 : 8_500_000);
+    var minScale = Number(options.minScale) || (profile === 'browser' ? 1.05 : 1.25);
+    scale = Math.min(scale, maxDimension / Math.max(baseViewport.width, baseViewport.height));
+    scale = Math.min(scale, Math.sqrt(maxPixels / Math.max(1, baseViewport.width * baseViewport.height)));
+    scale = Math.max(minScale, scale);
+    var viewport = page.getViewport({ scale: scale });
+    var canvas = document.createElement('canvas');
+    canvas.width = Math.max(1, Math.round(viewport.width));
+    canvas.height = Math.max(1, Math.round(viewport.height));
+    var context2d = canvas.getContext('2d', { alpha: false, willReadFrequently: false });
+    context2d.fillStyle = '#ffffff';
+    context2d.fillRect(0, 0, canvas.width, canvas.height);
+    await page.render({ canvasContext: context2d, viewport: viewport, intent: 'display' }).promise;
+    var type = options.mimeType === 'image/png' ? 'image/png' : 'image/jpeg';
+    var quality = Number(options.quality) || (profile === 'browser' ? 0.86 : 0.92);
+    var blob = await canvasBlob(canvas, type, quality);
+    var buffer = await blob.arrayBuffer();
+    try { page.cleanup(); } catch (error) {}
+    canvas.width = 1; canvas.height = 1;
+    return { blob: blob, mimeType: type, base64: arrayBufferToBase64(buffer), width: Math.round(viewport.width), height: Math.round(viewport.height), bytes: buffer.byteLength };
+  }
+
+  async function applyOcrResults(results, metadata) {
+    if (!previewDocument || previewDocument.format !== 'pdf' || !activePdfPages.length) throw new Error('当前没有可更新的 PDF 预览');
+    metadata = metadata || {};
+    results = Array.isArray(results) ? results : [];
+    if (!results.length) return;
+    rememberChapterState();
+    var updated = 0;
+    results.forEach(function (result) {
+      var pageNumber = Number(result.page);
+      var page = activePdfPages.find(function (entry) { return entry.page === pageNumber; });
+      var recognised = cleanText(result.text || result.markdown || '');
+      if (!page || !recognised) return;
+      page.text = recognised;
+      page.lowText = recognised.length < 20;
+      page.ocr = true;
+      page.ocrMode = metadata.mode || 'browser';
+      updated++;
+    });
+    if (!updated) throw new Error('OCR没有返回可用文字');
+    var isAdvanced = metadata.mode === 'advanced';
+    var pageCharCounts = activePdfPages.map(function (page) { return page.text.length; });
+    var totalText = cleanText(activePdfPages.map(function (page) { return page.text; }).join('\n\n'));
+    var lowPages = activePdfPages.filter(function (page) { return page.text.length < 20; });
+    previewDocument.chapters = groupPdfPagesToChapters(activePdfPages, removeExtension(activePdfFileName || previewDocument.fileName), previewDocument.warnings || []);
+    previewDocument.stats.characters = totalText.length;
+    previewDocument.stats.pages = activePdfPages.length;
+    var tags = isAdvanced ? ['pdf', 'local-ocr', 'paddleocr-vl'] : ['pdf', 'browser-ocr', 'pp-ocrv5'];
+    previewDocument.tags = unique((previewDocument.tags || []).filter(function (tag) { return tag !== 'possible-scan'; }).concat(tags));
+    previewDocument.warnings = unique((previewDocument.warnings || []).filter(function (warning) {
+      return warning.indexOf('很可能是扫描件') < 0 && warning.indexOf('补充本地 OCR') < 0 && warning.indexOf('补充浏览器 OCR') < 0;
+    }).concat([(isAdvanced ? '已通过高级本地 OCR 识别 ' : '已在浏览器中识别 ') + updated + ' 页；保存前请抽查专有名词、页眉页脚和段落顺序。']));
+    var record = { pages: results.map(function (result) { return Number(result.page); }), engine: metadata.engine || (isAdvanced ? 'PaddleOCR-VL' : 'PP-OCRv5 Mobile'), serviceVersion: metadata.serviceVersion || '0.8.0-m4-r1', processedAt: metadata.processedAt || new Date().toISOString(), mode: isAdvanced ? 'advanced' : 'browser' };
+    previewDocument.pdfStatus = Object.assign({}, previewDocument.pdfStatus || {}, {
+      lowTextPages: lowPages.length,
+      lowTextPageNumbers: lowPages.map(function (page) { return page.page; }),
+      lowTextRatio: Number((lowPages.length / Math.max(1, activePdfPages.length)).toFixed(3)),
+      averageChars: Math.round(totalText.length / Math.max(1, activePdfPages.length)),
+      medianChars: Math.round(median(pageCharCounts)),
+      scannedLikely: lowPages.length / Math.max(1, activePdfPages.length) > 0.65,
+      quality: lowPages.length ? 'mixed' : 'ocr-complete',
+      browserOcr: isAdvanced ? (previewDocument.pdfStatus && previewDocument.pdfStatus.browserOcr || null) : record,
+      localOcr: isAdvanced ? record : (previewDocument.pdfStatus && previewDocument.pdfStatus.localOcr || null)
+    });
+    renderPreview();
+  }
+
+  function getOcrContext() {
+    if (!previewDocument || previewDocument.format !== 'pdf') return null;
+    var status = previewDocument.pdfStatus || null;
+    return {
+      available: Boolean(activePdfBytes && activePdfBytes.length && activePdfPages.length),
+      fileName: activePdfFileName || previewDocument.fileName || '',
+      pages: status && status.pages || activePdfPages.length,
+      pdfStatus: status,
+      recommendedPages: status && Array.isArray(status.lowTextPageNumbers) ? status.lowTextPageNumbers.slice() : activePdfPages.filter(function (page) { return page.lowText; }).map(function (page) { return page.page; })
     };
   }
 
@@ -846,7 +1000,7 @@
       result.fileName = file.name;
       result.fileSize = file.size;
       result.chapters = capChapters(result.chapters, result.warnings || []);
-      if (!result.chapters.length) throw new Error('没有生成可保存的章节');
+      if (!result.chapters.length && !(result.format === 'pdf' && result.pdfStatus && result.pdfStatus.scannedLikely)) throw new Error('没有生成可保存的章节');
       previewDocument = result;
       renderPreview();
       setImportView('documentImportPreview');
@@ -867,6 +1021,7 @@
   function pdfQualityLabel(status) {
     if (!status) return '';
     if (status.quality === 'scan-likely') return '疑似扫描件';
+    if (status.quality === 'ocr-complete') return '本地OCR已完成';
     if (status.quality === 'complex-layout') return '复杂/双栏';
     if (status.quality === 'mixed') return '混合文字层';
     return '文字层良好';
@@ -904,10 +1059,16 @@
     byId('documentImportLicense').value = documentData.license || 'Personal study';
     byId('documentImportTags').value = unique(documentData.tags || []).join(', ');
     renderChapterList();
+    var saveButton = byId('saveImportedDocumentBtn');
+    if (saveButton) {
+      saveButton.disabled = !selectedPreviewChapters().length;
+      saveButton.title = saveButton.disabled ? '请先通过文字层或本地OCR生成至少一个章节' : '';
+    }
+    if (window.WritingAssistantLocalOCR && typeof window.WritingAssistantLocalOCR.render === 'function') window.WritingAssistantLocalOCR.render(getOcrContext());
   }
   function renderChapterList() {
     var chapters = previewDocument && previewDocument.chapters || [];
-    byId('documentImportChapterList').innerHTML = chapters.map(function (chapter, index) {
+    byId('documentImportChapterList').innerHTML = chapters.length ? chapters.map(function (chapter, index) {
       var words = h.wordCount(chapter.text);
       var characters = text(chapter.text).length;
       var snippet = cleanText(chapter.text).slice(0, 520);
@@ -934,7 +1095,7 @@
         '  </details>',
         '</article>'
       ].join('');
-    }).join('');
+    }).join('') : '<div class="import-empty-chapters"><strong>尚未生成章节</strong><p>这个 PDF 没有足够的文字层。请在上方使用可选本地 OCR，识别完成后章节会在这里出现。</p></div>';
     renderPreviewSummary();
   }
   function updateChapterCount() { renderPreviewSummary(); }
@@ -1212,7 +1373,11 @@
     parseText: chaptersFromText,
     pageItemsToText: pageItemsToText,
     analysePageItems: analysePageItems,
-    metrics: previewMetrics
+    metrics: previewMetrics,
+    getOcrContext: getOcrContext,
+    renderPdfPageForOcr: renderPdfPageForOcr,
+    applyOcrResults: applyOcrResults,
+    applyLocalOcrResults: applyOcrResults
   };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { window.setTimeout(bindEvents, 0); });

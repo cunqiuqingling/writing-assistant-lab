@@ -1,0 +1,24 @@
+{
+  "version": "0.8.0-m4",
+  "name": "Optional local OCR for scanned PDFs",
+  "requires": "0.8.0-m3",
+  "summary": [
+    "Detect scan-like and mixed-text PDFs without rejecting the import",
+    "Render explicitly selected PDF pages in the browser",
+    "Pair with a token-protected loopback-only OCR companion",
+    "Run PaddleOCR-VL locally and merge results into the M2 preview",
+    "Provide a macOS Apple Silicon installer, mock mode and uninstall path"
+  ],
+  "privacy": {
+    "cloudOcr": false,
+    "serviceUrl": "http://127.0.0.1:8765",
+    "pairingTokenInBackup": false,
+    "temporaryImagesDeleted": true
+  },
+  "companion": {
+    "platform": "macOS Apple Silicon",
+    "paddlepaddle": "3.2.1",
+    "paddleocr": "3.7.0",
+    "pipeline": "PaddleOCR-VL v1.6"
+  }
+}

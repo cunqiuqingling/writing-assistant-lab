@@ -46,7 +46,7 @@ EPUB, DOCX, PDF, TXT and Markdown files selected for import are read by JavaScri
 
 The production build can serve pinned local copies of JSZip, Mammoth and PDF.js. During development or when those local files are missing, the interface may load the same pinned parser code from jsDelivr. Loading a library from the CDN sends an ordinary library request to the CDN, but Writing Assistant does not send the selected document or extracted text with that request.
 
-PDF.js only extracts an existing PDF text layer in 0.8.0 M1. PaddleOCR-VL integration, when added later, will be an optional localhost service and will require separate user confirmation.
+PDF.js extracts existing PDF text layers directly in the browser. Scan-like PDFs may optionally use the M4 Local OCR companion after separate installation, browser permission and pairing.
 ## Local document edits in 0.8.0 M2
 
 Card-title overrides, edited metadata and chapter text remain in the visitor's own browser storage and ordinary local backups. Editing a document never uploads its source text to the project maintainer. When source chapter text changes, Writing Assistant may remove only local progress records that no longer match that chapter, after explicit confirmation.
@@ -55,3 +55,14 @@ Card-title overrides, edited metadata and chapter text remain in the visitor's o
 ## Wikimedia requests in M3
 
 Opening the online-resource center does not make a request. When the user explicitly searches or previews a page, the browser sends the search term or selected page title directly to English Wikipedia or English Wikisource. Writing Assistant does not proxy the request. Learner writing, notes, progress, AI keys and AI analysis are excluded. Imported text remains local unless the user separately exports or backs it up.
+
+## Local OCR companion in M4
+
+The Local OCR companion is optional and runs on the visitor’s own computer at `http://127.0.0.1:8765`. Writing Assistant does not upload scanned pages to Cloudflare, GitHub or a maintainer-operated OCR endpoint. Only PDF pages explicitly selected by the visitor are rendered into temporary images and sent to loopback. The companion deletes those temporary images after processing.
+
+A random pairing token is stored by the local companion and in the current browser's local storage. It is excluded from ordinary Writing Assistant JSON backups. OCR requests do not contain learner writing, notes, AI keys, AI analysis or unrelated practice progress. Modern Chromium browsers may ask for permission before the official HTTPS site can connect to loopback.
+
+
+## Browser OCR
+
+Browser OCR loads only after explicit user action. PDF page images and OCR results remain in the current browser. The optional advanced companion is a separate loopback-only path selected by the user.

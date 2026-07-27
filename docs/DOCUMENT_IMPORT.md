@@ -1,4 +1,4 @@
-# Document import — 0.8.0 M2
+# Document import — 0.8.0 M4
 
 ## Supported formats
 
@@ -7,7 +7,7 @@
 | TXT / Markdown | Browser File API | Detect headings and split long text |
 | EPUB | JSZip + DOMParser | Read `container.xml`, OPF metadata, manifest and spine |
 | DOCX | Mammoth | Convert semantic headings and text; ignore page styling |
-| PDF | PDF.js | Extract an existing text layer and estimate scan likelihood |
+| PDF | PDF.js + optional local OCR | Extract an existing text layer; scan-like pages can be sent explicitly to the loopback companion |
 
 The source file and extracted text stay in the current browser. Imported materials are saved to IndexedDB only after the visitor confirms the preview.
 
@@ -32,11 +32,11 @@ The source file and extracted text stay in the current browser. Imported materia
 
 These limits protect the browser from accidental memory exhaustion. They are not claims about what every device can process comfortably.
 
-## PDF boundary
+## PDF and OCR boundary
 
-M1 extracts only text already present inside the PDF. It may imperfectly order complex multi-column layouts. A warning appears when most pages contain little or no text.
+PDF.js first extracts text already present inside the PDF. It may imperfectly order complex multi-column layouts. M4 keeps low-text and image-only PDFs in preview, identifies recommended pages and offers an optional local OCR panel.
 
-Scanning and OCR are deferred to the optional PaddleOCR-VL local companion checkpoint. No PDF is silently sent to a cloud OCR service.
+OCR never starts automatically. The visitor must install/start the companion, approve loopback access, pair the browser, choose page numbers and click start. Selected pages are rendered in the browser and sent only to `127.0.0.1:8765`; no cloud OCR service is configured. Recognised text returns to this same preview and remains editable before saving.
 
 ## Parser delivery
 
@@ -62,3 +62,21 @@ Title-only edits and reordering preserve stable IDs. If source text changes, the
 
 PDF quality reporting now includes low-text ratios, median page characters and probable two-column page counts. These signals are heuristic and do not replace manual review.
 
+
+## M4 scanned-PDF flow
+
+1. PDF.js analyses every page and records low-text page numbers.
+2. Normal text-layer PDFs continue directly to preview.
+3. A scan-like or mixed PDF shows the optional Local OCR panel.
+4. The user detects and pairs a loopback-only companion.
+5. The user enters no more than 50 pages per OCR run.
+6. Each selected page is rendered at a bounded resolution and processed sequentially.
+7. Results replace or supplement those page records and regenerate the local chapters.
+8. The user reviews the result in the existing M2 editor before saving.
+
+The source PDF is held only for the active import session so that pages can be rendered. Closing or replacing the import releases the PDF.js document and clears the active source context.
+
+
+## 扫描PDF（M4-R1）
+
+扫描PDF优先使用浏览器PP-OCRv5文字识别，无需安装本地程序。识别目标仅为可编辑文字；图片、表格和公式会被忽略。高级PaddleOCR-VL连接器仅作为用户主动选择的实验性备用方案。
