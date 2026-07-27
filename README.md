@@ -109,3 +109,13 @@ Code is released under the [MIT License](LICENSE). Included original starter mat
 When enabled, AI analyses only the selected reference sentence or paragraph, such as a model essay, novel excerpt or academic text. Learner writing, notes, labels, plans and progress are not sent to the provider and are not evaluated.
 
 The normal exercise copy actions do not include AI analysis output. Analysis remains in a separate panel and local browser cache.
+
+## 0.8.0 M3: public resources and collapsible folders
+
+- Parent folders, including **All Materials**, can be expanded and collapsed independently from folder selection.
+- The state is local, persistent and included in ordinary backups.
+- The public-resource center ships forty metadata-only starters and supports user-triggered English Wikipedia/Wikisource search.
+- Remote pages always pass through the same local chapter preview before they can be saved.
+- Wikimedia requests never include learner writing, notes, AI keys or practice progress.
+
+See `docs/ONLINE_RESOURCES.md` and `docs/FOLDER_NAVIGATION.md`.

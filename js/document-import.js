@@ -10,7 +10,7 @@
   var actions = core.actions;
   var stores = core.stores;
 
-  var IMPORT_VERSION = '0.8.0-m2';
+  var IMPORT_VERSION = '0.8.0-m3';
   var MAX_TEXT_BYTES = 8 * 1024 * 1024;
   var MAX_DOCX_BYTES = 45 * 1024 * 1024;
   var MAX_EPUB_BYTES = 70 * 1024 * 1024;
@@ -305,6 +305,48 @@
     setImportView('documentImportChooser');
     byId('documentImportModal').classList.add('show');
   }
+  function openPreparedDocument(data) {
+    data = data || {};
+    if (currentJob) currentJob.cancelled = true;
+    currentJob = null;
+    resetImportMode();
+    var rawChapters = Array.isArray(data.chapters) ? data.chapters : [];
+    var chapters = rawChapters.map(function (chapter, index) {
+      return {
+        id: chapter.id || safeChapterId(index),
+        title: cleanTitle(chapter.title, 'Chapter ' + (index + 1)),
+        text: cleanText(chapter.text),
+        selected: chapter.selected !== false
+      };
+    }).filter(function (chapter) { return chapter.text; });
+    if (!chapters.length) { actions.showToast('在线页面没有生成可导入的正文'); return false; }
+    chapterHistory = [];
+    previewDocument = {
+      mode: 'import',
+      format: cleanTitle(data.format || 'web', 'web').toLowerCase(),
+      title: cleanTitle(data.title, 'Online resource'),
+      source: trimmed(data.source),
+      license: trimmed(data.license) || 'Verify the source page license before reuse',
+      tags: unique(data.tags || []),
+      folderId: data.folderId || currentFolderId(),
+      fileName: data.fileName || cleanTitle(data.title, 'online-resource'),
+      fileSize: Number(data.fileSize) || chapters.reduce(function (sum, chapter) { return sum + chapter.text.length; }, 0),
+      warnings: unique(data.warnings || []),
+      pdfStatus: null,
+      remoteMeta: data.remoteMeta ? deepClone(data.remoteMeta) : null,
+      stats: Object.assign({ characters: chapters.reduce(function (sum, chapter) { return sum + chapter.text.length; }, 0), pages: 0 }, data.stats || {}),
+      chapters: chapters
+    };
+    byId('documentImportModalTitle').textContent = '预览在线资源';
+    byId('documentImportModalSub').textContent = '页面正文刚刚从公开来源获取。保存前请检查章节、来源和许可信息。';
+    byId('chooseAnotherDocumentBtn').hidden = true;
+    byId('saveImportedDocumentBtn').textContent = '保存到本地练习库';
+    renderPreview();
+    setImportView('documentImportPreview');
+    byId('documentImportModal').classList.add('show');
+    return true;
+  }
+
   async function openExistingItem(itemId) {
     if (currentJob) currentJob.cancelled = true;
     currentJob = null;
@@ -1037,7 +1079,8 @@
     item.importMeta = Object.assign({}, item.importMeta || {}, {
       version: IMPORT_VERSION, format: previewDocument.format, fileName: previewDocument.fileName,
       fileSize: previewDocument.fileSize, importedAt: item.importMeta && item.importMeta.importedAt || now,
-      editedAt: isEdit ? now : null, pdfStatus: previewDocument.pdfStatus || null, warnings: unique(previewDocument.warnings || [])
+      editedAt: isEdit ? now : null, pdfStatus: previewDocument.pdfStatus || null, warnings: unique(previewDocument.warnings || []),
+      remote: previewDocument.remoteMeta ? deepClone(previewDocument.remoteMeta) : (item.importMeta && item.importMeta.remote || null)
     });
     if (typeof workspace.prepareImportedItem === 'function') item = workspace.prepareImportedItem(item, item) || item;
     if (isEdit && !(await reconcileProgress(item.id, editingOriginal, item))) return;
@@ -1164,6 +1207,7 @@
   window.WritingAssistantDocumentImport = {
     version: IMPORT_VERSION,
     open: openImportModal,
+    openPrepared: openPreparedDocument,
     editItem: function (id) { openExistingItem(id).catch(function (error) { console.error(error); actions.showToast('文档编辑器打开失败'); }); },
     parseText: chaptersFromText,
     pageItemsToText: pageItemsToText,

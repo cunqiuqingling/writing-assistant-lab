@@ -1,8 +1,8 @@
 {
   "name": "writing-assistant-lab",
-  "version": "0.8.0-m2",
+  "version": "0.8.0-m3",
   "private": true,
-  "description": "Local-first English writing practice with editable document structure, folder-based long-text progress, BYOK reference analysis, and browser-side EPUB, DOCX and PDF import.",
+  "description": "Local-first English writing practice with editable long documents, collapsible folders, curated Wikipedia/Wikisource discovery, BYOK reference analysis, and browser-side EPUB, DOCX and PDF import.",
   "scripts": {
     "vendor": "node scripts/vendor-assets.mjs",
     "build:site": "node scripts/build-site.mjs",
@@ -10,7 +10,7 @@
     "build:worker": "node scripts/build-worker.mjs",
     "dev": "npm run build:site:full && wrangler dev",
     "deploy": "npm run build:site:full && wrangler deploy",
-    "check:m2": "node scripts/check-m2.mjs"
+    "check:m3": "node scripts/check-m3.mjs"
   },
   "dependencies": {
     "jszip": "3.10.1",

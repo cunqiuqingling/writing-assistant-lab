@@ -1,7 +1,7 @@
 (function () {
       'use strict';
 
-      var APP_VERSION = '0.8.0-m2';
+      var APP_VERSION = '0.8.0-m3';
       // Keep the v4 storage keys for backward compatibility with existing local practice data.
       var STORAGE_KEY = 'writing-assistant-v4';
       var LEGACY_STORAGE_KEY = 'writing-assistant-v1';
@@ -53,7 +53,7 @@
       function defaultState() {
         return {
           schemaVersion: 5, activeLab: 'sentence', fontSize: 18,
-          library: { selectedFolderId:'folder-all' },
+          library: { selectedFolderId:'folder-all', collapsedFolderIds:[] },
           sentence: { materialId:'', title:'', text:'', source:'', license:'', tags:[], splitMode:'sentence', targetWords:45, segments:[], answers:[], notes:[], current:0, mode:'imitate' },
           paragraph: { materialId:'', title:'', text:'', source:'', license:'', tags:[], paragraphs:[], records:[], current:0, mode:'breakdown' }
         };
@@ -202,6 +202,7 @@
         if (['sentence','paragraph','library'].indexOf(state.activeLab)<0) state.activeLab='sentence';
         state.schemaVersion=5;
         state.library=Object.assign(defaultState().library,state.library||{});
+        state.library.collapsedFolderIds=Array.isArray(state.library.collapsedFolderIds)?uniqueStrings(state.library.collapsedFolderIds.map(String)):[];
         if ([16,18,20].indexOf(Number(state.fontSize))<0) state.fontSize=18;
         state.sentence=Object.assign(defaultState().sentence,state.sentence||{});
         state.paragraph=Object.assign(defaultState().paragraph,state.paragraph||{});

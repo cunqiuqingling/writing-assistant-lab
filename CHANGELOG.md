@@ -1,8 +1,17 @@
 # Changelog
 
-## 0.8.0 M2 — Editable cards, chapters and safer document revision
+## 0.8.0 M3 — Public resources and collapsible folder navigation
 
-- Refined M2 card editing and document-management UI without changing parsing, storage, or progress behavior.
+- Added independent expand/collapse controls for every parent folder in the Practice Library sidebar.
+- Added the same collapse behavior to the “All Materials” root and persisted the expanded state locally and in backups.
+- Added a curated public-resource center with 40 starter searches: 10 each for IELTS Writing, Academic Writing, Pharmacy & Biomedicine, and Literature.
+- Added explicit user-triggered search for English Wikipedia and English Wikisource through fixed MediaWiki API endpoints.
+- Added local preview and chapter editing before any online page is saved to the Practice Library.
+- Added source URL, provider, page ID, revision ID and fetch timestamp metadata for locally saved online pages.
+- Added strict remote-content boundaries: no learner writing, notes, AI keys or progress are included in Wikimedia requests.
+- Added response limits, request timeouts, cancellation, HTML-to-text sanitisation and source-license reminders.
+
+## 0.8.0 M2 — Editable cards, chapters and safer document revision
 
 - Added local card-title editing for built-in and imported materials.
 - Added restore-default-title support for built-in cards without changing public starter data.

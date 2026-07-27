@@ -51,3 +51,7 @@ PDF.js only extracts an existing PDF text layer in 0.8.0 M1. PaddleOCR-VL integr
 
 Card-title overrides, edited metadata and chapter text remain in the visitor's own browser storage and ordinary local backups. Editing a document never uploads its source text to the project maintainer. When source chapter text changes, Writing Assistant may remove only local progress records that no longer match that chapter, after explicit confirmation.
 
+
+## Wikimedia requests in M3
+
+Opening the online-resource center does not make a request. When the user explicitly searches or previews a page, the browser sends the search term or selected page title directly to English Wikipedia or English Wikisource. Writing Assistant does not proxy the request. Learner writing, notes, progress, AI keys and AI analysis are excluded. Imported text remains local unless the user separately exports or backs it up.

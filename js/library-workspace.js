@@ -165,6 +165,44 @@
     return found;
   }
 
+  function collapsedFolderIds() {
+    if (!state().library) state().library = { selectedFolderId: 'folder-all', collapsedFolderIds: [] };
+    if (!Array.isArray(state().library.collapsedFolderIds)) state().library.collapsedFolderIds = [];
+    return state().library.collapsedFolderIds;
+  }
+
+  function isFolderCollapsed(id) {
+    return collapsedFolderIds().indexOf(id) >= 0;
+  }
+
+  function setFolderCollapsed(id, collapsed) {
+    var ids = collapsedFolderIds().filter(function (value) { return value !== id; });
+    if (collapsed) ids.push(id);
+    state().library.collapsedFolderIds = ids;
+    actions.persistNow();
+  }
+
+  function revealFolderPath(id, includeSelf) {
+    var pathIds = folderPath(id).map(function (folder) { return folder.id; });
+    if (includeSelf === false) pathIds = pathIds.slice(0, -1);
+    if (!pathIds.length) return;
+    state().library.collapsedFolderIds = collapsedFolderIds().filter(function (value) { return pathIds.indexOf(value) < 0; });
+  }
+
+  function selectFolderInLibrary(id, reveal) {
+    if (!folderById(id)) id = 'folder-all';
+    if (reveal !== false) revealFolderPath(id, false);
+    state().library.selectedFolderId = id;
+    actions.persistNow();
+    renderLibrary();
+  }
+
+  function folderToggleMarkup(folder, expanded) {
+    var hasChildren = childrenOf(folder.id).length > 0;
+    if (!hasChildren) return '<span class="folder-tree-toggle-spacer" aria-hidden="true"></span>';
+    return '<button class="folder-tree-toggle" data-folder-toggle="' + h.escapeHtml(folder.id) + '" type="button" aria-label="' + (expanded ? '收起' : '展开') + h.escapeHtml(folder.name) + '" aria-expanded="' + (expanded ? 'true' : 'false') + '"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m7.5 4.8 5 5.2-5 5.2"/></svg></button>';
+  }
+
   function folderMaterialCount(id, includeDescendants) {
     var accepted = [id];
     if (includeDescendants) accepted = accepted.concat(descendantsOf(id));
@@ -566,6 +604,7 @@
       var parentId = byId('workspaceFolderParent').value || 'folder-my-library';
       var folder = { id: 'folder-custom-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 7), name: name, parentId: parentId, icon: '•', system: false, order: Date.now(), createdAt: new Date().toISOString() };
       await db.put(stores.folders, folder);
+      revealFolderPath(parentId, true);
       state().library.selectedFolderId = folder.id;
       actions.persistNow();
     }
@@ -588,7 +627,9 @@
     for (var j = 0; j < children.length; j++) { children[j].parentId = parent; await db.put(stores.folders, children[j]); }
     await db.delete(stores.folders, folderId);
     customFolders = await db.getAll(stores.folders);
+    state().library.collapsedFolderIds = collapsedFolderIds().filter(function (value) { return value !== folderId; });
     if (state().library.selectedFolderId === folderId) state().library.selectedFolderId = parent;
+    revealFolderPath(parent, false);
     actions.persistNow();
     await actions.refreshLibrary();
     actions.showToast('文件夹已删除');
@@ -654,26 +695,40 @@
     var tree = byId('folderTree');
     if (!tree) return;
     tree.innerHTML = '';
+
+    function appendFolderRow(folder, depth, isRoot) {
+      var hasChildren = childrenOf(folder.id).length > 0;
+      var expanded = hasChildren && !isFolderCollapsed(folder.id);
+      var row = document.createElement('div');
+      row.className = 'folder-tree-row' + (isRoot ? ' root' : '') + (state().library.selectedFolderId === folder.id ? ' active' : '') + (hasChildren ? ' has-children' : ' leaf') + (expanded ? ' expanded' : ' collapsed');
+      row.style.setProperty('--folder-depth', depth);
+      var count = folder.id === 'folder-all' ? libraryCache.length : folderMaterialCount(folder.id, true);
+      row.innerHTML = folderToggleMarkup(folder, expanded) + '<button class="folder-tree-main" data-folder-open="' + h.escapeHtml(folder.id) + '" type="button"><span class="folder-tree-icon">' + h.escapeHtml(folder.icon || '•') + '</span><span>' + h.escapeHtml(folder.name) + '</span><small>' + count + '</small></button>' + (!folder.system ? '<button class="folder-tree-more" data-folder-edit="' + h.escapeHtml(folder.id) + '" type="button" title="重命名">•••</button>' : '');
+      tree.appendChild(row);
+      return expanded;
+    }
+
     function renderChildren(parentId, depth) {
       childrenOf(parentId).forEach(function (folder) {
-        var row = document.createElement('div');
-        row.className = 'folder-tree-row' + (state().library.selectedFolderId === folder.id ? ' active' : '');
-        row.style.setProperty('--folder-depth', depth);
-        var count = folderMaterialCount(folder.id, true);
-        row.innerHTML = '<button class="folder-tree-main" data-folder-open="' + h.escapeHtml(folder.id) + '"><span class="folder-tree-icon">' + h.escapeHtml(folder.icon || '•') + '</span><span>' + h.escapeHtml(folder.name) + '</span><small>' + count + '</small></button>' + (!folder.system ? '<button class="folder-tree-more" data-folder-edit="' + h.escapeHtml(folder.id) + '" title="重命名">•••</button>' : '');
-        tree.appendChild(row);
-        renderChildren(folder.id, depth + 1);
+        var expanded = appendFolderRow(folder, depth, false);
+        if (expanded) renderChildren(folder.id, depth + 1);
       });
     }
+
     var root = folderById('folder-all');
-    var rootRow = document.createElement('div');
-    rootRow.className = 'folder-tree-row root' + (state().library.selectedFolderId === 'folder-all' ? ' active' : '');
-    rootRow.style.setProperty('--folder-depth', 0);
-    rootRow.innerHTML = '<button class="folder-tree-main" data-folder-open="folder-all"><span class="folder-tree-icon">' + root.icon + '</span><span>' + root.name + '</span><small>' + libraryCache.length + '</small></button>';
-    tree.appendChild(rootRow);
-    renderChildren('folder-all', 1);
+    var rootExpanded = appendFolderRow(root, 0, true);
+    if (rootExpanded) renderChildren('folder-all', 1);
+
+    all('[data-folder-toggle]').forEach(function (button) {
+      button.addEventListener('click', function (event) {
+        event.stopPropagation();
+        var id = this.dataset.folderToggle;
+        setFolderCollapsed(id, !isFolderCollapsed(id));
+        renderFolderTree();
+      });
+    });
     all('[data-folder-open]').forEach(function (button) {
-      button.addEventListener('click', function () { state().library.selectedFolderId = this.dataset.folderOpen; actions.persistNow(); renderLibrary(); });
+      button.addEventListener('click', function () { selectFolderInLibrary(this.dataset.folderOpen, true); });
     });
     all('[data-folder-edit]').forEach(function (button) {
       button.addEventListener('click', function (event) {
@@ -695,7 +750,7 @@
       return '<button data-breadcrumb-folder="' + h.escapeHtml(folder.id) + '">' + h.escapeHtml(folder.name) + '</button>' + (index < path.length - 1 ? '<span>›</span>' : '');
     }).join('');
     if (!selected.system) container.innerHTML += '<button class="breadcrumb-danger" data-delete-current-folder="' + h.escapeHtml(selected.id) + '">删除文件夹</button>';
-    all('[data-breadcrumb-folder]').forEach(function (button) { button.addEventListener('click', function () { state().library.selectedFolderId = this.dataset.breadcrumbFolder; actions.persistNow(); renderLibrary(); }); });
+    all('[data-breadcrumb-folder]').forEach(function (button) { button.addEventListener('click', function () { selectFolderInLibrary(this.dataset.breadcrumbFolder, true); }); });
     all('[data-delete-current-folder]').forEach(function (button) { button.addEventListener('click', function () { deleteFolder(this.dataset.deleteCurrentFolder).catch(function () { actions.showToast('文件夹删除失败'); }); }); });
   }
 
@@ -710,7 +765,7 @@
       var childFolders = folderChildCount(folder.id);
       return '<button class="folder-tile" data-child-folder="' + h.escapeHtml(folder.id) + '"><span class="folder-tile-icon">' + h.escapeHtml(folder.icon || '•') + '</span><span><strong>' + h.escapeHtml(folder.name) + '</strong><small>' + totalMaterials + ' 份材料' + (childFolders ? ' · ' + childFolders + ' 个子文件夹' : '') + '</small></span><span>→</span></button>';
     }).join('');
-    all('[data-child-folder]').forEach(function (button) { button.addEventListener('click', function () { state().library.selectedFolderId = this.dataset.childFolder; actions.persistNow(); renderLibrary(); }); });
+    all('[data-child-folder]').forEach(function (button) { button.addEventListener('click', function () { selectFolderInLibrary(this.dataset.childFolder, true); }); });
   }
 
   function renderCards(items) {
@@ -754,7 +809,8 @@
     rendering = true;
     try {
       ensureLibraryLayout();
-      if (!state().library) state().library = { selectedFolderId: 'folder-all' };
+      if (!state().library) state().library = { selectedFolderId: 'folder-all', collapsedFolderIds: [] };
+      if (!Array.isArray(state().library.collapsedFolderIds)) state().library.collapsedFolderIds = [];
       if (!folderById(state().library.selectedFolderId)) state().library.selectedFolderId = 'folder-all';
       renderFolderTree();
       renderBreadcrumb();
@@ -988,16 +1044,23 @@
     selectFolder: function (folderId) {
       if (!folderById(folderId)) folderId = 'folder-my-custom';
       state().library = state().library || {};
+      revealFolderPath(folderId, false);
       state().library.selectedFolderId = folderId;
       state().activeLab = 'library';
       actions.persistNow();
       actions.renderAll();
-    }
+    },
+    toggleFolder: function (folderId) {
+      if (!folderById(folderId) || !childrenOf(folderId).length) return;
+      setFolderCollapsed(folderId, !isFolderCollapsed(folderId));
+      if (state().activeLab === 'library') renderFolderTree();
+    },
+    isFolderCollapsed: isFolderCollapsed
   };
 
   injectModals();
   ensureMaterialFields();
   setTimeout(function () {
-    core.actions.refreshLibrary().then(onReady).catch(function (error) { console.error(error); actions.showToast('0.7.0 工作区初始化失败'); });
+    core.actions.refreshLibrary().then(onReady).catch(function (error) { console.error(error); actions.showToast('练习库工作区初始化失败'); });
   }, 0);
 })();

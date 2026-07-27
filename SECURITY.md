@@ -49,3 +49,7 @@ API keys must never be committed to this repository, included in screenshots or 
 
 Document and card editors validate non-empty titles, cap title length, render imported text as text rather than executable HTML, and preserve stable document and chapter identifiers where possible. Structural source changes require confirmation before incompatible local progress records are removed. Built-in title changes are browser-local overrides and never modify the public starter library.
 
+
+## M3 remote-content controls
+
+The online-resource client uses two fixed HTTPS MediaWiki endpoints, omits credentials, adds `origin=*`, applies request timeouts and cancellation, caps response sizes, removes executable and navigational HTML, converts retained content to plain text, and routes it through the existing local import preview. Arbitrary user-supplied remote endpoints and direct remote-HTML rendering are not supported.

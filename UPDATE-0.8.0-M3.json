@@ -1,0 +1,21 @@
+{
+  "version": "0.8.0-m3",
+  "checkpoint": "M3",
+  "title": "Public resources and collapsible folder navigation",
+  "requires": "0.8.0-m2",
+  "storageSchema": 5,
+  "features": [
+    "collapsible folder tree including All Materials",
+    "40 curated metadata-only resource starters",
+    "user-triggered Wikipedia and Wikisource search",
+    "sanitised remote page preview before local save",
+    "remote source and revision metadata"
+  ],
+  "network": [
+    "https://en.wikipedia.org/w/api.php",
+    "https://en.wikisource.org/w/api.php"
+  ],
+  "deferred": [
+    "PaddleOCR-VL local companion and scanned-PDF OCR (M4)"
+  ]
+}

@@ -10,3 +10,7 @@ Writing Assistant itself is released under the MIT License. Document import uses
 After `npm install && npm run vendor`, exact upstream license texts are copied into `vendor/licenses/`.
 
 Do not remove those notices when redistributing a production build that includes the local parser files.
+
+## Wikimedia content and APIs
+
+M3 can retrieve user-selected pages from English Wikipedia and English Wikisource through the MediaWiki Action API. Retrieved page content is not bundled with this repository. Page-specific attribution, licence and public-domain status remain governed by the source page and applicable jurisdiction.
