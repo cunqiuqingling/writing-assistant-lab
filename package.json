@@ -1,23 +1,25 @@
 {
   "name": "writing-assistant-lab",
-  "version": "0.8.0-m4-r1",
+  "version": "0.8.0",
   "private": true,
-  "description": "Local-first English writing practice with browser-first PP-OCRv5 text OCR and an optional advanced loopback PaddleOCR-VL companion.",
+  "description": "Local-first English writing practice with document import, public resources and browser-first text OCR.",
   "scripts": {
     "vendor": "node scripts/vendor-assets.mjs",
+    "check:release": "node scripts/check-release.mjs",
     "build:site": "node scripts/build-site.mjs",
-    "build:site:full": "npm run vendor && npm run build:site",
+    "build:release": "node scripts/check-release.mjs && node scripts/build-site.mjs --require-vendor && node scripts/check-release.mjs --dist",
     "build:worker": "node scripts/build-worker.mjs",
-    "dev": "npm run build:site:full && wrangler dev",
-    "deploy": "npm run build:site:full && wrangler deploy",
-    "check:m3": "node scripts/check-m3.mjs",
-    "check:m4": "node scripts/check-m4.mjs",
-    "check:m4-r1": "node scripts/check-m4-r1.mjs"
+    "package:release": "python3 scripts/package-release.py",
+    "release:prepare": "npm run vendor && npm run build:release && npm run package:release",
+    "dev": "node scripts/build-site.mjs --require-vendor && npx wrangler@4.114.0 dev",
+    "deploy": "npm run build:release && npx wrangler@4.114.0 deploy"
   },
   "dependencies": {
     "jszip": "3.10.1",
     "mammoth": "1.12.0",
-    "pdfjs-dist": "6.1.200"
+    "pdfjs-dist": "6.1.200",
+    "tesseract.js": "7.0.0",
+    "@tesseract.js-data/eng": "1.0.0"
   },
   "devDependencies": {
     "wrangler": "4.114.0"

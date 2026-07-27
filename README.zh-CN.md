@@ -40,9 +40,9 @@
 
 所有文档都会先进入导入预览，使用者可以检查元数据、选择章节、重命名、调整顺序、完整编辑正文、拆分或合并章节，并选择保存到哪个本地练习库文件夹。已经导入的文档也可以从卡片重新打开编辑。源文件不会上传给项目维护者。
 
-带文字层的PDF直接在浏览器中由PDF.js解析。M4为扫描PDF加入可选的PaddleOCR-VL本地连接器；不处理扫描件的使用者无需安装。
+带文字层的PDF直接在浏览器中由PDF.js解析。扫描PDF默认使用无需安装的浏览器文字OCR；体积更大的PaddleOCR-VL本地连接器仅作为可选实验功能。
 
-### M2文档管理与进度保护
+### 文档管理与进度保护
 
 - 每张卡片都可以修改显示标题；内置材料使用当前浏览器的本地覆盖，并可恢复默认标题。
 - 导入文档卡片可以重新打开元数据与章节编辑器。
@@ -75,19 +75,20 @@ python3 -m http.server 8080
 然后访问 `http://localhost:8080`。
 
 
-## 0.8.0过渡期部署
+## 0.8.0正式部署
 
-本地测试时可以直接启动HTTP服务器；如果还没有安装解析依赖，网页会从固定版本CDN载入解析器代码，但不会把使用者选择的文档发送到CDN。
+正式版将JSZip、Mammoth和PDF.js复制到`vendor/`并随静态网站一同部署，不再使用文档解析器CDN回退。
 
 正式部署前运行：
 
 ```bash
-npm install
-npm run build:site:full
+npm install --omit=dev --no-audit --no-fund
+npm run vendor
+npm run build:release
 npm run deploy
 ```
 
-项目现在包含`wrangler.jsonc`，并将`dist/site`作为Cloudflare Static Assets部署。旧的单文件Worker暂时仍可通过`npm run build:worker`生成，但0.8.0最终版推荐使用静态资源部署。
+项目现在包含`wrangler.jsonc`，并将`dist/site`作为Cloudflare Static Assets部署。正式站点使用`dist/site`和Cloudflare Workers Static Assets；旧单文件Worker仅保留为开发兼容构建，不用于正式发布。
 
 详见[文档导入说明](docs/DOCUMENT_IMPORT.md)和[Cloudflare静态资源部署](docs/CLOUDFLARE_STATIC_ASSETS.md)。
 
@@ -110,7 +111,7 @@ npm run deploy
 
 网页原有的练习复制功能不会附带AI解析结果。解析内容独立显示并缓存在当前浏览器中。
 
-## 0.8.0 M3：在线公共资源与可收缩目录
+## 在线公共资源与可收缩目录
 
 - 练习库侧栏中的所有父文件夹均可单独展开或收起，包括“全部材料”。
 - 展开状态保存在当前浏览器中，也会随普通JSON备份导出。
@@ -120,18 +121,15 @@ npm run deploy
 
 详细边界见 `docs/ONLINE_RESOURCES.md` 与 `docs/FOLDER_NAVIGATION.md`。
 
-## 0.8.0 M4-R1：扫描PDF可选本地OCR
+## 扫描PDF与浏览器OCR
 
 - PDF.js仍然在网页中直接处理带文字层的PDF，不需要额外安装。
 - 疑似扫描件不会再因“没有文字层”直接失败，而会显示本地OCR面板。
-- 用户可明确选择页码，浏览器将页面渲染为临时图像并只发送到 `127.0.0.1:8765`。
-- 本地连接器使用随机配对令牌、固定来源许可、请求上限和临时文件删除。
-- 第一版连接器面向macOS Apple Silicon，普通网页功能不依赖连接器。
-- 配对令牌不会进入普通JSON备份；Cloudflare、GitHub和项目维护者不会接收扫描PDF页面或OCR结果。
+- 默认浏览器OCR只在用户主动选择页码后加载，由Tesseract.js Worker逐页提取印刷英文。
+- 图片、表格和公式不作结构恢复，识别结果进入文档预览继续修正。
+- 高级PaddleOCR-VL连接器仅作为可选实验功能，安装前会提示耗时、性能和磁盘要求。
+- 使用高级连接器时只访问`127.0.0.1:8765`，配对令牌不进入普通JSON备份。
 
 详见 [本地OCR说明](docs/LOCAL_OCR.md)。
 
 
-## M4-R1 浏览器优先OCR
-
-扫描PDF默认使用无需安装的浏览器PP-OCRv5文字识别。高级PaddleOCR-VL连接器保留为可选实验功能，并在安装前显示耗时、磁盘、内存和兼容性警告。

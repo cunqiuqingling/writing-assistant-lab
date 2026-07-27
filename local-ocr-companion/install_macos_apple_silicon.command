@@ -37,7 +37,7 @@ MEM_GB=$(( $(sysctl -n hw.memsize 2>/dev/null || echo 0) / 1024 / 1024 / 1024 ))
 FREE_KB=$(df -Pk "$HOME" | awk 'NR==2 {print $4}')
 FREE_GB=$(( FREE_KB / 1024 / 1024 ))
 
-echo "Writing Assistant 高级本地OCR安装器 · M4-R1"
+echo "Writing Assistant 高级本地OCR安装器 · 0.8.0"
 echo "Python：$PYTHON_BIN ($PY_VERSION)"
 echo "内存：约 ${MEM_GB} GB"
 echo "可用磁盘：约 ${FREE_GB} GB"
@@ -103,7 +103,7 @@ cat > "$APP_BUNDLE/Contents/Info.plist" <<'APP_PLIST'
   <key>CFBundleName</key><string>Writing Assistant Local OCR</string>
   <key>CFBundleIdentifier</key><string>ccwu.writing-assistant.local-ocr</string>
   <key>CFBundleVersion</key><string>0.8.0.1</string>
-  <key>CFBundleShortVersionString</key><string>0.8.0 M4-R1</string>
+  <key>CFBundleShortVersionString</key><string>0.8.0</string>
   <key>CFBundlePackageType</key><string>APPL</string>
   <key>LSMinimumSystemVersion</key><string>13.0</string>
   <key>LSUIElement</key><true/>

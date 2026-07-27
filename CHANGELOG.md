@@ -1,12 +1,31 @@
-# 0.8.0 M4-R1 — Browser-first text OCR
+# Changelog
+
+## 0.8.0 — Document import, library workspace, public resources and browser OCR
+
+- Added browser-local TXT, Markdown, EPUB, DOCX and PDF import with unified preview.
+- Added editable card titles, document metadata and full chapter structure management.
+- Added long-text folders, collapsible navigation and chapter-level progress.
+- Added user-triggered English Wikipedia and Wikisource resource import.
+- Added PDF.js text-layer extraction and self-hosted browser English OCR for scan-like PDFs.
+- Kept PaddleOCR-VL as an optional experimental localhost companion behind an installation warning.
+- Preserved local-first storage, stable material identifiers, targeted progress reconciliation and BYOK reference-text boundaries.
+- Finalised Cloudflare Workers Static Assets deployment with local parser vendor files and production security headers.
+
+### Release R1 fast OCR hardening
+
+- Replaced the slow multi-CDN PaddleOCR.js browser path with self-hosted Tesseract.js 7.
+- Limited the default browser OCR to English writing materials.
+- Added real loading progress, same-origin runtime assets and a 90-second initialization timeout.
+- Kept the larger PaddleOCR-VL localhost companion optional and experimental.
+
+### Browser-first OCR checkpoint
 
 - Added on-demand PP-OCRv5 browser text recognition in a Web Worker.
-- Made the PaddleOCR-VL companion optional, experimental and gated by an installation warning.
-- Added device-based page limits, cancellation and lower-resolution browser rendering.
-- Fixed the zsh read-only `status` installer failure, rejected Python 3.13 and added retries, logs, source selection and cleanup.
-- Kept OCR focused on editable text rather than tables, formulae or publication layout.
+- Added device-based page limits, cancellation and lower-resolution page rendering.
+- Removed the production URL mock path during final release hardening.
+- Repaired the optional advanced macOS installer and restricted it to supported Python versions.
 
-# Changelog
+## 0.8.0 development checkpoints
 
 ## 0.8.0 M4 — Optional loopback PaddleOCR-VL for scanned PDFs
 

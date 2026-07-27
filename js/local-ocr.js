@@ -61,7 +61,7 @@
 
   async function api(path, options, timeoutMs) {
     options = Object.assign({}, options || {});
-    var headers = Object.assign({ 'X-WA-Client': 'WritingAssistant/0.8.0-m4-r1' }, options.headers || {});
+    var headers = Object.assign({ 'X-WA-Client': 'WritingAssistant/0.8.0' }, options.headers || {});
     var pairedToken = token();
     if (pairedToken) headers.Authorization = 'Bearer ' + pairedToken;
     options.headers = headers;
@@ -346,7 +346,7 @@
       }
       await importer.applyOcrResults(results, {
         mode: 'advanced',
-        serviceVersion: currentStatus && currentStatus.version || '0.8.0-m4-r1',
+        serviceVersion: currentStatus && currentStatus.version || '0.8.0',
         engine: results[0] && results[0].engine || (currentStatus && currentStatus.backend && currentStatus.backend.engine) || 'PaddleOCR-VL',
         processedAt: new Date().toISOString()
       });
@@ -382,7 +382,7 @@
   }
 
   window.WritingAssistantAdvancedOCR = {
-    version: '0.8.0-m4-r1',
+    version: '0.8.0',
     serviceUrl: SERVICE_URL,
     render: render,
     detect: detectConnector,

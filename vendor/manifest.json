@@ -1,0 +1,16 @@
+{
+  "generatedAt": "2026-07-27T15:27:26.588Z",
+  "packages": {
+    "jszip": "3.10.1",
+    "mammoth": "1.12.0",
+    "pdfjs-dist": "6.1.200",
+    "tesseract.js": "7.0.0",
+    "@tesseract.js-data/eng": "1.0.0"
+  },
+  "browserOcr": {
+    "engine": "Tesseract.js",
+    "language": "eng",
+    "trainedDataBytes": 2952873,
+    "selectedPackagedFile": "node_modules/@tesseract.js-data/eng/4.0.0_best_int/eng.traineddata.gz"
+  }
+}

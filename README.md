@@ -120,11 +120,11 @@ The normal exercise copy actions do not include AI analysis output. Analysis rem
 
 See `docs/ONLINE_RESOURCES.md` and `docs/FOLDER_NAVIGATION.md`.
 
-## 0.8.0 M4-R1: optional local OCR for scanned PDFs
+## Scanned PDFs and browser OCR
 
 PDF.js continues to parse normal text-layer PDFs directly in the browser without any installation. Scan-like PDFs now remain in the import preview and can use an optional loopback companion at `127.0.0.1:8765`. The visitor explicitly chooses pages, pairs the browser with a random local token, and runs PaddleOCR-VL on their own Mac. Cloudflare, GitHub and the project maintainer do not receive the rendered pages or OCR results. The first packaged companion targets macOS Apple Silicon; all non-OCR features remain usable without it. See `docs/LOCAL_OCR.md`.
 
 
-## M4-R1 browser-first OCR
+## Browser-first OCR
 
-Scanned PDFs default to on-demand PP-OCRv5 text recognition in a Web Worker. The PaddleOCR-VL loopback companion remains an optional experimental fallback behind an explicit installation warning.
+Scanned PDFs default to on-demand self-hosted English text recognition in a Web Worker. The PaddleOCR-VL loopback companion remains an optional experimental fallback behind an explicit installation warning.

@@ -2,7 +2,7 @@
 
 ## Supported version
 
-The current development release is `0.8.0`; the production site should be updated only after the full 0.8.0 acceptance checklist passes.
+The current supported public release is `0.8.0`.
 
 ## Data model
 
@@ -65,4 +65,4 @@ The generated macOS app is local and unsigned. Users should obtain it from this 
 
 ## Browser OCR worker
 
-M4-R1 runs lightweight text OCR in a dedicated Web Worker with device-based page limits and explicit cancellation. The advanced loopback service remains optional and token-authenticated.
+Writing Assistant 0.8.0 runs self-hosted English text OCR through Tesseract.js workers with device-based page limits, a 90-second initialization timeout and explicit cancellation. The advanced loopback service remains optional and token-authenticated.

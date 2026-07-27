@@ -10,7 +10,7 @@
   var actions = core.actions;
   var stores = core.stores;
 
-  var IMPORT_VERSION = '0.8.0-m4-r1';
+  var IMPORT_VERSION = '0.8.0';
   var MAX_TEXT_BYTES = 8 * 1024 * 1024;
   var MAX_DOCX_BYTES = 45 * 1024 * 1024;
   var MAX_EPUB_BYTES = 70 * 1024 * 1024;
@@ -31,19 +31,15 @@
   var LIBRARIES = {
     jszip: {
       globalName: 'JSZip',
-      local: 'vendor/jszip/jszip.min.js',
-      remote: 'https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js'
+      local: 'vendor/jszip/jszip.min.js'
     },
     mammoth: {
       globalName: 'mammoth',
-      local: 'vendor/mammoth/mammoth.browser.min.js',
-      remote: 'https://cdn.jsdelivr.net/npm/mammoth@1.12.0/mammoth.browser.min.js'
+      local: 'vendor/mammoth/mammoth.browser.min.js'
     },
     pdf: {
       local: 'vendor/pdfjs/pdf.min.mjs',
-      workerLocal: 'vendor/pdfjs/pdf.worker.min.mjs',
-      remote: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@6.1.200/build/pdf.min.mjs',
-      workerRemote: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@6.1.200/build/pdf.worker.min.mjs'
+      workerLocal: 'vendor/pdfjs/pdf.worker.min.mjs'
     }
   };
 
@@ -416,21 +412,19 @@
 
   function loadClassicScript(config) {
     if (window[config.globalName]) return Promise.resolve(window[config.globalName]);
-    function append(src) {
-      return new Promise(function (resolve, reject) {
-        var script = document.createElement('script');
-        script.src = src;
-        script.async = true;
-        script.onload = function () {
-          if (window[config.globalName]) resolve(window[config.globalName]);
-          else reject(new Error(config.globalName + ' did not initialise'));
-        };
-        script.onerror = function () { reject(new Error('无法加载 ' + src)); };
-        document.head.appendChild(script);
-      });
-    }
-    return append(new URL(config.local, document.baseURI).href).catch(function () {
-      return append(config.remote);
+    var source = new URL(config.local, document.baseURI).href;
+    return new Promise(function (resolve, reject) {
+      var script = document.createElement('script');
+      script.src = source;
+      script.async = true;
+      script.onload = function () {
+        if (window[config.globalName]) resolve(window[config.globalName]);
+        else reject(new Error(config.globalName + ' did not initialise'));
+      };
+      script.onerror = function () {
+        reject(new Error('正式版文档解析组件缺失：' + config.local + '。请重新部署完整的0.8.0静态资源。'));
+      };
+      document.head.appendChild(script);
     });
   }
 
@@ -443,11 +437,8 @@
       local.GlobalWorkerOptions.workerSrc = localWorker;
       window.__WRITING_ASSISTANT_PDFJS = { lib: local, source: 'local' };
       return window.__WRITING_ASSISTANT_PDFJS;
-    } catch (localError) {
-      var remote = await import(LIBRARIES.pdf.remote);
-      remote.GlobalWorkerOptions.workerSrc = LIBRARIES.pdf.workerRemote;
-      window.__WRITING_ASSISTANT_PDFJS = { lib: remote, source: 'cdn' };
-      return window.__WRITING_ASSISTANT_PDFJS;
+    } catch (error) {
+      throw new Error('正式版PDF.js组件缺失。请重新部署完整的0.8.0静态资源。');
     }
   }
 
@@ -823,13 +814,12 @@
     try { await pdf.destroy(); } catch (error) {}
     activePdfPages = pages.map(function (page) { return Object.assign({}, page); });
     var warnings = [];
-    if (loaded.source === 'cdn') warnings.push('本地 PDF.js 资源尚未安装，本次从固定版本 CDN 载入了解析器；PDF 文件本身没有发送到 CDN。');
     var nonEmpty = pages.filter(function (page) { return page.text.length >= 20; });
     var totalText = cleanText(pages.map(function (page) { return page.text; }).join('\n\n'));
     var averageChars = pdf.numPages ? totalText.length / pdf.numPages : 0;
     var scannedLikely = !nonEmpty.length || averageChars < 35 || lowTextPages / Math.max(1, pdf.numPages) > 0.65;
-    if (scannedLikely) warnings.push('该 PDF 很可能是扫描件或缺少可用文字层。可在下方连接本机 PaddleOCR-VL，对需要的页面执行本地 OCR。');
-    else if (lowTextPages) warnings.push(lowTextPages + ' 页提取到的文字很少，可能包含扫描页、图片页或复杂排版；可选择这些页面补充本地 OCR。');
+    if (scannedLikely) warnings.push('该 PDF 很可能是扫描件或缺少可用文字层。可在下方优先使用快速英文OCR；高级本地OCR仍是可选实验功能。');
+    else if (lowTextPages) warnings.push(lowTextPages + ' 页提取到的文字很少，可能包含扫描页、图片页或复杂排版；可选择这些页面补充快速英文OCR。');
     if (twoColumnPages) warnings.push('检测到 ' + twoColumnPages + ' 页可能采用双栏排版；已尝试按左栏后右栏排序，但保存前仍应抽查正文。');
     var chapters = groupPdfPagesToChapters(pages, removeExtension(file.name), warnings);
     return {
@@ -947,7 +937,7 @@
     previewDocument.warnings = unique((previewDocument.warnings || []).filter(function (warning) {
       return warning.indexOf('很可能是扫描件') < 0 && warning.indexOf('补充本地 OCR') < 0 && warning.indexOf('补充浏览器 OCR') < 0;
     }).concat([(isAdvanced ? '已通过高级本地 OCR 识别 ' : '已在浏览器中识别 ') + updated + ' 页；保存前请抽查专有名词、页眉页脚和段落顺序。']));
-    var record = { pages: results.map(function (result) { return Number(result.page); }), engine: metadata.engine || (isAdvanced ? 'PaddleOCR-VL' : 'PP-OCRv5 Mobile'), serviceVersion: metadata.serviceVersion || '0.8.0-m4-r1', processedAt: metadata.processedAt || new Date().toISOString(), mode: isAdvanced ? 'advanced' : 'browser' };
+    var record = { pages: results.map(function (result) { return Number(result.page); }), engine: metadata.engine || (isAdvanced ? 'PaddleOCR-VL' : 'PP-OCRv5 Mobile'), serviceVersion: metadata.serviceVersion || '0.8.0', processedAt: metadata.processedAt || new Date().toISOString(), mode: isAdvanced ? 'advanced' : 'browser' };
     previewDocument.pdfStatus = Object.assign({}, previewDocument.pdfStatus || {}, {
       lowTextPages: lowPages.length,
       lowTextPageNumbers: lowPages.map(function (page) { return page.page; }),

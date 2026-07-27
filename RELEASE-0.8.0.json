@@ -1,0 +1,32 @@
+{
+  "version": "0.8.0",
+  "status": "production",
+  "baseCommit": "386c48a1c804ef06c438c33281b8ca2fd9d8fef9",
+  "storageSchema": 5,
+  "storageKeysPreserved": [
+    "writing-assistant-v4",
+    "writing-assistant-v4-db"
+  ],
+  "productionBuild": "Cloudflare Workers Static Assets",
+  "documentParsers": {
+    "jszip": "3.10.1",
+    "mammoth": "1.12.0",
+    "pdfjs-dist": "6.1.200",
+    "productionCdnFallback": false
+  },
+  "browserOcr": {
+    "defaultForScannedPdf": true,
+    "onDemand": true,
+    "engine": "Tesseract.js 7",
+    "language": "eng",
+    "selfHosted": true,
+    "initialiseTimeoutSeconds": 90,
+    "worker": true,
+    "productionMockQuery": false
+  },
+  "advancedOcr": {
+    "optional": true,
+    "experimental": true,
+    "loopback": "127.0.0.1:8765"
+  }
+}

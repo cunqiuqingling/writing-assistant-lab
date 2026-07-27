@@ -35,7 +35,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 SERVICE_NAME = "Writing Assistant Local OCR"
-SERVICE_VERSION = "0.8.0-m4-r1"
+SERVICE_VERSION = "0.8.0"
 HOST = "127.0.0.1"
 DEFAULT_PORT = 8765
 MAX_REQUEST_BYTES = 18 * 1024 * 1024

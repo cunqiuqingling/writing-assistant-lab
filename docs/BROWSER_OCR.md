@@ -1,36 +1,54 @@
-# Browser-first text OCR（M4-R1）
+# Browser-first English OCR（0.8.0 Release R1）
 
-## 目标
+## 为什么改用英文专用快速OCR
 
-Writing Assistant是写作练习网站。OCR只负责从扫描PDF中提取可编辑文字，不恢复表格、公式、图片或出版级版式。
+Writing Assistant的核心材料是英文句子、段落、论文和文学文本。正式发布测试发现，原来的PaddleOCR.js浏览器路径需要从多个外部地址临时加载SDK、OpenCV、ONNX Runtime和模型，首次等待时间不可预测，也无法显示真实下载阶段。
 
-## 优先级
+Release R1改用Tesseract.js 7与英文快速识别数据：
 
-1. PDF.js直接读取现有文字层。
-2. 浏览器PP-OCRv5轻量OCR，默认推荐且无需安装。
-3. 可选PaddleOCR-VL本地连接器，仅在浏览器OCR效果不足时使用。
-4. 手动粘贴或仅保留PDF已有文字。
+- 只服务英文写作材料；
+- OCR核心、Worker、WASM和英文数据全部进入`vendor/tesseract/`；
+- 正式运行时不再向OCR CDN请求SDK或模型；
+- 第一次使用从Writing Assistant自己的Cloudflare静态资源加载；
+- Tesseract logger用于显示真实初始化与识别进度；
+- 初始化超过90秒会停止并给出错误，不再无限等待；
+- 后续由浏览器缓存相关静态资源。
 
-## 浏览器OCR
-
-- 只有用户点击“使用浏览器OCR”后才加载SDK和模型。
-- 使用独立Web Worker，避免长时间阻塞界面。
-- PDF页面先在浏览器中降采样，再逐页识别。
-- 低配置设备单次1页，中等设备3页，标准设备5页。
-- 支持取消；取消会终止Worker并释放模型内存。
-- 页面图像和结果不会发送到Writing Assistant服务器。
-- 第一次加载速度取决于网络，后续可由浏览器HTTP缓存复用。
-
-## 开发验收模式
-
-在本地地址后加入：
+## 数据流
 
 ```text
-?browserOcrMock=1
+用户选择扫描PDF页面
+  → PDF.js在浏览器渲染页面
+  → 同源Tesseract.js Worker
+  → 英文文字结果
+  → M2文档预览
 ```
 
-模拟模式不下载OCR SDK或模型，用于验证PDF渲染、Worker、取消和结果回填流程。
+页面图像、识别文字和练习内容不会发送给项目维护者。
 
-## 当前开发边界
+## 能力边界
 
-M4-R1使用固定版本的PaddleOCR.js ESM入口，并在用户主动触发时从固定CDN加载。正式部署0.8.0前应完成真实浏览器识别验收，并评估把SDK和模型资源固定到项目控制的静态路径。
+适合：
+
+- 清晰的印刷英文；
+- 英文论文、书籍和练习材料扫描页；
+- 简单单栏或可人工修正的双栏页面。
+
+不负责：
+
+- 中文等其他语言；
+- 表格和公式结构恢复；
+- 图片说明；
+- 出版级版面重建。
+
+识别结果进入文档预览，用户可以删除页眉页脚、调整段落顺序和修改错字。
+
+## 发布资产
+
+发布维护者运行`npm run vendor`时会：
+
+1. 复制Tesseract.js浏览器API和Worker；
+2. 复制Tesseract WebAssembly核心；
+3. 从`@tesseract.js-data/eng`中选择体积最小的`eng.traineddata.gz`；
+4. 写入`vendor/manifest.json`；
+5. 将全部资源随`dist/site`部署到Cloudflare。

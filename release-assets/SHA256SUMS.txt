@@ -1,0 +1,3 @@
+eb9cc6dca53b2d72ef56c1be4850c01e1cb7f06c3e78178d26f87c45f8880da8  writing-assistant-0.8.0-static-site.zip
+ee959fd6ef73a359b519090d86679f5ebcef59b2e04f95282fe9376aa67ddeaa  WritingAssistant-Advanced-Local-OCR-macOS-Apple-Silicon-0.8.0.zip
+6a03f109ed7820392fd581b65c8d958ccac5f9a7e2de1c37fdd6a79ad85468d5  RELEASE_NOTES_0.8.0.md

@@ -77,6 +77,6 @@ PDF quality reporting now includes low-text ratios, median page characters and p
 The source PDF is held only for the active import session so that pages can be rendered. Closing or replacing the import releases the PDF.js document and clears the active source context.
 
 
-## 扫描PDF（M4-R1）
+## 扫描PDF（0.8.0）
 
 扫描PDF优先使用浏览器PP-OCRv5文字识别，无需安装本地程序。识别目标仅为可编辑文字；图片、表格和公式会被忽略。高级PaddleOCR-VL连接器仅作为用户主动选择的实验性备用方案。

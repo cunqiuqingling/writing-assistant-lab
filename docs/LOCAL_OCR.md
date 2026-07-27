@@ -1,4 +1,4 @@
-# Advanced Local OCR Companion（M4-R1）
+# Advanced Local OCR Companion（0.8.0，可选实验功能）
 
 高级本地OCR是可选、实验性功能，不是扫描PDF的默认入口。
 
