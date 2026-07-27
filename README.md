@@ -8,7 +8,25 @@ A local-first English writing practice studio. Core practice works without an ac
 
 [中文说明](README.zh-CN.md)
 
-![Writing Assistant interface](assets/screenshot.png)
+## Interface preview
+
+### Sentence Lab
+
+Sentence imitation, precise copying and local rule-based analysis.
+
+![Writing Assistant Sentence Lab](assets/sentence-lab.png)
+
+### Paragraph Lab
+
+Sentence-function breakdown, guided paragraph building and independent writing.
+
+![Writing Assistant Paragraph Lab](assets/paragraph-lab.png)
+
+### Practice Library
+
+Local folders, imported documents, public resources and chapter progress.
+
+![Writing Assistant Practice Library](assets/practice-library.png)
 
 ## Writing philosophy
 
