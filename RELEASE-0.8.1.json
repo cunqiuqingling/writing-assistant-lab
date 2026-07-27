@@ -1,0 +1,16 @@
+{
+  "version": "0.8.1",
+  "date": "2026-07-28",
+  "type": "privacy-legal-transparency-patch",
+  "storageSchema": 5,
+  "preservesExistingLocalData": true,
+  "publicPages": [
+    "/legal/",
+    "/legal/privacy.html",
+    "/legal/terms.html",
+    "/legal/copyright.html",
+    "/legal/security.html",
+    "/legal/third-party.html",
+    "/legal/contact.html"
+  ]
+}

@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="列出正式网站包含的开源组件，以及Cloudflare、Wikimedia、AI提供商和高级OCR边界。" />
+  <meta name="color-scheme" content="light" />
+  <link rel="icon" href="../assets/icon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="legal.css" />
+  <title>第三方组件与外部服务 · Writing Assistant</title>
+</head>
+<body>
+  <header class="legal-topbar">
+    <a class="legal-brand" href="../">
+      <span class="legal-logo" aria-hidden="true">W</span>
+      <span><strong>Writing Assistant</strong><small>政策、隐私与项目说明</small></span>
+    </a>
+    <a class="back-link" href="../">返回练习工具</a>
+  </header>
+
+  <div class="legal-layout">
+    <nav class="legal-nav" aria-label="政策页面">
+      <a href="index.html">政策中心</a>
+<a href="privacy.html">隐私政策</a>
+<a href="terms.html">使用条款</a>
+<a href="copyright.html">版权与投诉</a>
+<a href="security.html">安全说明</a>
+<a class="active" href="third-party.html">第三方说明</a>
+<a href="contact.html">联系我们</a>
+    </nav>
+
+    <main class="legal-main">
+      <div class="legal-title">
+        <p class="eyebrow">WRITING ASSISTANT · 0.8.1</p>
+        <h1>第三方组件与外部服务</h1>
+        <p>列出正式网站包含的开源组件，以及Cloudflare、Wikimedia、AI提供商和高级OCR边界。</p>
+        <div class="effective">生效日期：2026年7月28日 · 最近更新：2026年7月28日</div>
+      </div>
+
+<section><h2>1. 随正式网站提供的开源组件</h2>
+<table class="data-table"><thead><tr><th>组件</th><th>用途</th><th>许可证</th></tr></thead><tbody>
+<tr><td>JSZip 3.10.1</td><td>读取EPUB等ZIP容器</td><td>MIT选项</td></tr>
+<tr><td>Mammoth 1.12.0</td><td>DOCX语义文本提取</td><td>BSD-2-Clause</td></tr>
+<tr><td>PDF.js 6.1.200</td><td>PDF文字层与页面渲染</td><td>Apache-2.0</td></tr>
+<tr><td>Tesseract.js 7.0.0</td><td>浏览器端英文OCR</td><td>Apache-2.0</td></tr>
+<tr><td>@tesseract.js-data/eng 1.0.0</td><td>英文OCR训练数据</td><td>MIT</td></tr>
+</tbody></table><p>正式构建会把上游许可证文本复制到 <code>vendor/licenses/</code>。</p></section>
+<section><h2>2. 部署与基础设施</h2><p>公开网站通过Cloudflare Workers Static Assets提供。Cloudflare可能为内容分发、安全和滥用防护处理普通连接元数据。Wrangler仅作为维护和部署工具使用。</p></section>
+<section><h2>3. Wikimedia</h2><p>在线资源中心在主动搜索或预览后访问英文Wikipedia与Wikisource。页面不随仓库打包；署名、许可和公版状态以来源页面及适用法律为准。</p></section>
+<section><h2>4. 用户选择的AI提供商</h2><p>BYOK允许使用者配置第三方AI提供商。模型名称、费用、数据保留、地区限制和合规状态可能变化，应直接查看所选提供商的最新政策。</p></section>
+<section><h2>5. 可选高级OCR</h2><p>高级本地连接器可安装PaddlePaddle、PaddleOCR及模型文件。这些依赖不嵌入核心网页包，受各自许可证和安全更新约束。</p></section>
+<section class="english-summary"><h2>English summary</h2><p>The production site bundles pinned open-source parser and OCR components. Cloudflare provides static hosting. Wikimedia and user-selected AI providers are external services. Advanced OCR installs separate local dependencies.</p></section>
+
+    </main>
+  </div>
+
+  <footer class="legal-footer">
+    <p>Writing Assistant 是本地优先的开源英语写作练习工具。政策文本用于说明当前产品行为，不构成针对任何人的法律意见。</p>
+    <p><a href="../">返回首页</a> · <a href="contact.html">联系项目</a> · <a href="https://github.com/cunqiuqingling/writing-assistant-lab" rel="noopener noreferrer">GitHub 仓库</a></p>
+  </footer>
+</body>
+</html>

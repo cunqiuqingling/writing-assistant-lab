@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.8.1 — Privacy, legal and transparency pages
+
+- Added a public legal center with privacy, terms, copyright, security, third-party and contact pages.
+- Added compact policy links to the main application footer.
+- Corrected the obsolete statement that the application made no AI requests.
+- Documented Cloudflare metadata, BYOK provider requests, Wikimedia access and both OCR paths.
+- Added a copyright/takedown process and private security-reporting boundary.
+- Preserved storage schema 5 and all existing local practice data.
+
+
 ## 0.8.0 — Document import, library workspace, public resources and browser OCR
 
 - Added browser-local TXT, Markdown, EPUB, DOCX and PDF import with unified preview.

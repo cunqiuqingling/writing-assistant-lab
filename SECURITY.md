@@ -2,67 +2,32 @@
 
 ## Supported version
 
-The current supported public release is `0.8.0`.
+The current supported public release is `0.8.1`.
 
-## Data model
+## Architecture
 
-Writing Assistant is a local-first static web application. It has no application backend and no shared user database. Practice data is stored in each visitor's browser.
+Writing Assistant is a local-first static web application with no shared user database or login backend. Main risks are deployment-account compromise, dependency supply chain, imported-content handling, shared-device browser storage and visitor-supplied API keys.
 
-## Reporting a vulnerability
+## Reporting
 
-Please do not publish an exploitable vulnerability, exposed credential or sensitive user data in a public issue.
+Do not publish an exploitable vulnerability, exposed credential, identity document or sensitive user data in a public Issue. Use GitHub Private Vulnerability Reporting when available, or a private contact method listed on the maintainer's GitHub profile.
 
-Contact the repository maintainer privately through the contact method listed on the maintainer's GitHub profile, and include:
+Include affected version, browser, reproduction steps, expected and observed behavior, impact and a minimal proof of concept without live credentials.
 
-- affected version;
-- reproduction steps;
-- expected and observed behavior;
-- potential impact;
-- a minimal proof of concept when appropriate.
+## Good-faith boundaries
 
-## Deployment credentials
+- Test only systems, data and accounts you control.
+- Do not perform denial of service, high-volume scanning, credential attacks, social engineering or third-party testing.
+- Do not retain or publish another person's data.
+- Stop and report privately if a live credential or sensitive record is encountered.
+- Allow a reasonable remediation period before disclosure.
 
-Cloudflare API tokens, account IDs with write context, private keys and browser backup files must never be committed to the repository.
+There is no formal bug bounty or guaranteed response time.
 
-If CI/CD deployment is added later:
+## Operational safeguards
 
-- use a narrowly scoped Cloudflare API token;
-- store the token only in GitHub Actions secrets;
-- protect the production branch;
-- require review before production changes are merged.
+Cloudflare, GitHub and domain credentials must never be committed. Maintainers should use passkeys or 2FA, keep recovery codes offline, review diffs before deployment and protect the production branch.
 
-## BYOK API-key boundary
+BYOK keys should be low-limit, revocable and dedicated to this tool. Imported and remote content is rendered as text, PDF JavaScript is disabled, parsers are pinned, browser OCR is self-hosted, and advanced OCR is loopback-only.
 
-Writing Assistant 0.6.0 can make direct browser requests with a visitor-supplied API key. Client-side key storage is not equivalent to a private backend. Users should create a low-limit, revocable key dedicated to this tool and should never paste production, organisational or high-value credentials into an untrusted deployment.
-
-API keys must never be committed to this repository, included in screenshots or issue reports, or added to starter-library data. Reports involving leaked credentials should be handled privately and the affected key should be revoked immediately.
-
-## Imported-document security
-
-- EPUB and DOCX archives are parsed as data; embedded scripts are never executed.
-- Converted document HTML is reduced to text and semantic headings before it reaches the application.
-- File size, page count, chapter count and extracted-character limits are enforced.
-- PDF JavaScript evaluation is disabled in the PDF.js loading options.
-- Parser dependencies are pinned to exact versions and should be committed with their license notices for production.
-- Do not enable external DOCX file access or EPUB scripting.
-## Document revision safety
-
-Document and card editors validate non-empty titles, cap title length, render imported text as text rather than executable HTML, and preserve stable document and chapter identifiers where possible. Structural source changes require confirmation before incompatible local progress records are removed. Built-in title changes are browser-local overrides and never modify the public starter library.
-
-
-## M3 remote-content controls
-
-The online-resource client uses two fixed HTTPS MediaWiki endpoints, omits credentials, adds `origin=*`, applies request timeouts and cancellation, caps response sizes, removes executable and navigational HTML, converts retained content to plain text, and routes it through the existing local import preview. Arbitrary user-supplied remote endpoints and direct remote-HTML rendering are not supported.
-
-## Loopback OCR companion
-
-The optional M4 companion binds only to `127.0.0.1`, permits the official production origin and explicit local-test origins, and requires a random bearer pairing token for OCR jobs and results. It enforces image-body, queue and result limits, serialises model execution, and removes temporary page images after completion or failure. Recognised text and image bodies are not written to request logs.
-
-The web client uses a fixed loopback URL; arbitrary OCR endpoints are not accepted. A user action is required to detect, pair and start OCR. Pairing credentials are separate from normal application backups. Do not change the companion to listen on `0.0.0.0`, expose it through port forwarding, disable origin checks, or commit a pairing token.
-
-The generated macOS app is local and unsigned. Users should obtain it from this repository/release, review the installer script, and avoid repackaged third-party installers. PaddleOCR and model files remain third-party dependencies subject to their own security updates.
-
-
-## Browser OCR worker
-
-Writing Assistant 0.8.0 runs self-hosted English text OCR through Tesseract.js workers with device-based page limits, a 90-second initialization timeout and explicit cancellation. The advanced loopback service remains optional and token-authenticated.
+Public HTML: `/legal/security.html`.

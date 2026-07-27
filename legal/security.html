@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="说明本地优先安全模型、私密报告渠道、善意测试边界和使用者安全建议。" />
+  <meta name="color-scheme" content="light" />
+  <link rel="icon" href="../assets/icon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="legal.css" />
+  <title>安全说明与漏洞报告 · Writing Assistant</title>
+</head>
+<body>
+  <header class="legal-topbar">
+    <a class="legal-brand" href="../">
+      <span class="legal-logo" aria-hidden="true">W</span>
+      <span><strong>Writing Assistant</strong><small>政策、隐私与项目说明</small></span>
+    </a>
+    <a class="back-link" href="../">返回练习工具</a>
+  </header>
+
+  <div class="legal-layout">
+    <nav class="legal-nav" aria-label="政策页面">
+      <a href="index.html">政策中心</a>
+<a href="privacy.html">隐私政策</a>
+<a href="terms.html">使用条款</a>
+<a href="copyright.html">版权与投诉</a>
+<a class="active" href="security.html">安全说明</a>
+<a href="third-party.html">第三方说明</a>
+<a href="contact.html">联系我们</a>
+    </nav>
+
+    <main class="legal-main">
+      <div class="legal-title">
+        <p class="eyebrow">WRITING ASSISTANT · 0.8.1</p>
+        <h1>安全说明与漏洞报告</h1>
+        <p>说明本地优先安全模型、私密报告渠道、善意测试边界和使用者安全建议。</p>
+        <div class="effective">生效日期：2026年7月28日 · 最近更新：2026年7月28日</div>
+      </div>
+
+<section><h2>1. 当前安全模型</h2><p>Writing Assistant 是静态、本地优先网页应用，没有共享用户数据库或登录后台。主要风险集中在GitHub、Cloudflare和域名账户，第三方依赖供应链，导入内容处理，以及用户自行配置的API密钥。</p></section>
+<section><h2>2. 私密报告安全问题</h2><p>不要在公开Issue中披露可直接利用的漏洞、凭据、私人文件或真实API密钥。优先使用GitHub Private Vulnerability Reporting（如可用），或通过维护者GitHub资料中的私密联系方式联系。</p></section>
+<section><h2>3. 善意测试边界</h2><ul>
+<li>只测试自己控制的数据、浏览器和账户；</li>
+<li>不要进行拒绝服务、批量扫描、社工、凭据猜测或第三方系统测试；</li>
+<li>不要持续访问、复制或公开他人数据；</li>
+<li>发现真实密钥或敏感材料时立即停止并私密报告；</li>
+<li>给维护者合理时间确认和修复后再讨论披露。</li>
+</ul></section>
+<section><h2>4. 不构成漏洞赏金计划</h2><p>项目目前没有正式漏洞赏金、服务等级协议或保证响应时间。提交报告不自动产生报酬、雇佣或保密合同。</p></section>
+<section><h2>5. 使用者安全建议</h2><ul>
+<li>只在官方域名或自己核验过的部署中输入API密钥；</li>
+<li>使用低额度、可撤销、专用于本工具的密钥；</li>
+<li>不要把密钥放入练习文本、备份、截图或GitHub Issue；</li>
+<li>共享设备上使用独立浏览器配置；</li>
+<li>高级OCR安装包只从官方仓库或Release获取。</li>
+</ul></section>
+<section class="english-summary"><h2>English summary</h2><p>Do not disclose vulnerabilities, credentials or personal data in public Issues. Good-faith testing must avoid denial of service, third-party systems, credential attacks and access to other people's data. There is no formal bug bounty program.</p></section>
+
+    </main>
+  </div>
+
+  <footer class="legal-footer">
+    <p>Writing Assistant 是本地优先的开源英语写作练习工具。政策文本用于说明当前产品行为，不构成针对任何人的法律意见。</p>
+    <p><a href="../">返回首页</a> · <a href="contact.html">联系项目</a> · <a href="https://github.com/cunqiuqingling/writing-assistant-lab" rel="noopener noreferrer">GitHub 仓库</a></p>
+  </footer>
+</body>
+</html>

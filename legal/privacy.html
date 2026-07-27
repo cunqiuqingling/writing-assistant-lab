@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="说明本地浏览器存储、基础设施日志、可选AI、Wikimedia和OCR功能的数据流。" />
+  <meta name="color-scheme" content="light" />
+  <link rel="icon" href="../assets/icon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="legal.css" />
+  <title>隐私政策 · Writing Assistant</title>
+</head>
+<body>
+  <header class="legal-topbar">
+    <a class="legal-brand" href="../">
+      <span class="legal-logo" aria-hidden="true">W</span>
+      <span><strong>Writing Assistant</strong><small>政策、隐私与项目说明</small></span>
+    </a>
+    <a class="back-link" href="../">返回练习工具</a>
+  </header>
+
+  <div class="legal-layout">
+    <nav class="legal-nav" aria-label="政策页面">
+      <a href="index.html">政策中心</a>
+<a class="active" href="privacy.html">隐私政策</a>
+<a href="terms.html">使用条款</a>
+<a href="copyright.html">版权与投诉</a>
+<a href="security.html">安全说明</a>
+<a href="third-party.html">第三方说明</a>
+<a href="contact.html">联系我们</a>
+    </nav>
+
+    <main class="legal-main">
+      <div class="legal-title">
+        <p class="eyebrow">WRITING ASSISTANT · 0.8.1</p>
+        <h1>隐私政策</h1>
+        <p>说明本地浏览器存储、基础设施日志、可选AI、Wikimedia和OCR功能的数据流。</p>
+        <div class="effective">生效日期：2026年7月28日 · 最近更新：2026年7月28日</div>
+      </div>
+
+<section>
+  <h2>1. 适用范围与项目维护者</h2>
+  <p>本政策适用于 Writing Assistant 官方公开站点及其浏览器端功能。项目由 GitHub 仓库维护者独立维护，不设用户账号系统、共享用户数据库、广告系统或站内行为分析服务。</p>
+</section>
+<section>
+  <h2>2. 默认保存在浏览器中的数据</h2>
+  <ul>
+    <li>句子与段落练习答案、拆解笔记、计划和进度；</li>
+    <li>自建练习材料、导入文档、章节编辑和本地标题覆盖；</li>
+    <li>文件夹展开状态、界面偏好和普通JSON备份所包含的数据；</li>
+    <li>浏览器支持时，由使用者授权的备份目录句柄；</li>
+    <li>可选AI设置，以及主动选择“加密保存”时的本地加密密钥数据；</li>
+    <li>可选高级OCR连接器的本地配对令牌，该令牌不进入普通JSON备份。</li>
+  </ul>
+  <p>使用同一设备、同一浏览器配置文件的人可能看到这些本地数据。共享设备上应使用独立系统账户或浏览器配置文件。</p>
+</section>
+<section>
+  <h2>3. 会产生网络请求的情况</h2>
+  <table class="data-table">
+    <thead><tr><th>场景</th><th>可能发送的内容</th><th>接收方</th></tr></thead>
+    <tbody>
+      <tr><td>打开网站</td><td>IP地址、请求时间、浏览器请求头等普通连接与安全日志信息</td><td>Cloudflare等基础设施提供商</td></tr>
+      <tr><td>AI参考文本解析</td><td>主动选择的参考句子或段落、API请求参数与用户提供的API密钥</td><td>使用者选择的AI提供商</td></tr>
+      <tr><td>Wikipedia/Wikisource搜索或预览</td><td>搜索词、页面标题和普通请求元数据</td><td>Wikimedia服务</td></tr>
+      <tr><td>浏览器OCR</td><td>同源下载OCR程序与英文数据；PDF页面图像和识别结果不离开当前浏览器</td><td>静态资源由本站提供，计算在浏览器完成</td></tr>
+      <tr><td>高级本地OCR</td><td>使用者明确选择的PDF页面临时图像</td><td>使用者自己电脑上的127.0.0.1本地连接器</td></tr>
+    </tbody>
+  </table>
+</section>
+<section>
+  <h2>4. BYOK AI边界</h2>
+  <p>AI功能默认关闭。只有在使用者配置第三方提供商并主动发起请求时，浏览器才会把当前选中的参考文本直接发送给该提供商。学习者自己的仿写、笔记、标签、写作计划和练习进度不应进入该请求。</p>
+  <p>项目维护者不运营AI代理服务器，也不会从正常功能中收到API密钥或AI请求正文。第三方提供商如何保存和处理请求，由其自身隐私政策、服务条款和所在地区规则决定。</p>
+</section>
+<section>
+  <h2>5. 文件导入与OCR</h2>
+  <p>TXT、Markdown、EPUB、DOCX和PDF由浏览器端JavaScript解析。正式版文档解析器随本站静态资源提供；源文件与提取后的正文不会发送给项目维护者。</p>
+  <p>浏览器英文OCR只在使用者主动启动后加载同源Tesseract.js资源，并在浏览器内处理页面图像。高级PaddleOCR-VL连接器是可选实验功能，仅绑定本机回环地址。</p>
+</section>
+<section>
+  <h2>6. 数据保留、备份与删除</h2>
+  <p>项目维护者通常无法访问或替使用者恢复浏览器中的本地数据。使用者可以通过“Data &amp; Backup → 清空本地练习数据”删除站点数据，也可以在浏览器设置中清除本站存储。重要练习应定期导出JSON备份。</p>
+</section>
+<section>
+  <h2>7. 未成年人</h2>
+  <p>本工具不主动收集年龄或身份信息。未成年人使用第三方AI、Wikimedia或其他外部服务时，应在监护人指导下阅读相应服务规则，避免提交个人敏感信息。</p>
+</section>
+<section>
+  <h2>8. 政策更新与联系</h2>
+  <p>功能、基础设施或外部服务发生重要变化时，本政策会同步更新并标明日期。一般问题可通过项目GitHub Issues提出；涉及漏洞、凭据、身份材料或版权证明的内容应使用私密渠道。</p>
+</section>
+<section class="english-summary">
+  <h2>English summary</h2>
+  <p>Practice data, imported documents and notes are stored in the current browser by default. Ordinary connection metadata may be processed by Cloudflare. AI requests are sent directly to the provider selected by the user and contain only selected reference text; learner writing and progress are excluded. Wikimedia requests occur only after user action. Browser OCR remains local; advanced OCR uses a loopback service.</p>
+</section>
+
+    </main>
+  </div>
+
+  <footer class="legal-footer">
+    <p>Writing Assistant 是本地优先的开源英语写作练习工具。政策文本用于说明当前产品行为，不构成针对任何人的法律意见。</p>
+    <p><a href="../">返回首页</a> · <a href="contact.html">联系项目</a> · <a href="https://github.com/cunqiuqingling/writing-assistant-lab" rel="noopener noreferrer">GitHub 仓库</a></p>
+  </footer>
+</body>
+</html>

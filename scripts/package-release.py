@@ -5,7 +5,6 @@ from pathlib import Path
 import hashlib
 import json
 import shutil
-import stat
 import zipfile
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -20,7 +19,10 @@ def zip_folder(folder: Path, output: Path, top_name: str) -> None:
         for path in sorted(folder.rglob("*")):
             if not path.is_file() or "__pycache__" in path.parts or path.suffix == ".pyc":
                 continue
-            info = zipfile.ZipInfo.from_file(path, arcname=str(Path(top_name) / path.relative_to(folder)))
+            info = zipfile.ZipInfo.from_file(
+                path,
+                arcname=str(Path(top_name) / path.relative_to(folder)),
+            )
             info.compress_type = zipfile.ZIP_DEFLATED
             with path.open("rb") as source:
                 archive.writestr(info, source.read())
@@ -36,12 +38,13 @@ if not (SITE / "index.html").exists():
     raise SystemExit("dist/site is missing. Run npm run build:release first.")
 
 OUT.mkdir(parents=True, exist_ok=True)
-site_zip = OUT / "writing-assistant-0.8.0-static-site.zip"
+site_zip = OUT / "writing-assistant-0.8.1-static-site.zip"
 companion_zip = OUT / "WritingAssistant-Advanced-Local-OCR-macOS-Apple-Silicon-0.8.0.zip"
-zip_folder(SITE, site_zip, "writing-assistant-0.8.0-static-site")
+
+zip_folder(SITE, site_zip, "writing-assistant-0.8.1-static-site")
 zip_folder(COMPANION, companion_zip, "WritingAssistant-Advanced-Local-OCR-macOS-Apple-Silicon-0.8.0")
 
-notes = ROOT / "RELEASE_NOTES_0.8.0.md"
+notes = ROOT / "RELEASE_NOTES_0.8.1.md"
 if notes.exists():
     shutil.copy2(notes, OUT / notes.name)
 
@@ -49,17 +52,18 @@ artifacts = [site_zip, companion_zip]
 if (OUT / notes.name).exists():
     artifacts.append(OUT / notes.name)
 
-checksums = []
-for path in artifacts:
-    checksums.append(f"{sha256(path)}  {path.name}")
-(OUT / "SHA256SUMS.txt").write_text("\n".join(checksums) + "\n", encoding="utf-8")
+(OUT / "SHA256SUMS.txt").write_text(
+    "\n".join(f"{sha256(path)}  {path.name}" for path in artifacts) + "\n",
+    encoding="utf-8",
+)
 
 manifest = {
-    "version": "0.8.0",
+    "version": "0.8.1",
+    "advancedOcrCompanionVersion": "0.8.0",
     "artifacts": [
         {"file": path.name, "bytes": path.stat().st_size, "sha256": sha256(path)}
         for path in artifacts
-    ]
+    ],
 }
 (OUT / "release-manifest.json").write_text(
     json.dumps(manifest, ensure_ascii=False, indent=2) + "\n",

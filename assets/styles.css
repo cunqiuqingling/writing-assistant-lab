@@ -1599,3 +1599,35 @@
   .browser-ocr-recommended { grid-column: 2; justify-self: start; }
   .browser-ocr-note { grid-template-columns: 1fr; }
 }
+
+/* 0.8.1 · public policy footer */
+.app { grid-template-rows: auto 1fr auto; }
+.app-footer {
+  display: grid;
+  gap: 7px;
+  margin: 0 14px 14px;
+  padding: 13px 16px;
+  border: 1px solid rgba(227,232,241,.96);
+  border-radius: 14px;
+  color: #667085;
+  background: rgba(255,255,255,.88);
+  box-shadow: 0 10px 30px rgba(24,39,75,.04);
+  font-size: 10px;
+  line-height: 1.55;
+}
+.app-footer-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+}
+.app-footer strong { color: #344054; }
+.app-footer nav { display: flex; flex-wrap: wrap; gap: 6px 12px; }
+.app-footer a { color: #526174; font-weight: 750; text-decoration: none; }
+.app-footer a:hover { color: var(--primary); text-decoration: underline; }
+.app-footer p { margin: 0; color: #8a94a6; }
+@media (max-width: 700px) {
+  .app-footer { margin: 0 9px 9px; }
+  .app-footer-main { align-items: flex-start; flex-direction: column; }
+}

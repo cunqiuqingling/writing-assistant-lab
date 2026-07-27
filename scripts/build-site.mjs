@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const out = resolve(root, 'dist/site');
 const requireVendor = process.argv.includes('--require-vendor');
-const entries = ['index.html', 'assets', 'data', 'js'];
+const entries = ['index.html', 'assets', 'data', 'js', 'legal'];
 const optionalFiles = ['_headers'];
 
 await rm(out, { recursive: true, force: true });
@@ -45,4 +45,4 @@ if (hasVendor) {
   console.warn('Vendor assets are absent. This non-production build cannot import EPUB, DOCX or PDF.');
 }
 
-console.log(`Built Writing Assistant 0.8.0 static site in ${out}.`);
+console.log(`Built Writing Assistant 0.8.1 static site in ${out}.`);

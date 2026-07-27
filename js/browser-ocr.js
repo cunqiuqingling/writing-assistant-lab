@@ -482,7 +482,7 @@
   }
 
   window.WritingAssistantLocalOCR = {
-    version: '0.8.0',
+    version: '0.8.1',
     engine: 'tesseract-english-fast',
     render: render,
     reset: reset,
