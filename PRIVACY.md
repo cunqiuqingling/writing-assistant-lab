@@ -9,15 +9,13 @@ The application may store the following data in the current browser:
 - sentence and paragraph practice state;
 - user-written answers and analysis notes;
 - custom practice-library items;
-- virtual practice-library folders and material locations;
-- per-document, per-chapter Sentence Lab and Paragraph Lab progress;
 - the last selected backup-directory handle, when the browser supports it.
 
-The active interface state uses `localStorage`. Custom library entries, virtual folders, chapter progress and the optional directory handle use IndexedDB.
+The main practice state uses `localStorage`. Custom library entries and the optional directory handle use IndexedDB.
 
 ## Network behavior
 
-The application does not include a cloud database, account system, analytics script or advertising tracker. Optional BYOK AI reference analysis makes a direct browser request only after the visitor configures and starts it. Clicking an external resource link opens that third-party website, which is governed by its own privacy policy.
+The application does not include a cloud database, account system, analytics script, advertising tracker, or AI API call. Clicking an external resource link opens that third-party website, which is governed by its own privacy policy.
 
 ## Shared devices
 
@@ -42,6 +40,10 @@ AI analysis is disabled until a visitor configures a provider and actively start
 
 The project maintainer does not operate an AI proxy and does not receive the API key or request body. API keys are excluded from ordinary Writing Assistant backup JSON files. The normal exercise copy actions never include AI analysis output.
 
-## Folder and chapter backups
+## Local document parsing
 
-Schema 5 backups include custom materials, custom folders and per-chapter progress records. They do not include API keys. Restoring a backup replaces the current local workspace after confirmation.
+EPUB, DOCX, PDF, TXT and Markdown files selected for import are read by JavaScript in the visitor's browser. The project maintainer does not receive the source file or extracted text.
+
+The production build can serve pinned local copies of JSZip, Mammoth and PDF.js. During development or when those local files are missing, the interface may load the same pinned parser code from jsDelivr. Loading a library from the CDN sends an ordinary library request to the CDN, but Writing Assistant does not send the selected document or extracted text with that request.
+
+PDF.js only extracts an existing PDF text layer in 0.8.0 M1. PaddleOCR-VL integration, when added later, will be an optional localhost service and will require separate user confirmation.

@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "version": "0.8.0-m1",
+  "checkpoint": "M1",
+  "title": "Browser document import and static-assets deployment",
+  "features": [
+    "EPUB import",
+    "DOCX import",
+    "PDF text-layer extraction",
+    "unified import preview",
+    "drag-and-drop",
+    "Cloudflare Static Assets build"
+  ],
+  "deferred": [
+    "advanced chapter editor",
+    "online public resource center",
+    "PaddleOCR-VL local companion"
+  ],
+  "privacy": "Source documents are parsed in the visitor's browser and are not sent to the project maintainer."
+}

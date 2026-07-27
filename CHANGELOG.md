@@ -1,19 +1,19 @@
 # Changelog
 
-## 0.7.0 — Folder library and long-text workspace
+## 0.8.0 M1 — Browser document import and static-assets deployment
 
-- Fixed parent-folder material totals, subfolder labels, and recursive card display.
+- Clarified text-material and document-import entry points, and added a direct EPUB/DOCX/PDF route inside the text modal.
 
-- Added a virtual folder tree while preserving the existing practice-material cards.
-- Added built-in IELTS, academic, pharmacy/biomedicine, literature and personal-library folder groups.
-- Added local custom-folder creation, rename, deletion and material movement.
-- Added document → chapter → batch → unit navigation for long texts.
-- Limited each visible batch to at most 45 practice units.
-- Added independent Sentence Lab and Paragraph Lab progress for every chapter.
-- Added automatic chapter recognition from Markdown and Chapter/Part/Book/Section headings.
-- Added safe migration of active 0.6.0 practice into a one-chapter document.
-- Upgraded JSON backups to schema 5 with custom folders and chapter progress.
-- Preserved the 0.6.0 BYOK AI reference-analysis and copy boundaries.
+- Added local EPUB import with OPF/spine chapter extraction.
+- Added local DOCX import through Mammoth with heading-aware chapter conversion.
+- Added local PDF text-layer extraction through PDF.js, basic reading-order recovery, and scan detection.
+- Added a unified local import preview with metadata, chapter selection, renaming, reordering and removal.
+- Added drag-and-drop import for EPUB, DOCX, PDF, TXT and Markdown.
+- Added pinned parser dependencies with local vendor copies and CDN fallbacks.
+- Added a Cloudflare Static Assets build and Wrangler deployment configuration.
+- Kept the legacy single-file Worker build available during the 0.8.0 transition.
+- Scanned-PDF OCR is intentionally deferred to the optional PaddleOCR-VL local companion checkpoint.
+
 
 ## 0.6.0 — BYOK AI reference-text analysis
 

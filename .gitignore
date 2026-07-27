@@ -5,3 +5,7 @@ writing-assistant-backup-*.json
 *-backup-*.json
 .env
 .env.*
+
+# Local dependency and Cloudflare build output
+.wrangler/
+dist/site/

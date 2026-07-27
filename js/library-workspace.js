@@ -633,7 +633,8 @@
       card.className = 'library-card';
       var tags = (item.tags || []).slice(0, 5).map(function (tag) { return '<span class="chip">' + h.escapeHtml(tag) + '</span>'; }).join('');
       var chapters = getItemChapters(item);
-      card.innerHTML = '<h3>' + h.escapeHtml(item.title) + '</h3><div class="library-meta">' + h.escapeHtml(item.category) + ' · ' + h.escapeHtml(item.source || 'Unknown source') + '<br />' + h.escapeHtml(item.license || 'Personal study') + '</div><div class="chips" style="margin-top:8px">' + tags + '<span class="chip neutral">' + chapters.length + ' 章</span></div><div class="library-preview">' + h.escapeHtml(item.text) + '</div><div class="library-actions"><button class="btn small soft" data-workspace-sentence="' + h.escapeHtml(item.id) + '">句子练习</button><button class="btn small primary" data-workspace-paragraph="' + h.escapeHtml(item.id) + '">段落练习</button>' + (item.builtin ? '' : '<button class="btn small" data-workspace-move="' + h.escapeHtml(item.id) + '">移动</button><button class="btn small danger" data-workspace-delete="' + h.escapeHtml(item.id) + '">删除</button>') + '</div>';
+      var importChip = item.importMeta && item.importMeta.format ? '<span class="chip neutral">' + h.escapeHtml(String(item.importMeta.format).toUpperCase()) + '</span>' : '';
+      card.innerHTML = '<h3>' + h.escapeHtml(item.title) + '</h3><div class="library-meta">' + h.escapeHtml(item.category) + ' · ' + h.escapeHtml(item.source || 'Unknown source') + '<br />' + h.escapeHtml(item.license || 'Personal study') + '</div><div class="chips" style="margin-top:8px">' + tags + importChip + '<span class="chip neutral">' + chapters.length + ' 章</span></div><div class="library-preview">' + h.escapeHtml(item.text) + '</div><div class="library-actions"><button class="btn small soft" data-workspace-sentence="' + h.escapeHtml(item.id) + '">句子练习</button><button class="btn small primary" data-workspace-paragraph="' + h.escapeHtml(item.id) + '">段落练习</button>' + (item.builtin ? '' : '<button class="btn small" data-workspace-move="' + h.escapeHtml(item.id) + '">移动</button><button class="btn small danger" data-workspace-delete="' + h.escapeHtml(item.id) + '">删除</button>') + '</div>';
       grid.appendChild(card);
     });
     all('[data-workspace-sentence]').forEach(function (button) { button.addEventListener('click', function () { loadDocumentChapter(this.dataset.workspaceSentence, 'sentence', 0, 0).catch(function () { actions.showToast('材料载入失败'); }); }); });
@@ -879,7 +880,16 @@
     saveCurrentProgress: saveCurrentProgress,
     afterBackupRestore: afterBackupRestore,
     loadDocumentChapter: loadDocumentChapter,
-    parseChapters: parseChapters
+    parseChapters: parseChapters,
+    getFolders: function () { return folderList().map(function (folder) { return Object.assign({}, folder); }); },
+    selectFolder: function (folderId) {
+      if (!folderById(folderId)) folderId = 'folder-my-custom';
+      state().library = state().library || {};
+      state().library.selectedFolderId = folderId;
+      state().activeLab = 'library';
+      actions.persistNow();
+      actions.renderAll();
+    }
   };
 
   injectModals();

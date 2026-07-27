@@ -2,7 +2,7 @@
 
 ## Supported version
 
-The current public release is `0.7.x`.
+The current public release is `0.5.x`.
 
 ## Data model
 
@@ -37,6 +37,11 @@ Writing Assistant 0.6.0 can make direct browser requests with a visitor-supplied
 
 API keys must never be committed to this repository, included in screenshots or issue reports, or added to starter-library data. Reports involving leaked credentials should be handled privately and the affected key should be revoked immediately.
 
-## Imported-content boundary
+## Imported-document security
 
-Virtual folders and chapter progress remain local browser records. Imported text is rendered as text rather than executable HTML. Backup and library JSON files should still be imported only from trusted sources, and unusually large or malformed files may be rejected in later hardening releases.
+- EPUB and DOCX archives are parsed as data; embedded scripts are never executed.
+- Converted document HTML is reduced to text and semantic headings before it reaches the application.
+- File size, page count, chapter count and extracted-character limits are enforced.
+- PDF JavaScript evaluation is disabled in the PDF.js loading options.
+- Parser dependencies are pinned to exact versions and should be committed with their license notices for production.
+- Do not enable external DOCX file access or EPUB scripting.

@@ -8,19 +8,7 @@
 
 [English README](README.md)
 
-## Interface
-
-### 句子练习
-
-![Sentence Lab](assets/sentence-lab.png)
-
-### 段落练习
-
-![Paragraph Lab](assets/paragraph-lab.png)
-
-### 练习库
-
-![Practice Library](assets/practice-library.png)
+![Writing Assistant 界面](assets/screenshot.png)
 
 ## 为什么做这个项目
 
@@ -36,11 +24,23 @@
 
 - **Sentence Lab**：精准跟写、结构仿写、自动拆分、纯前端规则分析，以及适合粘贴给 GPT 的反馈格式。
 - **Paragraph Lab**：逐句功能标注、引导式段落搭建、骨架迁移和独立段落训练。
-- **Practice Library**：采用本地虚拟文件夹分类，同时保留现有材料卡片，并支持TXT、Markdown和练习库JSON导入。
-- **长文本工作区**：材料按文档、章节和每批最多45个练习单元组织，Sentence Lab与Paragraph Lab分别保存章节进度。
+- **Practice Library**：内置原创材料，并支持导入 TXT、Markdown、EPUB、DOCX、PDF 和练习库 JSON。
 - **本地优先**：每位访问者的练习、笔记和自建材料保存在自己的浏览器中；支持 JSON 备份与恢复。
 - **可选的BYOK原文解析**：AI只解析选中的范文、小说节选、论文或其他参考文本，不发送或评价使用者的仿写内容。
 - **不需要注册账号**：每位访问者获得相互独立的本地练习空间。
+
+## 0.8.0 M1 文档导入
+
+浏览器现在可以在本地解析以下文件：
+
+- EPUB：读取书籍元数据、spine 顺序和 HTML/XHTML 章节；
+- DOCX：通过 Mammoth 提取语义标题和正文；
+- PDF：通过 PDF.js 提取已有文字层，并判断文件是否疑似扫描件；
+- TXT 与 Markdown：继续使用0.7.0的章节、批次和进度系统。
+
+所有文档都会先进入导入预览，使用者可以检查元数据、选择章节、重命名、调整顺序，并选择保存到哪个本地练习库文件夹。源文件不会上传给项目维护者。
+
+M1暂不包含扫描PDF的OCR。0.8.0后续检查点会提供可选的PaddleOCR-VL本地连接器，普通使用者不需要安装。
 
 ## 隐私与安全模型
 
@@ -53,7 +53,7 @@
 - GitHub 仓库公开后，普通访问者不会因此获得 Cloudflare 账户权限。
 - 只有维护者主动部署新 Worker，或以后明确配置了可信 CI/CD 自动部署，线上网站才会发生变化。
 
-详见 [PRIVACY.md](PRIVACY.md)、[SECURITY.md](SECURITY.md)、[BYOK AI配置说明](docs/AI_CONFIGURATION.md) 与 [文件夹和长文本说明](docs/LONG_TEXT_AND_FOLDERS.md)。
+详见 [PRIVACY.md](PRIVACY.md)、[SECURITY.md](SECURITY.md) 与 [BYOK AI配置说明](docs/AI_CONFIGURATION.md)。
 
 ## 本地运行
 
@@ -65,21 +65,31 @@ python3 -m http.server 8080
 
 然后访问 `http://localhost:8080`。
 
+## 发布到 GitHub Pages
 
+1. 将本项目上传到 GitHub 仓库。
+2. 打开 **Settings → Pages**。
+3. Source 选择 **Deploy from a branch**。
+4. 选择 `main` 分支和 `/ (root)`。
+5. 保存后访问 GitHub Pages 生成的网址。
 
-## 继续部署到 Cloudflare Worker
+GitHub Pages 不是必须的。仓库完全可以继续把现有 Cloudflare 网站作为主要在线演示。
 
-项目包含可直接部署的单文件版本：
+## 0.8.0过渡期部署
 
-```text
-dist/writing-assistant-worker.js
-```
+本地测试时可以直接启动HTTP服务器；如果还没有安装解析依赖，网页会从固定版本CDN载入解析器代码，但不会把使用者选择的文档发送到CDN。
 
-修改源代码后可重新构建：
+正式部署前运行：
 
 ```bash
-npm run build:worker
+npm install
+npm run build:site:full
+npm run deploy
 ```
+
+项目现在包含`wrangler.jsonc`，并将`dist/site`作为Cloudflare Static Assets部署。旧的单文件Worker暂时仍可通过`npm run build:worker`生成，但0.8.0最终版推荐使用静态资源部署。
+
+详见[文档导入说明](docs/DOCUMENT_IMPORT.md)和[Cloudflare静态资源部署](docs/CLOUDFLARE_STATIC_ASSETS.md)。
 
 ## 推荐的仓库信息
 
@@ -105,7 +115,3 @@ npm run build:worker
 启用后，AI只解析当前选中的参考句子或参考段落，例如范文、小说节选、论文或其他练习文本。使用者的仿写、笔记、标签、写作计划和练习进度不会发送给服务商，也不会被AI评价。
 
 网页原有的练习复制功能不会附带AI解析结果。解析内容独立显示并缓存在当前浏览器中。
-
-## 0.7.0格式边界
-
-本版继续支持纯文本、TXT、Markdown和练习库JSON。联网获取Wikipedia/Wikisource资源，以及EPUB、DOCX和PDF解析，不属于0.7.0范围。

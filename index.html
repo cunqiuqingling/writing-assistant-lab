@@ -18,7 +18,7 @@
         <div>
           <div class="brand-title-row">
             <div class="brand-title">Writing Assistant</div>
-            <span class="version-badge">0.7.0</span>
+            <span class="version-badge">0.8.0 M1</span>
           </div>
           <div class="brand-sub">Sentence → Paragraph → Independent Writing</div>
         </div>
@@ -41,7 +41,7 @@
               <strong>数据与备份</strong>
               <span id="dataMenuStatus">浏览器实时保存已开启</span>
             </div>
-            <button class="menu-action" id="addMaterialBtn" role="menuitem"><span>＋</span><span><strong>添加本地材料</strong><small>保存到这台设备的练习库</small></span></button>
+            <button class="menu-action" id="addMaterialBtn" role="menuitem"><span>＋</span><span><strong>粘贴 / 添加文本</strong><small>短文本、TXT 或 Markdown</small></span></button>
             <button class="menu-action" id="chooseFolderBtn" role="menuitem"><span>⌁</span><span><strong>选择备份文件夹</strong><small>支持的浏览器可直接写入文件夹</small></span></button>
             <button class="menu-action" id="saveBackupBtn" role="menuitem"><span>↓</span><span><strong>保存备份</strong><small>导出练习、笔记和自建材料</small></span></button>
             <button class="menu-action" id="importBackupBtn" role="menuitem"><span>↺</span><span><strong>恢复备份</strong><small>从 Writing Assistant JSON 恢复</small></span></button>
@@ -204,9 +204,11 @@
               <p>内置材料与自建材料都只在当前浏览器中使用。句子训练关注表达，段落训练关注论证推进。</p>
             </div>
             <div class="controls">
+              <button class="btn primary" id="importDocumentBtn">导入文档：EPUB / DOCX / PDF</button>
+              <input type="file" id="documentImportFileInput" accept=".epub,.docx,.pdf,.txt,.md,.markdown,text/plain,text/markdown,application/pdf,application/epub+zip,application/vnd.openxmlformats-officedocument.wordprocessingml.document" hidden />
               <button class="btn" id="importLibraryBtn">导入练习库 JSON</button>
               <input type="file" id="libraryFileInput" accept=".json,application/json" hidden />
-              <button class="btn primary" id="libraryAddBtn">添加本地材料</button>
+              <button class="btn" id="libraryAddBtn">粘贴 / 添加文本</button>
             </div>
           </div>
 
@@ -277,7 +279,7 @@
 
   <div class="modal-backdrop" id="materialModal" role="dialog" aria-modal="true">
     <div class="modal">
-      <div class="modal-head"><h2>添加本地练习材料</h2><button class="btn small" id="closeMaterialModalBtn">关闭</button></div>
+      <div class="modal-head"><h2>添加文本材料</h2><button class="btn small" id="closeMaterialModalBtn">关闭</button></div>
       <div class="modal-body">
         <div class="split-row">
           <div class="field"><label for="materialTitle">标题</label><input class="text-input" id="materialTitle" style="width:100%" placeholder="例如：IELTS Health Paragraph" /></div>
@@ -288,7 +290,7 @@
           <div class="field"><label for="materialLicense">许可或用途</label><input class="text-input" id="materialLicense" style="width:100%" placeholder="例如：Personal study / Public domain" /></div>
         </div>
         <div class="field"><label for="materialTags">标签（逗号分隔）</label><input class="text-input" id="materialTags" style="width:100%" placeholder="health, argument, long-acting treatment" /></div>
-        <div class="field"><label>从 TXT / Markdown 文件读取</label><div class="file-row"><input type="file" id="materialTextFile" accept=".txt,.md,.text,text/plain,text/markdown" /><span class="file-help">文件仅在本地读取，不会上传。</span></div></div>
+        <div class="field"><label>从 TXT / Markdown 文件读取</label><div class="file-row"><input type="file" id="materialTextFile" accept=".txt,.md,.text,text/plain,text/markdown" /><span class="file-help">此入口只处理文本文件。</span></div></div><div class="import-route-card"><div><strong>需要导入电子书、Word或PDF？</strong><p>EPUB、DOCX和PDF需要先解析章节与文字层，请使用专门的文档导入流程。</p></div><button class="btn primary" id="switchToDocumentImportBtn" type="button">改用 EPUB / DOCX / PDF 导入</button></div>
         <div class="field"><label for="materialText">正文</label><textarea class="source-input" id="materialText" placeholder="Paste an essay, paragraph, article, or public-domain excerpt here..."></textarea></div>
         <div class="modal-actions"><button class="btn" id="fillOriginalSampleBtn">载入原创示例</button><button class="btn primary" id="saveMaterialBtn">保存到练习库</button></div>
       </div>
@@ -300,6 +302,7 @@
   <script src="data/starter-library.js"></script>
   <script src="js/app.js"></script>
   <script src="js/library-workspace.js"></script>
+  <script src="js/document-import.js"></script>
   <script src="js/ai-addon.js"></script>
 </body>
 </html>

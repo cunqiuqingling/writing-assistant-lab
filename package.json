@@ -1,10 +1,22 @@
 {
   "name": "writing-assistant-lab",
-  "version": "0.7.0",
+  "version": "0.8.0-m1",
   "private": true,
-  "description": "Local-first English writing practice with virtual folders, chapter-based long-text progress, and optional BYOK AI reference analysis.",
+  "description": "Local-first English writing practice with folder-based long-text progress, BYOK reference analysis, and browser-side EPUB, DOCX and PDF import.",
   "scripts": {
-    "build:worker": "node scripts/build-worker.mjs"
+    "vendor": "node scripts/vendor-assets.mjs",
+    "build:site": "node scripts/build-site.mjs",
+    "build:site:full": "npm run vendor && npm run build:site",
+    "build:worker": "node scripts/build-worker.mjs",
+    "dev": "npm run build:site:full && wrangler dev",
+    "deploy": "npm run build:site:full && wrangler deploy"
   },
-  "type": "module"
+  "dependencies": {
+    "jszip": "3.10.1",
+    "mammoth": "1.12.0",
+    "pdfjs-dist": "6.1.200"
+  },
+  "devDependencies": {
+    "wrangler": "4.114.0"
+  }
 }
