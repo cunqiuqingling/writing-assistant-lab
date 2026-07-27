@@ -4,6 +4,8 @@
 
 A local-first English writing practice studio. Core practice works without an account, backend database or AI. Optional BYOK analysis processes only reference text selected by the visitor.
 
+**Core practice features will remain free to use: no account, subscription, advertising or AI setup is required.** Optional BYOK AI calls may incur charges from the provider selected by the visitor.
+
 **Live demo:** https://writing-assistant.ccwu.cc/
 
 [中文说明](README.zh-CN.md)
