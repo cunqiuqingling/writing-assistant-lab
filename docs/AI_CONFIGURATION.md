@@ -45,11 +45,21 @@ A preset fills the adapter, Base URL, endpoint and a default model name. It does
 
 预设只负责填充接口协议、Base URL、Endpoint和默认模型名，并不保证模型仍然可用、免费、适用于所在地区，或已经对当前账户开放。请以服务商官方控制台和最新文档为准。
 
+## Free and paid API options / 免费与付费API方案
+
+Users are not required to purchase an API specifically for Writing Assistant. They may choose a provider that offers a free API, free quota, free tier or free model, provided that the provider permits direct browser requests. A paid API can also be used when the visitor prefers a different model, larger quota or more stable availability.
+
+Free plans can still have daily or monthly limits, restricted models, slower service, regional restrictions, account-verification requirements or changing availability. “Free” refers to the provider's current plan, not a promise made or funded by Writing Assistant.
+
+使用者不一定需要为Writing Assistant购买付费API。只要服务商允许浏览器直连，就可以选择其提供的免费API、免费额度、免费套餐或免费模型；需要不同模型、更大额度或更稳定服务时，也可以自行使用付费API。
+
+免费方案仍可能存在每日或每月调用上限、模型限制、速度限制、地区限制、账户验证要求或临时调整。“免费”指服务商当前提供的方案，并不是由Writing Assistant代付或保证长期存在。
+
 ## Quick setup / 快速设置
 
 1. Open `https://writing-assistant.ccwu.cc/`.
 2. Click **AI Settings** in the top bar.
-3. Choose a provider preset.
+3. Choose a provider preset. A free API, free-tier account or free model can be used when the provider supports browser access.
 4. Paste an API key obtained from that provider's official console.
 5. Confirm the Base URL, endpoint and model name.
 6. Choose the analysis language.
@@ -61,7 +71,7 @@ A preset fills the adapter, Base URL, endpoint and a default model name. It does
 中文步骤：
 
 1. 打开网站，点击顶部 **AI Settings**。
-2. 选择服务商预设。
+2. 选择服务商预设；服务商支持时，可以使用免费API、免费套餐或免费模型。
 3. 粘贴从该服务商官方控制台申请的API Key。
 4. 检查Base URL、Endpoint和模型名称。
 5. 选择解析语言和密钥保存方式。
@@ -100,9 +110,9 @@ This mode encrypts the key in the browser with PBKDF2 and AES-GCM.
 - Never commit a real key to GitHub.
 - Never include a real key in screenshots, Issues, logs, practice materials or backups.
 - Remove or revoke the key immediately if it is exposed.
-- Review provider billing and usage limits before testing.
+- Review provider billing, free quotas and usage limits before testing.
 
-建议创建低额度、可撤销、只用于本工具的专用密钥。不要使用组织级、生产环境或高价值密钥，也不要把密钥放入GitHub、截图、Issue、日志、练习材料或备份。
+建议创建低额度、可撤销、只用于本工具的专用密钥。不要使用组织级、生产环境或高价值密钥，也不要把密钥放入GitHub、截图、Issue、日志、练习材料或备份。测试前应确认服务商当前的免费额度、计费方式和调用上限。
 
 ## Troubleshooting / 故障排查
 
@@ -120,7 +130,7 @@ Check that:
 - the key belongs to the selected provider;
 - the account has API access rather than only a consumer chat subscription;
 - the key has not expired or been revoked;
-- the account has sufficient balance or quota.
+- the account has sufficient balance or remaining free quota.
 
 ### Model not found / 模型不存在
 
@@ -140,7 +150,7 @@ Possible causes include:
 
 - the selected reference text is too long;
 - temporary provider rate limits;
-- insufficient quota;
+- insufficient balance or free quota;
 - a provider response-format change;
 - network or VPN routing problems;
 - the configured output-token limit is too small.
@@ -157,9 +167,9 @@ The password is not recoverable. Use **移除本地密钥**, then enter and save
 
 The selected reference text and API key are sent directly to the chosen provider when a request is made. The project maintainer does not operate an AI proxy and does not receive the request body or key during normal operation.
 
-Provider retention, training, billing, regional availability and content policies are controlled by that provider. API use may incur charges. Visitors should review the provider's current privacy policy, pricing and terms before enabling the feature.
+Provider retention, training, billing, free quotas, regional availability and content policies are controlled by that provider. Depending on the selected plan, API use may be free within its quota or may incur charges. Visitors should review the provider's current privacy policy, pricing and terms before enabling the feature.
 
-发起解析时，选中的参考原文和API Key会直接发送给所选服务商。项目维护者不运营AI代理服务器，正常情况下不会接收请求正文或密钥。数据保留、模型训练、费用、地区限制和内容政策由服务商决定，调用API可能产生费用。
+发起解析时，选中的参考原文和API Key会直接发送给所选服务商。项目维护者不运营AI代理服务器，正常情况下不会接收请求正文或密钥。数据保留、模型训练、免费额度、费用、地区限制和内容政策由服务商决定；根据所选方案，调用可能在免费额度内完成，也可能产生费用。
 
 ## Remove AI credentials / 移除AI凭据
 
