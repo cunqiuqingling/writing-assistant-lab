@@ -38,7 +38,7 @@ Many learners are asked to write full essays before they have been trained to bu
 - **Paragraph Lab** — sentence-function labeling, guided paragraph planning, skeleton transfer, and independent paragraph writing.
 - **Practice Library** — original starter materials plus local TXT, Markdown and JSON imports.
 - **Local-first storage** — practice state stays in the visitor's own browser; optional JSON backup and restore.
-- **No AI key required** — the site generates structured text that can be pasted into a ChatGPT conversation of the learner's choice.
+- **Optional BYOK reference analysis** — AI analyses only the selected model text, novel excerpt or academic source; learner writing is not sent or evaluated.
 - **No account required** — each visitor receives an independent local workspace.
 
 ## Privacy and security model
@@ -52,7 +52,7 @@ The public website contains only the application code and built-in practice mate
 - Publishing this repository does not give contributors access to the maintainer's Cloudflare account.
 - A change affects the live Cloudflare site only after an authorized maintainer deploys a new Worker version, or after an explicitly configured trusted CI/CD workflow deploys it.
 
-See [PRIVACY.md](PRIVACY.md) and [SECURITY.md](SECURITY.md).
+See [PRIVACY.md](PRIVACY.md), [SECURITY.md](SECURITY.md), and the [BYOK AI configuration guide](docs/AI_CONFIGURATION.md).
 
 ## Run locally
 
@@ -100,3 +100,9 @@ Bug reports and focused improvements are welcome. Please read [CONTRIBUTING.md](
 ## License
 
 Code is released under the [MIT License](LICENSE). Included original starter materials are licensed for use with this project; attribution is appreciated. Third-party imported material remains subject to its own copyright and license.
+
+## AI reference-analysis boundary
+
+When enabled, AI analyses only the selected reference sentence or paragraph, such as a model essay, novel excerpt or academic text. Learner writing, notes, labels, plans and progress are not sent to the provider and are not evaluated.
+
+The normal exercise copy actions do not include AI analysis output. Analysis remains in a separate panel and local browser cache.

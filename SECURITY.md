@@ -30,3 +30,9 @@ If CI/CD deployment is added later:
 - store the token only in GitHub Actions secrets;
 - protect the production branch;
 - require review before production changes are merged.
+
+## BYOK API-key boundary
+
+Writing Assistant 0.6.0 can make direct browser requests with a visitor-supplied API key. Client-side key storage is not equivalent to a private backend. Users should create a low-limit, revocable key dedicated to this tool and should never paste production, organisational or high-value credentials into an untrusted deployment.
+
+API keys must never be committed to this repository, included in screenshots or issue reports, or added to starter-library data. Reports involving leaked credentials should be handled privately and the affected key should be revoked immediately.

@@ -12,6 +12,7 @@ const files = {
   '/assets/styles.css': ['assets/styles.css', 'text/css; charset=utf-8'],
   '/assets/icon.svg': ['assets/icon.svg', 'image/svg+xml; charset=utf-8'],
   '/js/app.js': ['js/app.js', 'text/javascript; charset=utf-8'],
+  '/js/ai-addon.js': ['js/ai-addon.js', 'text/javascript; charset=utf-8'],
   '/data/starter-library.js': ['data/starter-library.js', 'text/javascript; charset=utf-8'],
   '/data/starter-library.json': ['data/starter-library.json', 'application/json; charset=utf-8'],
   '/data/library-import-template.json': ['data/library-import-template.json', 'application/json; charset=utf-8']

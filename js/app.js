@@ -1,7 +1,8 @@
 (function () {
       'use strict';
 
-      var APP_VERSION = '0.5.0';
+      var APP_VERSION = '0.6.0';
+      // Keep the v4 storage keys for backward compatibility with existing local practice data.
       var STORAGE_KEY = 'writing-assistant-v4';
       var LEGACY_STORAGE_KEY = 'writing-assistant-v1';
       var DB_NAME = 'writing-assistant-v4-db';

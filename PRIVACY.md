@@ -33,3 +33,9 @@ The official demo is currently hosted at:
 `https://writing-assistant.ccwu.cc/`
 
 The application does not send practice text to the project maintainer. Standard infrastructure providers may process ordinary connection metadata such as IP addresses and request headers as part of serving the website.
+
+## Optional BYOK AI reference analysis
+
+AI analysis is disabled until a visitor configures a provider and actively starts a request. The browser sends only the selected reference sentence or paragraph directly to the chosen provider. Learner writing, notes, labels, plans and progress are excluded from the request.
+
+The project maintainer does not operate an AI proxy and does not receive the API key or request body. API keys are excluded from ordinary Writing Assistant backup JSON files. The normal exercise copy actions never include AI analysis output.

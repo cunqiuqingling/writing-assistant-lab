@@ -1,0 +1,13 @@
+{
+  "version": "0.6.0",
+  "updatedAt": "2026-07-27T09:23:18.863950+00:00",
+  "newFiles": [
+    "js/ai-addon.js",
+    "docs/AI_CONFIGURATION.md"
+  ],
+  "generatedFiles": [
+    "dist/writing-assistant-worker.js",
+    "dist/writing-assistant-worker.txt"
+  ],
+  "notes": "AI analyses reference text only; learner writing and AI analysis are excluded from normal copy output. API keys are not included in ordinary application backups."
+}
