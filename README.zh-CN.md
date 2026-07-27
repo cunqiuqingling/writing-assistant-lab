@@ -8,7 +8,25 @@
 
 [English README](README.md)
 
-![Writing Assistant 界面](assets/screenshot.png)
+## 界面预览
+
+### Sentence Lab · 句子训练
+
+支持精准跟写、结构仿写、自动拆分和纯前端规则分析。
+
+![Writing Assistant 句子训练界面](assets/sentence-lab.png)
+
+### Paragraph Lab · 段落训练
+
+支持逐句功能拆解、引导式段落搭建、骨架迁移和独立写作。
+
+![Writing Assistant 段落训练界面](assets/paragraph-lab.png)
+
+### Practice Library · 练习库
+
+管理本地文件夹、导入文档、公开资源和章节练习进度。
+
+![Writing Assistant 练习库界面](assets/practice-library.png)
 
 ## 写作理念：在另一种语言里建立自己的表达
 
