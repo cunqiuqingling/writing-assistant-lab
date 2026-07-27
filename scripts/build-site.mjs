@@ -45,4 +45,4 @@ if (hasVendor) {
   console.warn('Vendor assets are absent. This non-production build cannot import EPUB, DOCX or PDF.');
 }
 
-console.log(`Built Writing Assistant 0.8.1 static site in ${out}.`);
+console.log(`Built Writing Assistant 0.8.2 static site in ${out}.`);

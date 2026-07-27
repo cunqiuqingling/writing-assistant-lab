@@ -15,6 +15,7 @@
   var rendering = false;
   var currentMoveItemId = '';
   var currentEditFolderId = '';
+  var currentManageItemId = '';
 
   var SYSTEM_FOLDERS = [
     { id: 'folder-all', name: '全部材料', parentId: '', icon: '⌂', system: true, order: 0 },
@@ -154,6 +155,91 @@
     closeTitleModal();
     await actions.refreshLibrary();
     actions.showToast('已恢复默认标题');
+  }
+
+  function ensureManageModal() {
+    if (byId('workspaceManageModal')) return;
+    var modal = document.createElement('div');
+    modal.id = 'workspaceManageModal';
+    modal.className = 'modal-backdrop';
+    modal.innerHTML = '<div class="modal compact-modal library-manage-modal"><div class="modal-head"><div><h2>管理材料</h2><p class="modal-helper" id="workspaceManageSubtitle"></p></div><button class="icon-close-button" id="closeWorkspaceManageModal" type="button" aria-label="关闭">×</button></div><div class="modal-body"><div class="library-manage-actions"><button class="library-manage-action" id="workspaceManageTitleBtn" type="button"><strong>修改标题</strong><span>只改变卡片显示名称</span></button><button class="library-manage-action" id="workspaceManageEditBtn" type="button"><strong>编辑文档</strong><span>调整章节、正文和顺序</span></button><button class="library-manage-action" id="workspaceManageMoveBtn" type="button"><strong>移动到文件夹</strong><span>改变本地练习库中的归类</span></button><button class="library-manage-action danger" id="workspaceManageDeleteBtn" type="button"><strong>删除材料</strong><span>同时删除该材料保存的章节进度</span></button></div><p class="library-manage-note" id="workspaceManageNote"></p></div></div>';
+    document.body.appendChild(modal);
+  }
+
+  function closeManageModal() {
+    closeModal('workspaceManageModal');
+    currentManageItemId = '';
+  }
+
+  function openManageModal(itemId) {
+    var item = getLibraryItem(itemId);
+    if (!item) return;
+    ensureManageModal();
+    currentManageItemId = itemId;
+    var editableDocument = !item.builtin && (Array.isArray(item.chapters) || item.importMeta);
+    byId('workspaceManageSubtitle').textContent = item.title || 'Untitled';
+    byId('workspaceManageEditBtn').hidden = !editableDocument;
+    byId('workspaceManageMoveBtn').hidden = Boolean(item.builtin);
+    byId('workspaceManageDeleteBtn').hidden = Boolean(item.builtin);
+    byId('workspaceManageNote').textContent = item.builtin
+      ? '这是内置练习材料，不能删除或移动；你仍然可以修改本机显示的标题。'
+      : '这些操作只影响当前浏览器中的本地材料。删除操作无法撤销。';
+    showModal('workspaceManageModal');
+  }
+
+  function clearLabUsingDocument(lab, documentId) {
+    var appState = state();
+    var current = appState[lab];
+    if (!current || (current.documentId !== documentId && current.materialId !== documentId)) return false;
+    if (lab === 'sentence') {
+      appState.sentence = {
+        materialId: '', title: '', text: '', source: '', license: '', tags: [],
+        splitMode: current.splitMode || 'sentence',
+        targetWords: Number(current.targetWords) || 45,
+        segments: [], answers: [], notes: [], current: 0,
+        mode: current.mode || 'imitate'
+      };
+    } else {
+      appState.paragraph = {
+        materialId: '', title: '', text: '', source: '', license: '', tags: [],
+        paragraphs: [], records: [], current: 0,
+        mode: current.mode || 'breakdown'
+      };
+    }
+    return true;
+  }
+
+  function clearLabsUsingDocument(documentId) {
+    return ['sentence', 'paragraph'].filter(function (lab) {
+      return clearLabUsingDocument(lab, documentId);
+    });
+  }
+
+  async function deleteLibraryItem(itemId) {
+    var item = getLibraryItem(itemId);
+    if (!item || item.builtin) {
+      actions.showToast('内置练习材料不能删除');
+      return;
+    }
+    var title = item.title || 'Untitled';
+    if (!window.confirm('删除《' + title + '》？\n\n将同时删除该材料的全部章节和已保存练习进度。此操作无法撤销。')) return;
+    try {
+      await db.delete(stores.library, itemId);
+      var progress = await db.getAll(stores.progress);
+      for (var i = 0; i < progress.length; i++) {
+        if (progress[i].documentId === itemId) await db.delete(stores.progress, progress[i].id);
+      }
+      if (state().library && state().library.titleOverrides) delete state().library.titleOverrides[itemId];
+      var clearedLabs = clearLabsUsingDocument(itemId);
+      actions.persistNow();
+      closeManageModal();
+      await actions.refreshLibrary();
+      actions.renderAll();
+      actions.showToast(clearedLabs.length ? '材料、章节进度和当前练习已删除' : '材料及章节进度已删除');
+    } catch (error) {
+      console.error(error);
+      actions.showToast('材料删除失败，请稍后重试');
+    }
   }
 
   function descendantsOf(id) {
@@ -553,6 +639,7 @@
       batchModal.innerHTML = '<div class="modal compact-modal"><div class="modal-head"><h2>本批次练习</h2><button class="btn small" id="closeBatchCompletionModal">留在当前批次</button></div><div class="modal-body"><div class="batch-completion-summary" id="batchCompletionSummary"></div><div class="modal-actions"><button class="btn" id="goNextBatchBtn">继续下一批</button><button class="btn primary" id="goNextChapterBtn">进入下一章</button></div></div></div>';
       document.body.appendChild(batchModal);
     }
+    ensureManageModal();
   }
 
   function ensureTitleModal() {
@@ -779,28 +866,13 @@
       var chapters = getItemChapters(item);
       var importChip = item.importMeta && item.importMeta.format ? '<span class="chip neutral">' + h.escapeHtml(String(item.importMeta.format).toUpperCase()) + '</span>' : '';
       var editableDocument = !item.builtin && (Array.isArray(item.chapters) || item.importMeta);
-      card.innerHTML = '<button class="card-edit-button" data-workspace-title="' + h.escapeHtml(item.id) + '" title="修改卡片标题" aria-label="修改卡片标题"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4.2L19 9.2a2.1 2.1 0 0 0 0-3L17.8 5a2.1 2.1 0 0 0-3 0L4 15.8V20Zm2-3.4 10.2-10.2 1.4 1.4L7.4 18H6v-1.4Z"/></svg></button><div class="library-card-title-row"><h3>' + h.escapeHtml(item.title) + '</h3></div><div class="library-meta">' + h.escapeHtml(item.category) + ' · ' + h.escapeHtml(item.source || 'Unknown source') + '<br />' + h.escapeHtml(item.license || 'Personal study') + '</div><div class="chips library-card-chips">' + tags + importChip + '<span class="chip neutral">' + chapters.length + ' 章</span></div><div class="library-preview">' + h.escapeHtml(item.text) + '</div><div class="library-actions"><button class="btn small soft" data-workspace-sentence="' + h.escapeHtml(item.id) + '">句子练习</button><button class="btn small primary" data-workspace-paragraph="' + h.escapeHtml(item.id) + '">段落练习</button>' + (editableDocument ? '<button class="btn small quiet" data-workspace-edit-document="' + h.escapeHtml(item.id) + '">编辑文档</button>' : '') + (item.builtin ? '' : '<button class="btn small quiet" data-workspace-move="' + h.escapeHtml(item.id) + '">移动</button><button class="btn small quiet danger-text-button" data-workspace-delete="' + h.escapeHtml(item.id) + '">删除</button>') + '</div>';
+      card.innerHTML = '<button class="card-manage-button" data-workspace-manage="' + h.escapeHtml(item.id) + '" title="管理材料" aria-label="管理材料"><span aria-hidden="true">•••</span></button><div class="library-card-title-row"><h3>' + h.escapeHtml(item.title) + '</h3></div><div class="library-meta">' + h.escapeHtml(item.category) + ' · ' + h.escapeHtml(item.source || 'Unknown source') + '<br />' + h.escapeHtml(item.license || 'Personal study') + '</div><div class="chips library-card-chips">' + tags + importChip + '<span class="chip neutral">' + chapters.length + ' 章</span></div><div class="library-preview">' + h.escapeHtml(item.text) + '</div><div class="library-actions"><button class="btn small soft" data-workspace-sentence="' + h.escapeHtml(item.id) + '">句子练习</button><button class="btn small primary" data-workspace-paragraph="' + h.escapeHtml(item.id) + '">段落练习</button></div>';
       grid.appendChild(card);
     });
     all('[data-workspace-sentence]').forEach(function (button) { button.addEventListener('click', function () { loadDocumentChapter(this.dataset.workspaceSentence, 'sentence', 0, 0).catch(function () { actions.showToast('材料载入失败'); }); }); });
     all('[data-workspace-paragraph]').forEach(function (button) { button.addEventListener('click', function () { loadDocumentChapter(this.dataset.workspaceParagraph, 'paragraph', 0, 0).catch(function () { actions.showToast('材料载入失败'); }); }); });
-    all('[data-workspace-title]').forEach(function (button) { button.addEventListener('click', function () { openTitleModal(this.dataset.workspaceTitle); }); });
-    all('[data-workspace-edit-document]').forEach(function (button) { button.addEventListener('click', function () {
-      var api = window.WritingAssistantDocumentImport;
-      if (api && api.editItem) api.editItem(this.dataset.workspaceEditDocument);
-      else actions.showToast('文档编辑器尚未载入');
-    }); });
-    all('[data-workspace-move]').forEach(function (button) { button.addEventListener('click', function () { openMoveModal(this.dataset.workspaceMove); }); });
-    all('[data-workspace-delete]').forEach(function (button) {
-      button.addEventListener('click', async function () {
-        var id = this.dataset.workspaceDelete;
-        if (!window.confirm('确定从本地练习库删除这份材料及其保存的章节进度吗？')) return;
-        await db.delete(stores.library, id);
-        var progress = await db.getAll(stores.progress);
-        for (var i = 0; i < progress.length; i++) if (progress[i].documentId === id) await db.delete(stores.progress, progress[i].id);
-        await actions.refreshLibrary();
-        actions.showToast('材料已删除');
-      });
+    all('[data-workspace-manage]').forEach(function (button) {
+      button.addEventListener('click', function () { openManageModal(this.dataset.workspaceManage); });
     });
   }
 
@@ -1007,17 +1079,24 @@
     if (document.body.dataset.workspaceEventsBound) return;
     document.body.dataset.workspaceEventsBound = '1';
     ensureTitleModal();
+    ensureManageModal();
     byId('closeWorkspaceTitleModal').addEventListener('click', closeTitleModal);
     byId('saveWorkspaceTitleBtn').addEventListener('click', function () { saveCardTitle().catch(function () { actions.showToast('标题保存失败'); }); });
     byId('restoreWorkspaceTitleBtn').addEventListener('click', function () { restoreCardTitle().catch(function () { actions.showToast('标题恢复失败'); }); });
     byId('workspaceTitleModal').addEventListener('click', function (event) { if (event.target === this) closeTitleModal(); });
+    byId('closeWorkspaceManageModal').addEventListener('click', closeManageModal);
+    byId('workspaceManageModal').addEventListener('click', function (event) { if (event.target === this) closeManageModal(); });
+    byId('workspaceManageTitleBtn').addEventListener('click', function () { var id = currentManageItemId; closeManageModal(); if (id) openTitleModal(id); });
+    byId('workspaceManageEditBtn').addEventListener('click', function () { var id = currentManageItemId; closeManageModal(); var api = window.WritingAssistantDocumentImport; if (id && api && api.editItem) api.editItem(id); else actions.showToast('文档编辑器尚未载入'); });
+    byId('workspaceManageMoveBtn').addEventListener('click', function () { var id = currentManageItemId; closeManageModal(); if (id) openMoveModal(id); });
+    byId('workspaceManageDeleteBtn').addEventListener('click', function () { var id = currentManageItemId; if (id) deleteLibraryItem(id); });
     byId('closeWorkspaceFolderModal').addEventListener('click', function () { closeModal('workspaceFolderModal'); });
     byId('saveWorkspaceFolder').addEventListener('click', function () { saveFolder().catch(function () { actions.showToast('文件夹保存失败'); }); });
     byId('closeWorkspaceMoveModal').addEventListener('click', function () { closeModal('workspaceMoveModal'); });
     byId('confirmWorkspaceMove').addEventListener('click', function () { confirmMoveItem().catch(function () { actions.showToast('材料移动失败'); }); });
     byId('closeBatchCompletionModal').addEventListener('click', function () { closeModal('batchCompletionModal'); });
     ['workspaceFolderModal', 'workspaceMoveModal', 'batchCompletionModal'].forEach(function (id) { byId(id).addEventListener('click', function (event) { if (event.target === this) closeModal(id); }); });
-    document.addEventListener('keydown', function (event) { if (event.key === 'Escape') { closeModal('workspaceFolderModal'); closeModal('workspaceMoveModal'); closeModal('batchCompletionModal'); closeTitleModal(); } });
+    document.addEventListener('keydown', function (event) { if (event.key === 'Escape') { closeModal('workspaceFolderModal'); closeModal('workspaceMoveModal'); closeModal('batchCompletionModal'); closeTitleModal(); closeManageModal(); } });
     var observer = new MutationObserver(function () { if (byId('materialModal').classList.contains('show')) refreshMaterialFolderSelect(); });
     observer.observe(byId('materialModal'), { attributes: true, attributeFilter: ['class'] });
   }

@@ -17,6 +17,8 @@ const app = await text('js/app.js');
 const importer = await text('js/document-import.js');
 const browser = await text('js/browser-ocr.js');
 const localOcr = await text('js/local-ocr.js');
+const workspace = await text('js/library-workspace.js');
+const aiAddon = await text('js/ai-addon.js');
 const pkg = JSON.parse(await text('package.json'));
 const wrangler = await text('wrangler.jsonc');
 const headers = await text('_headers');
@@ -25,18 +27,24 @@ const terms = await text('TERMS.md');
 const copyright = await text('COPYRIGHT_AND_TAKEDOWN.md');
 const contact = await text('CONTACT.md');
 
-check(index.includes('<span class="version-badge">0.8.1</span>'), 'public version badge must be 0.8.1');
+check(index.includes('<span class="version-badge">0.8.2</span>'), 'public version badge must be 0.8.2');
 check(index.includes('class="app-footer"'), 'main application must expose the policy footer');
 check(index.includes('legal/privacy.html'), 'main application must link to the privacy page');
 check(index.includes('about/philosophy.html'), 'main application must link to the writing philosophy');
 check(index.includes('Language is information, and information is everything.'), 'main footer must show the permanent philosophy line');
-check(app.includes("APP_VERSION = '0.8.1'"), 'app version must be 0.8.1');
-check(importer.includes("IMPORT_VERSION = '0.8.1'"), 'document import version must be 0.8.1');
-check(browser.includes("version: '0.8.1'"), 'browser OCR client version must be 0.8.1');
+check(app.includes("APP_VERSION = '0.8.2'"), 'app version must be 0.8.2');
+check(importer.includes("IMPORT_VERSION = '0.8.2'"), 'document import version must be 0.8.2');
+check(browser.includes("version: '0.8.2'"), 'browser OCR client version must be 0.8.2');
 check(browser.includes("engine: 'tesseract-english-fast'"), 'browser OCR must use the self-hosted English engine');
 check(!browser.includes('cdn.jsdelivr.net') && !browser.includes('@paddleocr/paddleocr-js'), 'browser OCR must not load its engine from a remote CDN');
-check(localOcr.includes("WritingAssistant/0.8.1"), 'advanced OCR client version must be 0.8.1');
-check(pkg.version === '0.8.1', 'package version must be 0.8.1');
+check(localOcr.includes("WritingAssistant/0.8.2"), 'advanced OCR client version must be 0.8.2');
+check(pkg.version === '0.8.2', 'package version must be 0.8.2');
+check(workspace.includes('data-workspace-manage'), 'library cards must expose a management entry');
+check(workspace.includes('deleteLibraryItem'), 'library deletion must use the coordinated deletion path');
+check(workspace.includes('clearLabsUsingDocument'), 'deleting an active material must clear affected labs');
+check(aiAddon.includes('aiResetConfigBtn'), 'AI settings must expose full configuration clearing');
+check(aiAddon.includes('clearAllAiConfiguration'), 'AI configuration clearing function must exist');
+check(aiAddon.includes('移除API Key'), 'AI settings must distinguish API-key removal');
 check(!browser.includes('browserOcrMock') && !browser.includes('mockMode'), 'production query mock must be removed');
 check(!importer.includes('cdn.jsdelivr.net/npm/jszip') && !importer.includes('cdn.jsdelivr.net/npm/mammoth') && !importer.includes('workerRemote') && !importer.includes('LIBRARIES.pdf.remote'), 'document parsers must be local-only');
 check(importer.includes('vendor/jszip/jszip.min.js'), 'local JSZip path');
@@ -116,8 +124,8 @@ if (checkDist) {
 }
 
 if (failures.length) {
-  console.error('0.8.1 release checks failed:');
+  console.error('0.8.2 release checks failed:');
   failures.forEach((failure) => console.error(' - ' + failure));
   process.exit(1);
 }
-console.log(`0.8.1 release checks passed${sourceOnly ? ' (source-only)' : checkDist ? ' (including dist/site)' : ''}.`);
+console.log(`0.8.2 release checks passed${sourceOnly ? ' (source-only)' : checkDist ? ' (including dist/site)' : ''}.`);

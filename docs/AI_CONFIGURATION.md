@@ -166,3 +166,10 @@ Provider retention, training, billing, regional availability and content policie
 Open **AI Settings** and click **移除本地密钥**. This removes both the current session key and any encrypted local key record. Provider-side keys remain active until they are revoked in the provider's own console.
 
 在 **AI Settings** 中点击 **移除本地密钥**，可以删除当前标签页密钥和浏览器中的加密密钥记录。服务商侧的API Key仍需在对应官方控制台中单独撤销。
+
+## 清除密钥与AI设置
+
+- **移除API Key**：删除当前标签页密钥和本机加密密钥，但保留服务商、接口与模型设置。
+- **清除全部AI配置与密钥**：删除密钥、服务商、Base URL、Endpoint、模型和其他AI参数，恢复为未配置状态。
+
+两种操作都不会删除练习库、写作、笔记、文件夹、进度或已保存的AI原文解析结果。Writing Assistant不保存复制历史，因此没有“清除复制缓存”操作。

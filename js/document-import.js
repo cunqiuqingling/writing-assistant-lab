@@ -10,7 +10,7 @@
   var actions = core.actions;
   var stores = core.stores;
 
-  var IMPORT_VERSION = '0.8.1';
+  var IMPORT_VERSION = '0.8.2';
   var MAX_TEXT_BYTES = 8 * 1024 * 1024;
   var MAX_DOCX_BYTES = 45 * 1024 * 1024;
   var MAX_EPUB_BYTES = 70 * 1024 * 1024;

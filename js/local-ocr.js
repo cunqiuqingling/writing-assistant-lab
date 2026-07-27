@@ -61,7 +61,7 @@
 
   async function api(path, options, timeoutMs) {
     options = Object.assign({}, options || {});
-    var headers = Object.assign({ 'X-WA-Client': 'WritingAssistant/0.8.1' }, options.headers || {});
+    var headers = Object.assign({ 'X-WA-Client': 'WritingAssistant/0.8.2' }, options.headers || {});
     var pairedToken = token();
     if (pairedToken) headers.Authorization = 'Bearer ' + pairedToken;
     options.headers = headers;

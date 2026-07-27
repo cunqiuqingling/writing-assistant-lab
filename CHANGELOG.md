@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.8.2 — Library deletion and AI credential controls
+
+- Added a visible card management dialog for user-added and imported materials.
+- Deleting a material now also deletes its saved chapter progress.
+- Deleting a material currently open in a lab safely returns that lab to its empty state.
+- Added separate actions for removing only the API Key and clearing all AI configuration and keys.
+- Confirmed that Writing Assistant stores no clipboard or copy-history cache.
+- Preserved storage schema 5 and existing local practice data.
+
+
 ## 0.8.1 — Privacy, legal and transparency pages
 
 ### R1 — Writing philosophy

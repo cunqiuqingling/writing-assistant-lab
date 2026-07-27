@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  var ADDON_VERSION = '0.6.0';
+  var ADDON_VERSION = '0.8.2';
   var CONFIG_KEY = 'writing-assistant-ai-config-v1';
   var SESSION_KEY = 'writing-assistant-ai-session-key-v1';
   var ENCRYPTED_KEY = 'writing-assistant-ai-encrypted-key-v1';
@@ -103,6 +103,21 @@
     };
   }
 
+  function emptyConfig() {
+    return {
+      provider: 'custom',
+      adapter: 'openai',
+      baseUrl: '',
+      endpoint: '/v1/chat/completions',
+      model: '',
+      maxTokens: 1800,
+      temperature: 0.2,
+      feedbackLanguage: 'zh-CN',
+      storageMode: 'session',
+      anthropicVersion: '2023-06-01'
+    };
+  }
+
   function loadConfig() {
     var next = defaultConfig();
     try {
@@ -192,7 +207,13 @@
       '.ai-lock-panel{display:none;grid-column:1/-1;border:1px solid #dbe4f3;background:#f8faff;border-radius:12px;padding:13px}',
       '.ai-lock-panel.show{display:block}',
       '.ai-lock-row{display:grid;grid-template-columns:1fr auto;gap:9px;align-items:end}',
-      '@media(max-width:760px){.ai-grid{grid-template-columns:1fr}.ai-field.full{grid-column:auto}.ai-modal{border-radius:16px}.ai-lock-row{grid-template-columns:1fr}}'
+      '.ai-local-data{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-top:18px;padding:15px 16px;border:1px solid #e1e6ef;border-radius:14px;background:#f8f9fc}',
+      '.ai-local-data strong{display:block;color:#344054;font-size:13px}',
+      '.ai-local-data p{margin:4px 0 0;color:#7b8495;font-size:11px;line-height:1.55}',
+      '.ai-local-data-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px;flex:0 0 auto}',
+      '.ai-danger-button{color:#b42318!important}',
+      '.ai-danger-button:hover{background:#fff1f0!important;border-color:#f2b8b5!important}',
+      '@media(max-width:760px){.ai-grid{grid-template-columns:1fr}.ai-field.full{grid-column:auto}.ai-modal{border-radius:16px}.ai-lock-row{grid-template-columns:1fr}.ai-local-data{align-items:stretch;flex-direction:column}.ai-local-data-actions{justify-content:stretch}.ai-local-data-actions .btn{flex:1 1 auto}}'
     ].join('\n');
     document.head.appendChild(style);
   }
@@ -242,8 +263,9 @@
       '    </div>',
       '    <div class="ai-modal-actions">',
       '      <span class="ai-test-status" id="aiTestStatus">设置尚未测试。</span>',
-      '      <div class="ai-action-group"><button class="btn" id="aiRemoveKeyBtn" type="button">移除本地密钥</button><button class="btn" id="aiTestBtn" type="button">测试连接</button><button class="btn primary" id="aiSaveBtn" type="button">保存设置</button></div>',
+      '      <div class="ai-action-group"><button class="btn" id="aiTestBtn" type="button">测试连接</button><button class="btn primary" id="aiSaveBtn" type="button">保存设置</button></div>',
       '    </div>',
+      '    <div class="ai-local-data"><div><strong>本地AI数据</strong><p>密钥与服务商设置只保存在当前浏览器。清除操作不会删除练习库、写作内容、笔记、进度或已保存的AI解析结果。</p></div><div class="ai-local-data-actions"><button class="btn" id="aiRemoveKeyBtn" type="button">移除API Key</button><button class="btn ai-danger-button" id="aiResetConfigBtn" type="button">清除全部AI配置与密钥</button></div></div>',
       '  </div>',
       '</div>'
     ].join('');
@@ -265,6 +287,7 @@
     byId('aiToggleKeyBtn').addEventListener('click', toggleKeyVisibility);
     byId('aiUnlockBtn').addEventListener('click', unlockSavedKey);
     byId('aiRemoveKeyBtn').addEventListener('click', removeSavedKey);
+    byId('aiResetConfigBtn').addEventListener('click', clearAllAiConfiguration);
     byId('aiSaveBtn').addEventListener('click', function () { saveSettings(false); });
     byId('aiTestBtn').addEventListener('click', testConnection);
   }
@@ -469,15 +492,36 @@
   }
 
   function removeSavedKey() {
-    if (!window.confirm('确定移除当前标签页密钥和本机加密密钥吗？')) return;
+    if (!window.confirm('确定移除当前标签页和本机加密保存的API Key吗？\n\n服务商、接口和模型设置会保留。')) return;
     runtimeApiKey = '';
     try { sessionStorage.removeItem(SESSION_KEY); } catch (e) {}
     localStorage.removeItem(ENCRYPTED_KEY);
     byId('aiApiKey').value = '';
     byId('aiVaultPassword').value = '';
-    byId('aiKeyState').textContent = '密钥已移除。';
+    byId('aiKeyState').textContent = 'API Key已移除；其他AI设置仍保留。';
+    setTestStatus('API Key已移除。', '');
     updateConnectionBadge();
-    showToast('本地密钥已移除');
+    showToast('API Key已移除');
+  }
+
+  function clearAllAiConfiguration() {
+    if (!window.confirm('确定清除全部AI配置与密钥吗？\n\n这会删除当前标签页和浏览器中保存的API Key、服务商、Base URL、Endpoint、模型及其他AI设置。不会删除练习、材料、笔记、进度或已保存的AI解析结果。')) return;
+    if (activeRequest) activeRequest.abort();
+    activeRequest = null;
+    runtimeApiKey = '';
+    try { sessionStorage.removeItem(SESSION_KEY); } catch (e) {}
+    localStorage.removeItem(ENCRYPTED_KEY);
+    localStorage.removeItem(CONFIG_KEY);
+    config = emptyConfig();
+    try { localStorage.setItem(CONFIG_KEY, JSON.stringify(config)); } catch (e) {}
+    fillSettingsForm();
+    byId('aiApiKey').value = '';
+    byId('aiVaultPassword').value = '';
+    byId('aiKeyState').textContent = 'AI配置与密钥已清除。';
+    setTestStatus('AI配置与密钥已清除；需要使用时请重新设置。', '');
+    updateConnectionBadge();
+    refreshAllFeedbackPanels();
+    showToast('全部AI配置与密钥已清除');
   }
 
   function bytesToBase64(bytes) {
@@ -922,7 +966,9 @@
       openSettings: openSettings,
       buildSentencePrompt: buildSentencePrompt,
       buildParagraphPrompt: buildParagraphPrompt,
-      clearAllFeedback: function () { localStorage.removeItem(ANALYSIS_KEY); refreshAllFeedbackPanels(); }
+      clearAllFeedback: function () { localStorage.removeItem(ANALYSIS_KEY); refreshAllFeedbackPanels(); },
+      removeApiKey: removeSavedKey,
+      clearAllConfiguration: clearAllAiConfiguration
     };
   }
 

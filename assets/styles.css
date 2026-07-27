@@ -1644,3 +1644,57 @@
   .app-footer-main { align-items: flex-start; flex-direction: column; }
   .app-footer-motto { line-height: 1.55; }
 }
+
+/* 0.8.2 · library card management */
+.card-manage-button {
+  position: absolute;
+  z-index: 3;
+  top: 11px;
+  right: 11px;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: rgba(255,255,255,.82);
+  color: #667085;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  cursor: pointer;
+  opacity: .9;
+}
+.card-manage-button:hover,
+.card-manage-button:focus-visible {
+  border-color: #c7d2fe;
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+.library-manage-modal { width: min(560px, calc(100vw - 28px)); }
+.library-manage-actions { display: grid; gap: 8px; }
+.library-manage-action {
+  display: grid;
+  gap: 3px;
+  width: 100%;
+  padding: 13px 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+  color: #344054;
+  text-align: left;
+  cursor: pointer;
+}
+.library-manage-action:hover { border-color: #c7d2fe; background: #fafbff; }
+.library-manage-action strong { font-size: 12px; }
+.library-manage-action span { color: var(--muted); font-size: 10px; line-height: 1.5; }
+.library-manage-action.danger strong { color: var(--bad); }
+.library-manage-action.danger:hover { border-color: #f4c7c3; background: var(--bad-soft); }
+.library-manage-note {
+  margin: 13px 0 0;
+  color: #7b8495;
+  font-size: 10px;
+  line-height: 1.65;
+}
