@@ -2,7 +2,7 @@
 
 ## Supported version
 
-The current public release is `0.5.x`.
+The current public release is `0.7.x`.
 
 ## Data model
 
@@ -36,3 +36,7 @@ If CI/CD deployment is added later:
 Writing Assistant 0.6.0 can make direct browser requests with a visitor-supplied API key. Client-side key storage is not equivalent to a private backend. Users should create a low-limit, revocable key dedicated to this tool and should never paste production, organisational or high-value credentials into an untrusted deployment.
 
 API keys must never be committed to this repository, included in screenshots or issue reports, or added to starter-library data. Reports involving leaked credentials should be handled privately and the affected key should be revoked immediately.
+
+## Imported-content boundary
+
+Virtual folders and chapter progress remain local browser records. Imported text is rendered as text rather than executable HTML. Backup and library JSON files should still be imported only from trusted sources, and unusually large or malformed files may be rejected in later hardening releases.

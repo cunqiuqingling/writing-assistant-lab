@@ -1,13 +1,15 @@
 (function () {
       'use strict';
 
-      var APP_VERSION = '0.6.0';
+      var APP_VERSION = '0.7.0';
       // Keep the v4 storage keys for backward compatibility with existing local practice data.
       var STORAGE_KEY = 'writing-assistant-v4';
       var LEGACY_STORAGE_KEY = 'writing-assistant-v1';
       var DB_NAME = 'writing-assistant-v4-db';
       var LIBRARY_STORE = 'library';
       var HANDLE_STORE = 'handles';
+      var FOLDER_STORE = 'folders';
+      var PROGRESS_STORE = 'progress';
       var HANDLE_KEY = 'backup-directory';
       var saveTimer = null;
       var toastTimer = null;
@@ -50,7 +52,8 @@
       }
       function defaultState() {
         return {
-          schemaVersion: 4, activeLab: 'sentence', fontSize: 18,
+          schemaVersion: 5, activeLab: 'sentence', fontSize: 18,
+          library: { selectedFolderId:'folder-all' },
           sentence: { materialId:'', title:'', text:'', source:'', license:'', tags:[], splitMode:'sentence', targetWords:45, segments:[], answers:[], notes:[], current:0, mode:'imitate' },
           paragraph: { materialId:'', title:'', text:'', source:'', license:'', tags:[], paragraphs:[], records:[], current:0, mode:'breakdown' }
         };
@@ -105,11 +108,13 @@
       function openDatabase() {
         return new Promise(function(resolve,reject){
           if (!window.indexedDB) { reject(new Error('IndexedDB unavailable')); return; }
-          var request = indexedDB.open(DB_NAME,1);
+          var request = indexedDB.open(DB_NAME,2);
           request.onupgradeneeded = function(){
             var db = request.result;
             if (!db.objectStoreNames.contains(LIBRARY_STORE)) db.createObjectStore(LIBRARY_STORE,{keyPath:'id'});
             if (!db.objectStoreNames.contains(HANDLE_STORE)) db.createObjectStore(HANDLE_STORE);
+            if (!db.objectStoreNames.contains(FOLDER_STORE)) db.createObjectStore(FOLDER_STORE,{keyPath:'id'});
+            if (!db.objectStoreNames.contains(PROGRESS_STORE)) db.createObjectStore(PROGRESS_STORE,{keyPath:'id'});
           };
           request.onsuccess = function(){resolve(request.result);};
           request.onerror = function(){reject(request.error || new Error('Database unavailable'));};
@@ -120,6 +125,13 @@
         return new Promise(function(resolve,reject){
           var tx=db.transaction(storeName,'readonly'); var req=tx.objectStore(storeName).getAll();
           req.onsuccess=function(){resolve(req.result||[]);}; req.onerror=function(){reject(req.error);}; tx.oncomplete=function(){db.close();};
+        });
+      }
+      async function dbGet(storeName,key) {
+        var db=await openDatabase();
+        return new Promise(function(resolve,reject){
+          var tx=db.transaction(storeName,'readonly');var req=tx.objectStore(storeName).get(key);
+          req.onsuccess=function(){resolve(req.result||null);};req.onerror=function(){reject(req.error);};tx.oncomplete=function(){db.close();};
         });
       }
       async function dbPut(storeName,value,key) {
@@ -147,6 +159,7 @@
         var custom=[];
         try { custom=await dbGetAll(LIBRARY_STORE); } catch(e) { custom=[]; }
         libraryCache=BUILTIN_LIBRARY.concat(custom.sort(function(a,b){return String(b.createdAt||'').localeCompare(String(a.createdAt||''));}));
+        if(window.WritingAssistantWorkspace&&window.WritingAssistantWorkspace.onLibraryRefresh)window.WritingAssistantWorkspace.onLibraryRefresh(libraryCache);
         renderLibrary();
       }
       async function storeDirectoryHandle(handle) { await dbPut(HANDLE_STORE,handle,HANDLE_KEY); }
@@ -177,7 +190,7 @@
       function loadState() {
         try {
           var saved=JSON.parse(localStorage.getItem(STORAGE_KEY)||'null');
-          if (saved && saved.schemaVersion===4) state=Object.assign(defaultState(),saved);
+          if (saved && (saved.schemaVersion===4 || saved.schemaVersion===5)) { state=Object.assign(defaultState(),saved); state.schemaVersion=5; }
           else {
             var migrated=migrateLegacy();
             if (migrated) { state=migrated; localStorage.setItem(STORAGE_KEY,JSON.stringify(state)); }
@@ -187,6 +200,8 @@
       }
       function normalizeState() {
         if (['sentence','paragraph','library'].indexOf(state.activeLab)<0) state.activeLab='sentence';
+        state.schemaVersion=5;
+        state.library=Object.assign(defaultState().library,state.library||{});
         if ([16,18,20].indexOf(Number(state.fontSize))<0) state.fontSize=18;
         state.sentence=Object.assign(defaultState().sentence,state.sentence||{});
         state.paragraph=Object.assign(defaultState().paragraph,state.paragraph||{});
@@ -227,6 +242,7 @@
         else if(state.activeLab==='paragraph') renderParagraphLab();
         else renderLibrary();
         renderLeftPanel();
+        if(window.WritingAssistantWorkspace&&window.WritingAssistantWorkspace.afterRender)window.WritingAssistantWorkspace.afterRender(state.activeLab);
       }
 
       function renderLeftPanel() {
@@ -295,7 +311,7 @@
       function renderParagraphCoach(){var p=state.paragraph;if(!p.paragraphs.length){byId('paragraphSourceWords').textContent='0';byId('paragraphWritingWords').textContent='0';byId('paragraphSentences').textContent='0';byId('paragraphCoverage').textContent='0%';byId('paragraphChecklist').innerHTML='<li class="analysis-empty">选择材料后显示检查结果。</li>';renderChips('paragraphMetaChips',[],'暂无材料');byId('paragraphSourceNote').textContent='';return;}var paragraph=p.paragraphs[p.current]||'',rec=currentParagraphRecord(),writing=currentParagraphWriting(),coverage=0,checks=[];if(p.mode==='breakdown'){coverage=rec.roles.length?Math.round(rec.roles.filter(Boolean).length/rec.roles.length*100):0;checks.push(coverage===100?'每句话都已标注功能':'还有句子没有标注功能');checks.push(String(rec.breakdownNote||'').trim()?'已经记录段落推进心得':'建议写下整体推进路径');}else if(p.mode==='guided'){var required=['claim','reason','mechanism','example','conclusion'];coverage=Math.round(required.filter(function(k){return String(rec.guided[k]||'').trim();}).length/required.length*100);checks.push(String(rec.guided.claim||'').trim()?'中心观点已填写':'缺少明确中心观点');checks.push(String(rec.guided.reason||'').trim()?'原因已填写':'缺少直接原因');checks.push(String(rec.guided.mechanism||'').trim()?'已有机制解释':'原因还没有进一步展开');checks.push(String(rec.guided.example||'').trim()?'已有例子':'缺少具体例子');checks.push(String(rec.guided.conclusion||'').trim()?'已经回扣中心':'缺少结尾回扣');}else{coverage=Math.min(100,Math.round(wordCount(writing)/80*100));checks.push(wordCount(writing)>=45?'段落已经达到基本展开长度':'内容仍较短，可能尚未充分展开');checks.push(sentenceSplit(writing).length>=4?'包含多个推进步骤':'句子数量较少，检查是否只重复了观点');var lower=' '+writing.toLowerCase()+' ';var connectorHits=[];connectorGroups.forEach(function(g){g.values.forEach(function(v){if(lower.indexOf(' '+v+' ')>=0)connectorHits.push(v);});});checks.push(connectorHits.length?'使用了连接表达：'+uniqueStrings(connectorHits).slice(0,4).join(', '):'未识别到明显连接表达；逻辑也可以通过句意自然推进');var freq={};wordList(writing).map(function(w){return w.toLowerCase();}).filter(function(w){return w.length>5;}).forEach(function(w){freq[w]=(freq[w]||0)+1;});var repeated=Object.keys(freq).filter(function(w){return freq[w]>=3;}).slice(0,3);if(repeated.length)checks.push('检查重复词：'+repeated.join(', '));}
         byId('paragraphSourceWords').textContent=wordCount(paragraph);byId('paragraphWritingWords').textContent=wordCount(writing);byId('paragraphSentences').textContent=sentenceSplit(writing).length;byId('paragraphCoverage').textContent=coverage+'%';var list=byId('paragraphChecklist');list.innerHTML='';checks.forEach(function(v){var li=document.createElement('li');li.textContent=v;list.appendChild(li);});renderChips('paragraphMetaChips',[p.source||'Local material',p.license||'Personal study'].concat(p.tags||[]),'暂无元数据');byId('paragraphSourceNote').textContent='当前模式：'+({breakdown:'段落拆解',guided:'引导式搭建',transfer:'骨架迁移',independent:'独立段落'}[p.mode]||p.mode);}
 
-      function renderLibrary(){if(!byId('libraryGrid'))return;var query=String(byId('librarySearch').value||'').trim().toLowerCase(),category=byId('libraryCategory').value||'all';var items=libraryCache.filter(function(item){var hay=[item.title,item.category,item.source,item.license,(item.tags||[]).join(' '),item.text].join(' ').toLowerCase();return(!query||hay.indexOf(query)>=0)&&(category==='all'||item.category===category||(category==='Custom'&&!item.builtin));});byId('libraryCount').textContent=items.length+' items';var grid=byId('libraryGrid');grid.innerHTML='';if(!items.length){grid.innerHTML='<div class="analysis-empty">没有匹配的材料。</div>';return;}items.forEach(function(item){var card=document.createElement('article');card.className='library-card';var tags=(item.tags||[]).slice(0,5).map(function(t){return '<span class="chip">'+escapeHtml(t)+'</span>';}).join('');card.innerHTML='<h3>'+escapeHtml(item.title)+'</h3><div class="library-meta">'+escapeHtml(item.category)+' · '+escapeHtml(item.source||'Unknown source')+'<br />'+escapeHtml(item.license||'Personal study')+'</div><div class="chips" style="margin-top:8px">'+tags+'</div><div class="library-preview">'+escapeHtml(item.text)+'</div><div class="library-actions"><button class="btn small soft" data-use-sentence="'+escapeHtml(item.id)+'">句子练习</button><button class="btn small primary" data-use-paragraph="'+escapeHtml(item.id)+'">段落练习</button>'+(item.builtin?'':'<button class="btn small danger" data-delete-item="'+escapeHtml(item.id)+'">删除</button>')+'</div>';grid.appendChild(card);});all('[data-use-sentence]').forEach(function(btn){btn.addEventListener('click',function(){useLibraryItem(this.dataset.useSentence,'sentence');});});all('[data-use-paragraph]').forEach(function(btn){btn.addEventListener('click',function(){useLibraryItem(this.dataset.useParagraph,'paragraph');});});all('[data-delete-item]').forEach(function(btn){btn.addEventListener('click',async function(){var id=this.dataset.deleteItem;if(!window.confirm('确定从本地练习库删除这份材料吗？'))return;await dbDelete(LIBRARY_STORE,id);await refreshLibrary();showToast('材料已删除');});});}
+      function renderLibrary(){if(!byId('libraryGrid'))return;if(window.WritingAssistantWorkspace&&window.WritingAssistantWorkspace.renderLibrary&&window.WritingAssistantWorkspace.renderLibrary())return;var query=String(byId('librarySearch').value||'').trim().toLowerCase(),category=byId('libraryCategory').value||'all';var items=libraryCache.filter(function(item){var hay=[item.title,item.category,item.source,item.license,(item.tags||[]).join(' '),item.text].join(' ').toLowerCase();return(!query||hay.indexOf(query)>=0)&&(category==='all'||item.category===category||(category==='Custom'&&!item.builtin));});byId('libraryCount').textContent=items.length+' items';var grid=byId('libraryGrid');grid.innerHTML='';if(!items.length){grid.innerHTML='<div class="analysis-empty">没有匹配的材料。</div>';return;}items.forEach(function(item){var card=document.createElement('article');card.className='library-card';var tags=(item.tags||[]).slice(0,5).map(function(t){return '<span class="chip">'+escapeHtml(t)+'</span>';}).join('');card.innerHTML='<h3>'+escapeHtml(item.title)+'</h3><div class="library-meta">'+escapeHtml(item.category)+' · '+escapeHtml(item.source||'Unknown source')+'<br />'+escapeHtml(item.license||'Personal study')+'</div><div class="chips" style="margin-top:8px">'+tags+'</div><div class="library-preview">'+escapeHtml(item.text)+'</div><div class="library-actions"><button class="btn small soft" data-use-sentence="'+escapeHtml(item.id)+'">句子练习</button><button class="btn small primary" data-use-paragraph="'+escapeHtml(item.id)+'">段落练习</button>'+(item.builtin?'':'<button class="btn small danger" data-delete-item="'+escapeHtml(item.id)+'">删除</button>')+'</div>';grid.appendChild(card);});all('[data-use-sentence]').forEach(function(btn){btn.addEventListener('click',function(){useLibraryItem(this.dataset.useSentence,'sentence');});});all('[data-use-paragraph]').forEach(function(btn){btn.addEventListener('click',function(){useLibraryItem(this.dataset.useParagraph,'paragraph');});});all('[data-delete-item]').forEach(function(btn){btn.addEventListener('click',async function(){var id=this.dataset.deleteItem;if(!window.confirm('确定从本地练习库删除这份材料吗？'))return;await dbDelete(LIBRARY_STORE,id);await refreshLibrary();showToast('材料已删除');});});}
       function findLibraryItem(id){return libraryCache.find(function(item){return item.id===id;});}
       function useLibraryItem(id,lab){var item=findLibraryItem(id);if(!item)return;if(lab==='sentence'){if(state.sentence.segments.length&&sentenceHasWork()&&!window.confirm('载入新材料会替换当前句子练习，是否继续？'))return;loadSentenceItem(item);}else{if(state.paragraph.paragraphs.length&&paragraphHasWork()&&!window.confirm('载入新材料会替换当前段落练习，是否继续？'))return;loadParagraphItem(item);}state.activeLab=lab;persistNow();renderAll();showToast('已载入：'+item.title);}
       function loadSentenceItem(item){var segments=splitSentenceMaterial(item.text,state.sentence.splitMode,state.sentence.targetWords).filter(function(v){return wordCount(v)>0;}).slice(0,300);state.sentence={materialId:item.id,title:item.title,text:item.text,source:item.source||'',license:item.license||'',tags:item.tags||[],splitMode:state.sentence.splitMode||'sentence',targetWords:45,segments:segments,answers:new Array(segments.length).fill(''),notes:new Array(segments.length).fill(''),current:0,mode:state.sentence.mode||'imitate'};}
@@ -312,7 +328,7 @@
 
       function openMaterialModal(){byId('materialTitle').value='';byId('materialCategory').value='Custom';byId('materialSource').value='Personal import';byId('materialLicense').value='Personal study';byId('materialTags').value='';byId('materialText').value='';byId('materialTextFile').value='';byId('materialModal').classList.add('show');setTimeout(function(){byId('materialText').focus();},20);}
       function closeMaterialModal(){byId('materialModal').classList.remove('show');}
-      async function saveMaterial(){var title=byId('materialTitle').value.trim(),text=byId('materialText').value.trim();if(!title||!text){showToast('请填写标题和正文');return;}var item={id:uid(),builtin:false,title:title,category:byId('materialCategory').value||'Custom',source:byId('materialSource').value.trim()||'Personal import',license:byId('materialLicense').value.trim()||'Personal study',tags:uniqueStrings(byId('materialTags').value.split(',').map(function(v){return v.trim();})),text:text,createdAt:new Date().toISOString()};await dbPut(LIBRARY_STORE,item);closeMaterialModal();await refreshLibrary();state.activeLab='library';persistNow();renderAll();showToast('已保存到本地练习库');}
+      async function saveMaterial(){var title=byId('materialTitle').value.trim(),text=byId('materialText').value.trim();if(!title||!text){showToast('请填写标题和正文');return;}var item={id:uid(),builtin:false,title:title,category:byId('materialCategory').value||'Custom',source:byId('materialSource').value.trim()||'Personal import',license:byId('materialLicense').value.trim()||'Personal study',tags:uniqueStrings(byId('materialTags').value.split(',').map(function(v){return v.trim();})),text:text,createdAt:new Date().toISOString()};if(window.WritingAssistantWorkspace&&window.WritingAssistantWorkspace.prepareLibraryItem)item=window.WritingAssistantWorkspace.prepareLibraryItem(item)||item;await dbPut(LIBRARY_STORE,item);closeMaterialModal();await refreshLibrary();state.activeLab='library';persistNow();renderAll();showToast('已保存到本地练习库');}
 
       async function chooseBackupDirectory(){if(typeof window.showDirectoryPicker!=='function'){showToast('当前浏览器不支持选择文件夹，将使用普通下载');return;}try{var handle=await window.showDirectoryPicker({id:'writing-assistant-backups',mode:'readwrite',startIn:'documents'});backupDirectoryHandle=handle;try{await storeDirectoryHandle(handle);}catch(e){}updateFolderButton();showToast('已选择文件夹：'+handle.name);}catch(e){if(!e||e.name!=='AbortError')showToast('未能选择文件夹');}}
       function updateFolderButton(){var btn=byId('chooseFolderBtn');if(!btn)return;if(typeof window.showDirectoryPicker!=='function'){btn.querySelector('strong').textContent='选择备份文件夹（不可用）';btn.disabled=true;updateDataMenuStatus('自动保存开启 · 备份将下载');return;}btn.disabled=false;btn.querySelector('strong').textContent=backupDirectoryHandle?'备份文件夹：'+backupDirectoryHandle.name:'选择备份文件夹';updateDataMenuStatus(backupDirectoryHandle?'自动保存开启 · 已记住文件夹':'浏览器实时保存已开启');}
@@ -321,9 +337,9 @@
       function safeStem(value){return String(value||'writing-assistant').replace(/[^a-zA-Z0-9\u4e00-\u9fa5_-]+/g,'-').replace(/^-+|-+$/g,'').slice(0,50)||'writing-assistant';}
       function datedFileName(){var d=new Date();function p(v){return String(v).padStart(2,'0');}return safeStem((state.sentence.title||state.paragraph.title||'writing-assistant')+'-backup')+'_'+d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+'_'+p(d.getHours())+'-'+p(d.getMinutes())+'-'+p(d.getSeconds())+'.json';}
       function downloadText(text,name){var blob=new Blob([text],{type:'application/json;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},0);}
-      async function saveBackup(){commitVisibleFields();persistNow();var custom=[];try{custom=await dbGetAll(LIBRARY_STORE);}catch(e){}var backup={schemaVersion:4,appVersion:APP_VERSION,exportedAt:new Date().toISOString(),state:state,customLibrary:custom};var text=JSON.stringify(backup,null,2),name=datedFileName();if(backupDirectoryHandle){try{if(await folderPermission(backupDirectoryHandle,true)){var fh=await backupDirectoryHandle.getFileHandle(name,{create:true});var writable=await fh.createWritable();await writable.write(text);await writable.close();showToast('备份已保存到：'+backupDirectoryHandle.name);return;}}catch(e){}}downloadText(text,name);showToast('备份已下载到浏览器默认目录');}
-      async function importBackupFile(file){var text=await file.text(),data;try{data=JSON.parse(text);}catch(e){showToast('JSON 文件无法解析');return;}if(!window.confirm('恢复备份会替换当前练习状态和自建练习库，是否继续？'))return;try{if(data.schemaVersion===4&&data.state){state=data.state;normalizeState();await dbClear(LIBRARY_STORE);var items=Array.isArray(data.customLibrary)?data.customLibrary:[];for(var i=0;i<items.length;i++){items[i].builtin=false;await dbPut(LIBRARY_STORE,items[i]);}}else if(data.schemaVersion===1&&Array.isArray(data.segments)){state=defaultState();state.sentence.title=data.title||'Imported legacy practice';state.sentence.text=data.source||data.segments.map(function(x){return x.original||'';}).join(' ');state.sentence.segments=data.segments.map(function(x){return x.original||'';});state.sentence.answers=data.segments.map(function(x){return x.writing||'';});state.sentence.notes=data.segments.map(function(x){return x.note||'';});}else throw new Error('Unsupported backup');persistNow();await refreshLibrary();renderAll();showToast('备份恢复完成');}catch(e){showToast('备份格式不受支持');}}
-      async function importLibraryFile(file){var data;try{data=JSON.parse(await file.text());}catch(e){showToast('练习库 JSON 无法解析');return;}var items=Array.isArray(data)?data:Array.isArray(data.items)?data.items:[];var accepted=0;for(var i=0;i<items.length;i++){var raw=items[i];if(!raw||!raw.title||!raw.text)continue;var item={id:raw.id&&String(raw.id).indexOf('builtin-')!==0?String(raw.id):uid(),builtin:false,title:String(raw.title),category:['IELTS','Academic','Literature','Custom'].indexOf(raw.category)>=0?raw.category:'Custom',source:String(raw.source||'Imported library'),license:String(raw.license||'Personal study'),tags:Array.isArray(raw.tags)?uniqueStrings(raw.tags.map(String)):[],text:String(raw.text),createdAt:raw.createdAt||new Date().toISOString()};await dbPut(LIBRARY_STORE,item);accepted++;}await refreshLibrary();showToast('已导入 '+accepted+' 份材料');}
+      async function saveBackup(){commitVisibleFields();persistNow();if(window.WritingAssistantWorkspace&&window.WritingAssistantWorkspace.saveCurrentProgress)await window.WritingAssistantWorkspace.saveCurrentProgress();var custom=[],folders=[],progress=[];try{custom=await dbGetAll(LIBRARY_STORE);}catch(e){}try{folders=await dbGetAll(FOLDER_STORE);}catch(e){}try{progress=await dbGetAll(PROGRESS_STORE);}catch(e){}var backup={schemaVersion:5,appVersion:APP_VERSION,exportedAt:new Date().toISOString(),state:state,customLibrary:custom,customFolders:folders,progressRecords:progress};var text=JSON.stringify(backup,null,2),name=datedFileName();if(backupDirectoryHandle){try{if(await folderPermission(backupDirectoryHandle,true)){var fh=await backupDirectoryHandle.getFileHandle(name,{create:true});var writable=await fh.createWritable();await writable.write(text);await writable.close();showToast('备份已保存到：'+backupDirectoryHandle.name);return;}}catch(e){}}downloadText(text,name);showToast('备份已下载到浏览器默认目录');}
+      async function importBackupFile(file){var text=await file.text(),data;try{data=JSON.parse(text);}catch(e){showToast('JSON 文件无法解析');return;}if(!window.confirm('恢复备份会替换当前练习状态、自建文件夹和自建练习库，是否继续？'))return;try{if((data.schemaVersion===5||data.schemaVersion===4)&&data.state){state=data.state;state.schemaVersion=5;normalizeState();await dbClear(LIBRARY_STORE);await dbClear(FOLDER_STORE);await dbClear(PROGRESS_STORE);var items=Array.isArray(data.customLibrary)?data.customLibrary:[];for(var i=0;i<items.length;i++){items[i].builtin=false;await dbPut(LIBRARY_STORE,items[i]);}var folders=Array.isArray(data.customFolders)?data.customFolders:[];for(var f=0;f<folders.length;f++)await dbPut(FOLDER_STORE,folders[f]);var progress=Array.isArray(data.progressRecords)?data.progressRecords:[];for(var r=0;r<progress.length;r++)await dbPut(PROGRESS_STORE,progress[r]);}else if(data.schemaVersion===1&&Array.isArray(data.segments)){state=defaultState();state.sentence.title=data.title||'Imported legacy practice';state.sentence.text=data.source||data.segments.map(function(x){return x.original||'';}).join(' ');state.sentence.segments=data.segments.map(function(x){return x.original||'';});state.sentence.answers=data.segments.map(function(x){return x.writing||'';});state.sentence.notes=data.segments.map(function(x){return x.note||'';});}else throw new Error('Unsupported backup');persistNow();await refreshLibrary();if(window.WritingAssistantWorkspace&&window.WritingAssistantWorkspace.afterBackupRestore)await window.WritingAssistantWorkspace.afterBackupRestore();renderAll();showToast('备份恢复完成');}catch(e){console.error(e);showToast('备份格式不受支持');}}
+      async function importLibraryFile(file){var data;try{data=JSON.parse(await file.text());}catch(e){showToast('练习库 JSON 无法解析');return;}var items=Array.isArray(data)?data:Array.isArray(data.items)?data.items:[];var accepted=0;for(var i=0;i<items.length;i++){var raw=items[i];if(!raw||!raw.title||!raw.text)continue;var item={id:raw.id&&String(raw.id).indexOf('builtin-')!==0?String(raw.id):uid(),builtin:false,title:String(raw.title),category:['IELTS','Academic','Literature','Custom'].indexOf(raw.category)>=0?raw.category:'Custom',source:String(raw.source||'Imported library'),license:String(raw.license||'Personal study'),tags:Array.isArray(raw.tags)?uniqueStrings(raw.tags.map(String)):[],text:String(raw.text),folderId:raw.folderId?String(raw.folderId):'',chapters:Array.isArray(raw.chapters)?raw.chapters:undefined,createdAt:raw.createdAt||new Date().toISOString()};if(window.WritingAssistantWorkspace&&window.WritingAssistantWorkspace.prepareImportedItem)item=window.WritingAssistantWorkspace.prepareImportedItem(item,raw)||item;await dbPut(LIBRARY_STORE,item);accepted++;}await refreshLibrary();showToast('已导入 '+accepted+' 份材料');}
 
 
       function setDataMenu(open) {
@@ -386,6 +402,18 @@
         byId('chooseFolderBtn').addEventListener('click',function(){setDataMenu(false);chooseBackupDirectory();});byId('saveBackupBtn').addEventListener('click',function(){setDataMenu(false);saveBackup().catch(function(){showToast('备份保存失败');});});byId('importBackupBtn').addEventListener('click',function(){setDataMenu(false);byId('backupFileInput').click();});byId('backupFileInput').addEventListener('change',function(e){var file=e.target.files&&e.target.files[0];if(file)importBackupFile(file).catch(function(){showToast('备份导入失败');});e.target.value='';});
         document.addEventListener('keydown',function(e){if(e.key==='Escape')closeMaterialModal();if((e.metaKey||e.ctrlKey)&&e.key==='Enter'){e.preventDefault();if(state.activeLab==='sentence')byId('copySentenceAllBtn').click();else if(state.activeLab==='paragraph')byId('copyParagraphCurrentBtn').click();}});
       }
+
+      window.WritingAssistantCore={
+        version:APP_VERSION,
+        stores:{library:LIBRARY_STORE,handles:HANDLE_STORE,folders:FOLDER_STORE,progress:PROGRESS_STORE},
+        getState:function(){return state;},
+        replaceState:function(next){state=next||defaultState();normalizeState();},
+        getLibrary:function(){return libraryCache;},
+        getBuiltinLibrary:function(){return BUILTIN_LIBRARY;},
+        helpers:{byId:byId,all:all,clamp:clamp,normalizeSpace:normalizeSpace,wordCount:wordCount,escapeHtml:escapeHtml,uid:uid,uniqueStrings:uniqueStrings,sentenceSplit:sentenceSplit,paragraphSplit:paragraphSplit,splitSentenceMaterial:splitSentenceMaterial,emptyParagraphRecord:emptyParagraphRecord},
+        db:{get:dbGet,getAll:dbGetAll,put:dbPut,delete:dbDelete,clear:dbClear},
+        actions:{renderAll:renderAll,renderLeftPanel:renderLeftPanel,renderSentenceLab:renderSentenceLab,renderParagraphLab:renderParagraphLab,renderLibrary:renderLibrary,refreshLibrary:refreshLibrary,commitVisibleFields:commitVisibleFields,persistNow:persistNow,scheduleSave:scheduleSave,showToast:showToast,copyText:copyText,findLibraryItem:findLibraryItem,loadSentenceItem:loadSentenceItem,loadParagraphItem:loadParagraphItem,sentenceDone:sentenceDone,paragraphRecordStarted:paragraphRecordStarted,paragraphRecordDone:paragraphRecordDone,roleLabel:roleLabel,skeletonFromRecord:skeletonFromRecord}
+      };
 
       loadState();
       bindEvents();

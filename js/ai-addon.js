@@ -910,7 +910,7 @@
     injectAiPanel('sentenceCoach', 'sentence');
     injectAiPanel('paragraphCoach', 'paragraph');
     var badge = document.querySelector('.version-badge');
-    if (badge) badge.textContent = ADDON_VERSION;
+    if (badge && window.WritingAssistantCore) badge.textContent = window.WritingAssistantCore.version;
     updateConnectionBadge();
     attachRefreshListeners();
     refreshAllFeedbackPanels();

@@ -36,7 +36,8 @@
 
 - **Sentence Lab**：精准跟写、结构仿写、自动拆分、纯前端规则分析，以及适合粘贴给 GPT 的反馈格式。
 - **Paragraph Lab**：逐句功能标注、引导式段落搭建、骨架迁移和独立段落训练。
-- **Practice Library**：内置原创材料，并支持导入 TXT、Markdown 和练习库 JSON。
+- **Practice Library**：采用本地虚拟文件夹分类，同时保留现有材料卡片，并支持TXT、Markdown和练习库JSON导入。
+- **长文本工作区**：材料按文档、章节和每批最多45个练习单元组织，Sentence Lab与Paragraph Lab分别保存章节进度。
 - **本地优先**：每位访问者的练习、笔记和自建材料保存在自己的浏览器中；支持 JSON 备份与恢复。
 - **可选的BYOK原文解析**：AI只解析选中的范文、小说节选、论文或其他参考文本，不发送或评价使用者的仿写内容。
 - **不需要注册账号**：每位访问者获得相互独立的本地练习空间。
@@ -52,7 +53,7 @@
 - GitHub 仓库公开后，普通访问者不会因此获得 Cloudflare 账户权限。
 - 只有维护者主动部署新 Worker，或以后明确配置了可信 CI/CD 自动部署，线上网站才会发生变化。
 
-详见 [PRIVACY.md](PRIVACY.md)、[SECURITY.md](SECURITY.md) 与 [BYOK AI配置说明](docs/AI_CONFIGURATION.md)。
+详见 [PRIVACY.md](PRIVACY.md)、[SECURITY.md](SECURITY.md)、[BYOK AI配置说明](docs/AI_CONFIGURATION.md) 与 [文件夹和长文本说明](docs/LONG_TEXT_AND_FOLDERS.md)。
 
 ## 本地运行
 
@@ -104,3 +105,7 @@ npm run build:worker
 启用后，AI只解析当前选中的参考句子或参考段落，例如范文、小说节选、论文或其他练习文本。使用者的仿写、笔记、标签、写作计划和练习进度不会发送给服务商，也不会被AI评价。
 
 网页原有的练习复制功能不会附带AI解析结果。解析内容独立显示并缓存在当前浏览器中。
+
+## 0.7.0格式边界
+
+本版继续支持纯文本、TXT、Markdown和练习库JSON。联网获取Wikipedia/Wikisource资源，以及EPUB、DOCX和PDF解析，不属于0.7.0范围。

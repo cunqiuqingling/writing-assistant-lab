@@ -1,8 +1,8 @@
 {
   "name": "writing-assistant-lab",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "private": true,
-  "description": "Local-first English writing practice with optional BYOK AI reference-text analysis.",
+  "description": "Local-first English writing practice with virtual folders, chapter-based long-text progress, and optional BYOK AI reference analysis.",
   "scripts": {
     "build:worker": "node scripts/build-worker.mjs"
   },

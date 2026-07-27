@@ -36,7 +36,8 @@ Many learners are asked to write full essays before they have been trained to bu
 
 - **Sentence Lab** — precise copying, structural imitation, automatic text splitting, local rule-based analysis, and copy-ready feedback prompts.
 - **Paragraph Lab** — sentence-function labeling, guided paragraph planning, skeleton transfer, and independent paragraph writing.
-- **Practice Library** — original starter materials plus local TXT, Markdown and JSON imports.
+- **Practice Library** — a folder-based local library that preserves the existing material cards and supports custom folders, TXT, Markdown and JSON imports.
+- **Long-text workspace** — documents are organised into chapters and batches of at most 45 practice units, with separate saved progress for Sentence Lab and Paragraph Lab.
 - **Local-first storage** — practice state stays in the visitor's own browser; optional JSON backup and restore.
 - **Optional BYOK reference analysis** — AI analyses only the selected model text, novel excerpt or academic source; learner writing is not sent or evaluated.
 - **No account required** — each visitor receives an independent local workspace.
@@ -52,7 +53,7 @@ The public website contains only the application code and built-in practice mate
 - Publishing this repository does not give contributors access to the maintainer's Cloudflare account.
 - A change affects the live Cloudflare site only after an authorized maintainer deploys a new Worker version, or after an explicitly configured trusted CI/CD workflow deploys it.
 
-See [PRIVACY.md](PRIVACY.md), [SECURITY.md](SECURITY.md), and the [BYOK AI configuration guide](docs/AI_CONFIGURATION.md).
+See [PRIVACY.md](PRIVACY.md), [SECURITY.md](SECURITY.md), the [BYOK AI configuration guide](docs/AI_CONFIGURATION.md), and the [folder and long-text guide](docs/LONG_TEXT_AND_FOLDERS.md).
 
 ## Run locally
 
@@ -106,3 +107,7 @@ Code is released under the [MIT License](LICENSE). Included original starter mat
 When enabled, AI analyses only the selected reference sentence or paragraph, such as a model essay, novel excerpt or academic text. Learner writing, notes, labels, plans and progress are not sent to the provider and are not evaluated.
 
 The normal exercise copy actions do not include AI analysis output. Analysis remains in a separate panel and local browser cache.
+
+## 0.7.0 format boundary
+
+This release continues to import plain text, TXT, Markdown and practice-library JSON. Online Wikipedia/Wikisource retrieval and EPUB, DOCX or PDF parsing are not included in 0.7.0.

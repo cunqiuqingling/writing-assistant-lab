@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "version": "0.7.0",
+  "title": "Folder library and chapter-based long-text workspace",
+  "changes": [
+    "Virtual practice-library folder tree with custom folders",
+    "Document, chapter, batch and unit navigation",
+    "Maximum 45 practice units per batch",
+    "Separate Sentence Lab and Paragraph Lab chapter progress",
+    "Schema 5 backup with custom folders and progress records",
+    "Automatic migration of active 0.6.0 practice",
+    "Preserved 0.6.0 BYOK AI reference-analysis boundary"
+  ],
+  "notIncluded": [
+    "Wikipedia or Wikisource online resource download",
+    "EPUB import",
+    "DOCX import",
+    "PDF text extraction or OCR"
+  ]
+}
