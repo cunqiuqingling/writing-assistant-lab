@@ -76,6 +76,86 @@
   }
   function itemFolderId(item) { return item.folderId || BUILTIN_FOLDER_MAP[item.id] || defaultFolderForCategory(item.category); }
 
+  function titleOverrides() {
+    var appState = state();
+    appState.library = appState.library || {};
+    appState.library.titleOverrides = appState.library.titleOverrides || {};
+    return appState.library.titleOverrides;
+  }
+  function displayedItem(item) {
+    var copy = Object.assign({}, item || {});
+    copy._originalTitle = String(item && (item._originalTitle || item.title) || 'Untitled');
+    if (copy.builtin && titleOverrides()[copy.id]) copy.title = titleOverrides()[copy.id];
+    return copy;
+  }
+  function displayedItems(items) { return (items || []).map(displayedItem); }
+  function getLibraryItem(id) { return libraryCache.find(function (item) { return item.id === id; }) || null; }
+  async function syncDocumentTitle(documentId, title) {
+    var appState = state();
+    ['sentence', 'paragraph'].forEach(function (lab) {
+      var current = appState[lab];
+      if (current && (current.documentId === documentId || current.materialId === documentId)) {
+        current.title = title;
+        current.documentTitle = title;
+      }
+    });
+    var records = await db.getAll(stores.progress);
+    for (var i = 0; i < records.length; i++) {
+      var record = records[i];
+      if (record.documentId !== documentId || !record.snapshot) continue;
+      record.snapshot.title = title;
+      record.snapshot.documentTitle = title;
+      record.updatedAt = new Date().toISOString();
+      await db.put(stores.progress, record);
+    }
+    actions.persistNow();
+    actions.renderAll();
+  }
+  var currentTitleItemId = '';
+  function openTitleModal(itemId) {
+    var item = getLibraryItem(itemId);
+    if (!item) return;
+    currentTitleItemId = itemId;
+    byId('workspaceTitleInput').value = item.title || '';
+    byId('workspaceTitleOriginal').textContent = item._originalTitle || item.title || '';
+    byId('restoreWorkspaceTitleBtn').hidden = !item.builtin || !(titleOverrides()[item.id]);
+    byId('workspaceTitleModal').classList.add('show');
+    window.setTimeout(function () { byId('workspaceTitleInput').focus(); byId('workspaceTitleInput').select(); }, 0);
+  }
+  function closeTitleModal() { byId('workspaceTitleModal').classList.remove('show'); currentTitleItemId = ''; }
+  async function saveCardTitle() {
+    var item = getLibraryItem(currentTitleItemId);
+    if (!item) return;
+    var title = String(byId('workspaceTitleInput').value || '').replace(/\s+/g, ' ').trim().slice(0, 160);
+    if (!title) { actions.showToast('标题不能为空'); return; }
+    if (item.builtin) {
+      if (title === item._originalTitle) delete titleOverrides()[item.id];
+      else titleOverrides()[item.id] = title;
+      actions.persistNow();
+    } else {
+      var stored = await db.get(stores.library, item.id);
+      if (!stored) { actions.showToast('没有找到本地材料'); return; }
+      stored.title = title;
+      stored.updatedAt = new Date().toISOString();
+      await db.put(stores.library, stored);
+    }
+    await syncDocumentTitle(item.id, title);
+    closeTitleModal();
+    await actions.refreshLibrary();
+    actions.showToast('卡片标题已更新');
+  }
+  async function restoreCardTitle() {
+    var item = getLibraryItem(currentTitleItemId);
+    if (!item || !item.builtin) return;
+    var original = item._originalTitle || item.title;
+    delete titleOverrides()[item.id];
+    actions.persistNow();
+    await syncDocumentTitle(item.id, original);
+    closeTitleModal();
+    await actions.refreshLibrary();
+    actions.showToast('已恢复默认标题');
+  }
+
   function descendantsOf(id) {
     var found = [];
     function walk(parent) {
@@ -437,6 +517,15 @@
     }
   }
 
+  function ensureTitleModal() {
+    if (byId('workspaceTitleModal')) return;
+    var modal = document.createElement('div');
+    modal.id = 'workspaceTitleModal';
+    modal.className = 'modal-backdrop';
+    modal.innerHTML = '<div class="modal compact-modal title-edit-modal"><div class="modal-head"><div><h2>修改卡片标题</h2><p class="modal-helper">只修改显示名称，不会改变材料、章节或练习进度。</p></div><button class="icon-close-button" id="closeWorkspaceTitleModal" type="button" aria-label="关闭">×</button></div><div class="modal-body"><div class="field title-edit-field"><label for="workspaceTitleInput">新标题</label><input class="text-input" id="workspaceTitleInput" style="width:100%" maxlength="160" /></div><div class="title-original-note"><span>原始标题</span><strong id="workspaceTitleOriginal"></strong></div><div class="modal-actions title-edit-actions"><button class="btn quiet" id="restoreWorkspaceTitleBtn" type="button">恢复默认标题</button><button class="btn primary" id="saveWorkspaceTitleBtn" type="button">保存修改</button></div></div></div>';
+    document.body.appendChild(modal);
+  }
+
   function closeModal(id) { var modal = byId(id); if (modal) modal.classList.remove('show'); }
   function showModal(id) { var modal = byId(id); if (modal) modal.classList.add('show'); }
 
@@ -634,11 +723,18 @@
       var tags = (item.tags || []).slice(0, 5).map(function (tag) { return '<span class="chip">' + h.escapeHtml(tag) + '</span>'; }).join('');
       var chapters = getItemChapters(item);
       var importChip = item.importMeta && item.importMeta.format ? '<span class="chip neutral">' + h.escapeHtml(String(item.importMeta.format).toUpperCase()) + '</span>' : '';
-      card.innerHTML = '<h3>' + h.escapeHtml(item.title) + '</h3><div class="library-meta">' + h.escapeHtml(item.category) + ' · ' + h.escapeHtml(item.source || 'Unknown source') + '<br />' + h.escapeHtml(item.license || 'Personal study') + '</div><div class="chips" style="margin-top:8px">' + tags + importChip + '<span class="chip neutral">' + chapters.length + ' 章</span></div><div class="library-preview">' + h.escapeHtml(item.text) + '</div><div class="library-actions"><button class="btn small soft" data-workspace-sentence="' + h.escapeHtml(item.id) + '">句子练习</button><button class="btn small primary" data-workspace-paragraph="' + h.escapeHtml(item.id) + '">段落练习</button>' + (item.builtin ? '' : '<button class="btn small" data-workspace-move="' + h.escapeHtml(item.id) + '">移动</button><button class="btn small danger" data-workspace-delete="' + h.escapeHtml(item.id) + '">删除</button>') + '</div>';
+      var editableDocument = !item.builtin && (Array.isArray(item.chapters) || item.importMeta);
+      card.innerHTML = '<button class="card-edit-button" data-workspace-title="' + h.escapeHtml(item.id) + '" title="修改卡片标题" aria-label="修改卡片标题"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4.2L19 9.2a2.1 2.1 0 0 0 0-3L17.8 5a2.1 2.1 0 0 0-3 0L4 15.8V20Zm2-3.4 10.2-10.2 1.4 1.4L7.4 18H6v-1.4Z"/></svg></button><div class="library-card-title-row"><h3>' + h.escapeHtml(item.title) + '</h3></div><div class="library-meta">' + h.escapeHtml(item.category) + ' · ' + h.escapeHtml(item.source || 'Unknown source') + '<br />' + h.escapeHtml(item.license || 'Personal study') + '</div><div class="chips library-card-chips">' + tags + importChip + '<span class="chip neutral">' + chapters.length + ' 章</span></div><div class="library-preview">' + h.escapeHtml(item.text) + '</div><div class="library-actions"><button class="btn small soft" data-workspace-sentence="' + h.escapeHtml(item.id) + '">句子练习</button><button class="btn small primary" data-workspace-paragraph="' + h.escapeHtml(item.id) + '">段落练习</button>' + (editableDocument ? '<button class="btn small quiet" data-workspace-edit-document="' + h.escapeHtml(item.id) + '">编辑文档</button>' : '') + (item.builtin ? '' : '<button class="btn small quiet" data-workspace-move="' + h.escapeHtml(item.id) + '">移动</button><button class="btn small quiet danger-text-button" data-workspace-delete="' + h.escapeHtml(item.id) + '">删除</button>') + '</div>';
       grid.appendChild(card);
     });
     all('[data-workspace-sentence]').forEach(function (button) { button.addEventListener('click', function () { loadDocumentChapter(this.dataset.workspaceSentence, 'sentence', 0, 0).catch(function () { actions.showToast('材料载入失败'); }); }); });
     all('[data-workspace-paragraph]').forEach(function (button) { button.addEventListener('click', function () { loadDocumentChapter(this.dataset.workspaceParagraph, 'paragraph', 0, 0).catch(function () { actions.showToast('材料载入失败'); }); }); });
+    all('[data-workspace-title]').forEach(function (button) { button.addEventListener('click', function () { openTitleModal(this.dataset.workspaceTitle); }); });
+    all('[data-workspace-edit-document]').forEach(function (button) { button.addEventListener('click', function () {
+      var api = window.WritingAssistantDocumentImport;
+      if (api && api.editItem) api.editItem(this.dataset.workspaceEditDocument);
+      else actions.showToast('文档编辑器尚未载入');
+    }); });
     all('[data-workspace-move]').forEach(function (button) { button.addEventListener('click', function () { openMoveModal(this.dataset.workspaceMove); }); });
     all('[data-workspace-delete]').forEach(function (button) {
       button.addEventListener('click', async function () {
@@ -842,7 +938,8 @@
     ensureMaterialFields();
     injectModals();
     customFolders = await db.getAll(stores.folders);
-    libraryCache = core.getLibrary();
+    libraryCache = displayedItems(core.getLibrary());
+    ensureTitleModal();
     await migrateCurrentState();
     installNavigationInterceptors();
     bindWorkspaceEvents();
@@ -853,26 +950,31 @@
   function bindWorkspaceEvents() {
     if (document.body.dataset.workspaceEventsBound) return;
     document.body.dataset.workspaceEventsBound = '1';
+    ensureTitleModal();
+    byId('closeWorkspaceTitleModal').addEventListener('click', closeTitleModal);
+    byId('saveWorkspaceTitleBtn').addEventListener('click', function () { saveCardTitle().catch(function () { actions.showToast('标题保存失败'); }); });
+    byId('restoreWorkspaceTitleBtn').addEventListener('click', function () { restoreCardTitle().catch(function () { actions.showToast('标题恢复失败'); }); });
+    byId('workspaceTitleModal').addEventListener('click', function (event) { if (event.target === this) closeTitleModal(); });
     byId('closeWorkspaceFolderModal').addEventListener('click', function () { closeModal('workspaceFolderModal'); });
     byId('saveWorkspaceFolder').addEventListener('click', function () { saveFolder().catch(function () { actions.showToast('文件夹保存失败'); }); });
     byId('closeWorkspaceMoveModal').addEventListener('click', function () { closeModal('workspaceMoveModal'); });
     byId('confirmWorkspaceMove').addEventListener('click', function () { confirmMoveItem().catch(function () { actions.showToast('材料移动失败'); }); });
     byId('closeBatchCompletionModal').addEventListener('click', function () { closeModal('batchCompletionModal'); });
     ['workspaceFolderModal', 'workspaceMoveModal', 'batchCompletionModal'].forEach(function (id) { byId(id).addEventListener('click', function (event) { if (event.target === this) closeModal(id); }); });
-    document.addEventListener('keydown', function (event) { if (event.key === 'Escape') { closeModal('workspaceFolderModal'); closeModal('workspaceMoveModal'); closeModal('batchCompletionModal'); } });
+    document.addEventListener('keydown', function (event) { if (event.key === 'Escape') { closeModal('workspaceFolderModal'); closeModal('workspaceMoveModal'); closeModal('batchCompletionModal'); closeTitleModal(); } });
     var observer = new MutationObserver(function () { if (byId('materialModal').classList.contains('show')) refreshMaterialFolderSelect(); });
     observer.observe(byId('materialModal'), { attributes: true, attributeFilter: ['class'] });
   }
 
   async function afterBackupRestore() {
     customFolders = await db.getAll(stores.folders);
-    libraryCache = core.getLibrary();
+    libraryCache = displayedItems(core.getLibrary());
     await migrateCurrentState();
     renderLibrary();
   }
 
   window.WritingAssistantWorkspace = {
-    onLibraryRefresh: function (items) { libraryCache = items || []; if (initialized && state().activeLab === 'library') renderLibrary(); },
+    onLibraryRefresh: function (items) { libraryCache = displayedItems(items || []); if (initialized && state().activeLab === 'library') renderLibrary(); },
     renderLibrary: renderLibrary,
     afterRender: afterRender,
     prepareLibraryItem: prepareLibraryItem,
@@ -882,6 +984,7 @@
     loadDocumentChapter: loadDocumentChapter,
     parseChapters: parseChapters,
     getFolders: function () { return folderList().map(function (folder) { return Object.assign({}, folder); }); },
+    getItem: function (id) { var item = getLibraryItem(id); return item ? JSON.parse(JSON.stringify(item)) : null; },
     selectFolder: function (folderId) {
       if (!folderById(folderId)) folderId = 'folder-my-custom';
       state().library = state().library || {};

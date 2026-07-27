@@ -47,3 +47,7 @@ EPUB, DOCX, PDF, TXT and Markdown files selected for import are read by JavaScri
 The production build can serve pinned local copies of JSZip, Mammoth and PDF.js. During development or when those local files are missing, the interface may load the same pinned parser code from jsDelivr. Loading a library from the CDN sends an ordinary library request to the CDN, but Writing Assistant does not send the selected document or extracted text with that request.
 
 PDF.js only extracts an existing PDF text layer in 0.8.0 M1. PaddleOCR-VL integration, when added later, will be an optional localhost service and will require separate user confirmation.
+## Local document edits in 0.8.0 M2
+
+Card-title overrides, edited metadata and chapter text remain in the visitor's own browser storage and ordinary local backups. Editing a document never uploads its source text to the project maintainer. When source chapter text changes, Writing Assistant may remove only local progress records that no longer match that chapter, after explicit confirmation.
+

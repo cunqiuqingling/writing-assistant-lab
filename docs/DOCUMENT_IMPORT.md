@@ -1,4 +1,4 @@
-# Document import — 0.8.0 M1
+# Document import — 0.8.0 M2
 
 ## Supported formats
 
@@ -48,3 +48,17 @@ npm run vendor
 ```
 
 If the vendor assets are missing, the interface can fall back to exact, pinned jsDelivr files. Only parser JavaScript is fetched; the selected document is not included in that request.
+## M2 preview and revision
+
+M2 keeps the parsing formats from M1 and strengthens the review stage:
+
+- full chapter text is edited in a dedicated modal rather than a truncated textarea;
+- a chapter can be split at the textarea cursor, merged with an adjacent chapter, reordered or removed;
+- the latest ten structural states can be undone while the editor remains open;
+- selected word, character, sentence-unit, paragraph-unit and 45-unit batch estimates update during review;
+- imported documents can be reopened from Practice Library for metadata and structure correction.
+
+Title-only edits and reordering preserve stable IDs. If source text changes, the application asks before clearing only the incompatible progress records for affected chapter IDs.
+
+PDF quality reporting now includes low-text ratios, median page characters and probable two-column page counts. These signals are heuristic and do not replace manual review.
+

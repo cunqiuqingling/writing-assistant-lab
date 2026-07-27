@@ -45,3 +45,7 @@ API keys must never be committed to this repository, included in screenshots or 
 - PDF JavaScript evaluation is disabled in the PDF.js loading options.
 - Parser dependencies are pinned to exact versions and should be committed with their license notices for production.
 - Do not enable external DOCX file access or EPUB scripting.
+## Document revision safety
+
+Document and card editors validate non-empty titles, cap title length, render imported text as text rather than executable HTML, and preserve stable document and chapter identifiers where possible. Structural source changes require confirmation before incompatible local progress records are removed. Built-in title changes are browser-local overrides and never modify the public starter library.
+

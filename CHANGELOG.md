@@ -1,8 +1,20 @@
 # Changelog
 
-## 0.8.0 M1 — Browser document import and static-assets deployment
+## 0.8.0 M2 — Editable cards, chapters and safer document revision
 
-- Clarified text-material and document-import entry points, and added a direct EPUB/DOCX/PDF route inside the text modal.
+- Refined M2 card editing and document-management UI without changing parsing, storage, or progress behavior.
+
+- Added local card-title editing for built-in and imported materials.
+- Added restore-default-title support for built-in cards without changing public starter data.
+- Added post-import document editing for metadata, folders and chapters.
+- Added full chapter-text editing, cursor-based splitting, adjacent merging, reordering, removal and ten-step structural undo.
+- Added selected word/character counts, estimated sentence and paragraph units, and 45-unit batch estimates.
+- Added targeted progress reconciliation: only changed or removed source chapters lose incompatible saved progress.
+- Added stronger PDF text-layer quality signals, including mixed-page and probable two-column warnings.
+- Added soft warnings before parsing files close to browser memory limits.
+- Clarified text-material and EPUB/DOCX/PDF entry points.
+
+## 0.8.0 M1 — Browser document import and static-assets deployment
 
 - Added local EPUB import with OPF/spine chapter extraction.
 - Added local DOCX import through Mammoth with heading-aware chapter conversion.

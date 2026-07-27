@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "version": "0.8.0-m2",
+  "checkpoint": "M2",
+  "title": "Editable cards, chapter management and safer progress reconciliation",
+  "requires": "0.8.0-m1",
+  "features": [
+    "card-title-editing",
+    "builtin-title-overrides",
+    "post-import-document-editing",
+    "full-chapter-editor",
+    "chapter-split-merge-reorder-undo",
+    "preview-metrics",
+    "targeted-progress-reconciliation",
+    "pdf-layout-quality-signals"
+  ],
+  "privacy": "All document edits remain local. Built-in title overrides are browser-local. No source file is uploaded by Writing Assistant.",
+  "deployment": "Development checkpoint only; do not deploy production Cloudflare until M3 and M4 complete."
+}

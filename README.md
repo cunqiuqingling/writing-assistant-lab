@@ -29,7 +29,7 @@ Many learners are asked to write full essays before they have been trained to bu
 - **Optional BYOK reference analysis** — AI analyses only the selected model text, novel excerpt or academic source; learner writing is not sent or evaluated.
 - **No account required** — each visitor receives an independent local workspace.
 
-## Document import in 0.8.0 M1
+## Document import and management in 0.8.0 M2
 
 The browser can now parse supported documents locally:
 
@@ -38,9 +38,18 @@ The browser can now parse supported documents locally:
 - PDF: extracts an existing text layer through PDF.js and warns when the file appears to be scanned;
 - TXT and Markdown: reuse the chapter and long-text workspace introduced in 0.7.0.
 
-Every document enters a preview before it is saved. The visitor can review metadata, select chapters, rename or reorder them, and choose a local library folder. The source file is not uploaded to the project maintainer.
+Every document enters a preview before it is saved. The visitor can review metadata, select chapters, rename or reorder them, fully edit chapter text, split or merge chapters, and choose a local library folder. Imported documents can be reopened from their cards for later correction. The source file is not uploaded to the project maintainer.
 
-Scanned-PDF OCR is not included in M1. A later 0.8.0 checkpoint will add an optional local PaddleOCR-VL companion; ordinary users will not be required to install it.
+Scanned-PDF OCR is not included in M2. A later 0.8.0 checkpoint will add an optional local PaddleOCR-VL companion; ordinary users will not be required to install it.
+
+### M2 document-management safeguards
+
+- Every card has a local title-edit action. Built-in material titles use a browser-only override and can be restored to their defaults.
+- Imported document cards can reopen the full metadata and chapter editor.
+- Reordering and title-only edits preserve chapter IDs and saved progress.
+- Editing, merging, splitting or deleting chapter text clears only progress records whose source chapter no longer matches; the interface asks for confirmation first.
+- The preview displays selected word/character counts, estimated sentence and paragraph units, and 45-unit batch estimates.
+- PDF import reports probable scan pages, mixed text layers and likely two-column layouts.
 
 ## Privacy and security model
 
@@ -65,15 +74,6 @@ python3 -m http.server 8080
 
 Then open `http://localhost:8080`.
 
-## Deploy to GitHub Pages
-
-1. Upload this project to a GitHub repository.
-2. Open **Settings → Pages**.
-3. Choose **Deploy from a branch**.
-4. Select the `main` branch and `/ (root)`.
-5. Save and open the generated Pages URL.
-
-GitHub Pages is optional. The repository can also use the Cloudflare deployment above as its main live demo.
 
 ## Deployment during the 0.8.0 transition
 
@@ -91,12 +91,6 @@ The project now includes `wrangler.jsonc` and deploys `dist/site` as Cloudflare 
 
 See [DOCUMENT_IMPORT.md](docs/DOCUMENT_IMPORT.md) and [CLOUDFLARE_STATIC_ASSETS.md](docs/CLOUDFLARE_STATIC_ASSETS.md).
 
-## Repository suggestions
-
-- Repository name: `writing-assistant-lab`
-- Description: `Local-first English writing practice: Sentence → Paragraph → Independent Writing`
-- Website: `https://writing-assistant.ccwu.cc/`
-- Topics: `english-writing`, `ielts`, `writing-practice`, `local-first`, `vanilla-javascript`, `cloudflare-workers`
 
 ## Content and copyright
 

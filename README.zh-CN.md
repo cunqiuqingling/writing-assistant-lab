@@ -29,7 +29,7 @@
 - **可选的BYOK原文解析**：AI只解析选中的范文、小说节选、论文或其他参考文本，不发送或评价使用者的仿写内容。
 - **不需要注册账号**：每位访问者获得相互独立的本地练习空间。
 
-## 0.8.0 M1 文档导入
+## 0.8.0 M2 文档导入与管理
 
 浏览器现在可以在本地解析以下文件：
 
@@ -38,9 +38,18 @@
 - PDF：通过 PDF.js 提取已有文字层，并判断文件是否疑似扫描件；
 - TXT 与 Markdown：继续使用0.7.0的章节、批次和进度系统。
 
-所有文档都会先进入导入预览，使用者可以检查元数据、选择章节、重命名、调整顺序，并选择保存到哪个本地练习库文件夹。源文件不会上传给项目维护者。
+所有文档都会先进入导入预览，使用者可以检查元数据、选择章节、重命名、调整顺序、完整编辑正文、拆分或合并章节，并选择保存到哪个本地练习库文件夹。已经导入的文档也可以从卡片重新打开编辑。源文件不会上传给项目维护者。
 
 M1暂不包含扫描PDF的OCR。0.8.0后续检查点会提供可选的PaddleOCR-VL本地连接器，普通使用者不需要安装。
+
+### M2文档管理与进度保护
+
+- 每张卡片都可以修改显示标题；内置材料使用当前浏览器的本地覆盖，并可恢复默认标题。
+- 导入文档卡片可以重新打开元数据与章节编辑器。
+- 只重命名或调整顺序时保留章节ID和已有进度。
+- 修改正文、合并、拆分或删除章节时，只清除与新原文不再对应的章节进度，并在保存前明确确认。
+- 预览页显示已选词数、字符数、预计句子/段落单元与45单元批次数量。
+- PDF导入会提示疑似扫描页、混合文字层和可能的双栏版式。
 
 ## 隐私与安全模型
 
@@ -65,15 +74,6 @@ python3 -m http.server 8080
 
 然后访问 `http://localhost:8080`。
 
-## 发布到 GitHub Pages
-
-1. 将本项目上传到 GitHub 仓库。
-2. 打开 **Settings → Pages**。
-3. Source 选择 **Deploy from a branch**。
-4. 选择 `main` 分支和 `/ (root)`。
-5. 保存后访问 GitHub Pages 生成的网址。
-
-GitHub Pages 不是必须的。仓库完全可以继续把现有 Cloudflare 网站作为主要在线演示。
 
 ## 0.8.0过渡期部署
 
@@ -91,12 +91,6 @@ npm run deploy
 
 详见[文档导入说明](docs/DOCUMENT_IMPORT.md)和[Cloudflare静态资源部署](docs/CLOUDFLARE_STATIC_ASSETS.md)。
 
-## 推荐的仓库信息
-
-- 仓库名：`writing-assistant-lab`
-- Description：`Local-first English writing practice: Sentence → Paragraph → Independent Writing`
-- Website：`https://writing-assistant.ccwu.cc/`
-- Topics：`english-writing`、`ielts`、`writing-practice`、`local-first`、`vanilla-javascript`、`cloudflare-workers`
 
 ## 素材与版权
 
