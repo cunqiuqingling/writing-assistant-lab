@@ -1604,9 +1604,9 @@
 .app { grid-template-rows: auto 1fr auto; }
 .app-footer {
   display: grid;
-  gap: 7px;
+  gap: 8px;
   margin: 0 14px 14px;
-  padding: 13px 16px;
+  padding: 14px 16px;
   border: 1px solid rgba(227,232,241,.96);
   border-radius: 14px;
   color: #667085;
@@ -1615,19 +1615,32 @@
   font-size: 10px;
   line-height: 1.55;
 }
+.app-footer-motto {
+  margin: 0;
+  text-align: center;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(13px, 1.45vw, 17px);
+  font-style: italic;
+  letter-spacing: .02em;
+}
+.app-footer-motto a { color: #61708a; font-weight: 500; text-decoration: none; }
+.app-footer-motto a:hover { color: var(--primary); }
 .app-footer-main {
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 8px 16px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(227,232,241,.85);
 }
 .app-footer strong { color: #344054; }
 .app-footer nav { display: flex; flex-wrap: wrap; gap: 6px 12px; }
-.app-footer a { color: #526174; font-weight: 750; text-decoration: none; }
-.app-footer a:hover { color: var(--primary); text-decoration: underline; }
-.app-footer p { margin: 0; color: #8a94a6; }
+.app-footer nav a { color: #526174; font-weight: 750; text-decoration: none; }
+.app-footer nav a:hover { color: var(--primary); text-decoration: underline; }
+.app-footer-disclosure { margin: 0; color: #8a94a6; text-align: center; }
 @media (max-width: 700px) {
   .app-footer { margin: 0 9px 9px; }
   .app-footer-main { align-items: flex-start; flex-direction: column; }
+  .app-footer-motto { line-height: 1.55; }
 }

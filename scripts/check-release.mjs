@@ -28,6 +28,8 @@ const contact = await text('CONTACT.md');
 check(index.includes('<span class="version-badge">0.8.1</span>'), 'public version badge must be 0.8.1');
 check(index.includes('class="app-footer"'), 'main application must expose the policy footer');
 check(index.includes('legal/privacy.html'), 'main application must link to the privacy page');
+check(index.includes('about/philosophy.html'), 'main application must link to the writing philosophy');
+check(index.includes('Language is information, and information is everything.'), 'main footer must show the permanent philosophy line');
 check(app.includes("APP_VERSION = '0.8.1'"), 'app version must be 0.8.1');
 check(importer.includes("IMPORT_VERSION = '0.8.1'"), 'document import version must be 0.8.1');
 check(browser.includes("version: '0.8.1'"), 'browser OCR client version must be 0.8.1');
@@ -51,6 +53,7 @@ check(privacy.includes('BYOK'), 'privacy policy must disclose BYOK data flow');
 check(terms.includes('Terms of Use and Disclaimer'), 'terms document must exist');
 check(copyright.toLowerCase().includes('rights notice'), 'copyright notice process must exist');
 check(contact.includes('Private Vulnerability Reporting'), 'private contact route must be documented');
+check((await text('README.zh-CN.md')).includes('文字是自由的，我们要学会如何排列它们，让自己的宇宙和这个世界产生连接。'), 'required Chinese philosophy sentence must be preserved');
 
 const legalFiles = [
   'legal/index.html',
@@ -60,7 +63,9 @@ const legalFiles = [
   'legal/security.html',
   'legal/third-party.html',
   'legal/contact.html',
-  'legal/legal.css'
+  'legal/legal.css',
+  'about/philosophy.html',
+  'about/philosophy.css'
 ];
 for (const path of legalFiles) {
   check(await exists(path, 1000), `missing public legal file: ${path}`);
@@ -95,6 +100,8 @@ if (checkDist) {
     ['dist/site/legal/third-party.html', 1000],
     ['dist/site/legal/contact.html', 1000],
     ['dist/site/legal/legal.css', 1000],
+    ['dist/site/about/philosophy.html', 1000],
+    ['dist/site/about/philosophy.css', 1000],
     ['dist/site/vendor/jszip/jszip.min.js', 50000],
     ['dist/site/vendor/mammoth/mammoth.browser.min.js', 300000],
     ['dist/site/vendor/pdfjs/pdf.min.mjs', 250000],

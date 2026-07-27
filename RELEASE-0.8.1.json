@@ -11,6 +11,12 @@
     "/legal/copyright.html",
     "/legal/security.html",
     "/legal/third-party.html",
-    "/legal/contact.html"
-  ]
+    "/legal/contact.html",
+    "/about/philosophy.html"
+  ],
+  "writingPhilosophy": {
+    "page": "/about/philosophy.html",
+    "footerMotto": "Language is information, and information is everything.",
+    "requiredChineseSentence": "文字是自由的，我们要学会如何排列它们，让自己的宇宙和这个世界产生连接。"
+  }
 }

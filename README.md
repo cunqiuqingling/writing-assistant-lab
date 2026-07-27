@@ -10,6 +10,20 @@ A local-first English writing practice studio. Core practice works without an ac
 
 ![Writing Assistant interface](assets/screenshot.png)
 
+## Writing philosophy
+
+The project does not promise to turn every learner into a native-language author. Its more practical goal is to make English a language in which learners can express what they actually mean, with less stiffness and a more natural sense of movement.
+
+That requires high-quality input as well as sustained output. Strong writing does not have one fixed form: an essay, news report, speech, academic paper, screenplay, short story, piece of prose and poem all organise information differently.
+
+Writing Assistant therefore encourages observation, breakdown, imitation, transfer and independent writing rather than word-for-word movement from a sentence already completed in another language.
+
+> **文字是自由的，我们要学会如何排列它们，让自己的宇宙和这个世界产生连接。**
+
+*Language is information, and information is everything.*
+
+[Read the full writing philosophy](https://writing-assistant.ccwu.cc/about/philosophy.html)
+
 ## Features
 
 - Sentence Lab: copying, structural imitation, splitting and local rule analysis.

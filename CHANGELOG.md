@@ -2,6 +2,13 @@
 
 ## 0.8.1 — Privacy, legal and transparency pages
 
+### R1 — Writing philosophy
+
+- Added a dedicated writing-philosophy page for high-quality input, genre diversity, imitation and transfer.
+- Added the permanent footer line: Language is information, and information is everything.
+- Preserved the central Chinese project sentence in the README and public philosophy page.
+
+
 - Added a public legal center with privacy, terms, copyright, security, third-party and contact pages.
 - Added compact policy links to the main application footer.
 - Corrected the obsolete statement that the application made no AI requests.

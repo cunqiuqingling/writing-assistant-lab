@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const out = resolve(root, 'dist/site');
 const requireVendor = process.argv.includes('--require-vendor');
-const entries = ['index.html', 'assets', 'data', 'js', 'legal'];
+const entries = ['index.html', 'assets', 'data', 'js', 'legal', 'about'];
 const optionalFiles = ['_headers'];
 
 await rm(out, { recursive: true, force: true });
