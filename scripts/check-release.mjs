@@ -27,6 +27,7 @@ const privacy = await text('PRIVACY.md');
 const terms = await text('TERMS.md');
 const copyright = await text('COPYRIGHT_AND_TAKEDOWN.md');
 const contact = await text('CONTACT.md');
+const aiProviderGuide = await text('docs/AI_PROVIDER_SETUP.md');
 
 check(index.includes('<span class="version-badge">0.8.2-R1</span>'), 'public version badge must be 0.8.2-R1');
 check(index.includes('class="app-footer"'), 'main application must expose the policy footer');
@@ -53,8 +54,15 @@ check(aiAddon.includes("PROFILE_KEY = 'writing-assistant-ai-profiles-v2'"), 'AI 
 check(aiAddon.includes("SESSION_KEYS_KEY = 'writing-assistant-ai-session-keys-v2'"), 'session keys must be separated by provider');
 check(aiAddon.includes("ENCRYPTED_KEYS_KEY = 'writing-assistant-ai-encrypted-keys-v2'"), 'encrypted keys must be separated by provider');
 check(aiAddon.includes("zhipu: {"), 'Zhipu GLM must have a first-party preset');
+check(aiAddon.includes("model: 'glm-4-flash-250414'"), 'Zhipu preset must default to glm-4-flash-250414');
+check(aiAddon.includes("model: 'gemini-3.1-flash-lite'"), 'Gemini preset must default to gemini-3.1-flash-lite');
+check(aiAddon.includes('模型名称 <span class="ai-model-label-note">（可自行选择）</span>'), 'model field must state that the model is user-selectable');
+check(aiAddon.includes('AI设置与调用说明'), 'AI settings must include setup and invocation instructions');
+check(aiAddon.includes('aiProviderDocsLink'), 'AI settings must link to provider API documentation');
 check(aiAddon.includes("endpoint: '/chat/completions'"), 'Zhipu GLM endpoint must omit the extra /v1 segment');
-check(aiAddon.includes("next.provider === 'deepseek' || next.provider === 'zhipu'"), 'thinking must be disabled for supported reasoning-model presets');
+check(aiAddon.includes('zhipuThinkingConfigSupported'), 'Zhipu Thinking compatibility must be model-aware');
+check(aiAddon.includes("next.provider === 'zhipu' && zhipuThinkingConfigSupported(next.model)"), 'Thinking must only be disabled for supported Zhipu model families');
+check(!aiAddon.includes("next.provider === 'deepseek' || next.provider === 'zhipu'"), 'non-Thinking Zhipu models must not receive a blanket Thinking parameter');
 check(aiAddon.includes('renderAnalysisMarkdown'), 'AI output must use the restricted Markdown renderer');
 check(aiAddon.includes("document.createTextNode"), 'AI result renderer must construct escaped DOM nodes');
 check(!aiAddon.includes('<pre class="ai-result"'), 'AI output must not be rendered as a raw preformatted block');
@@ -79,6 +87,9 @@ check(privacy.includes('BYOK'), 'privacy policy must disclose BYOK data flow');
 check(terms.includes('Terms of Use and Disclaimer'), 'terms document must exist');
 check(copyright.toLowerCase().includes('rights notice'), 'copyright notice process must exist');
 check(contact.includes('Private Vulnerability Reporting'), 'private contact route must be documented');
+check(aiProviderGuide.includes('glm-4-flash-250414'), 'provider guide must document the Zhipu default model');
+check(aiProviderGuide.includes('gemini-3.1-flash-lite'), 'provider guide must document the Gemini default model');
+check(aiProviderGuide.includes('如何配置和调用'), 'provider guide must explain setup and invocation');
 check((await text('README.zh-CN.md')).includes('文字是自由的，我们要学会如何排列它们，让自己的宇宙和这个世界产生连接。'), 'required Chinese philosophy sentence must be preserved');
 
 const legalFiles = [

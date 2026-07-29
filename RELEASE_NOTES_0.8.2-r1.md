@@ -15,10 +15,19 @@
 
 - Adds `Zhipu GLM / 智谱` as a built-in preset.
 - Uses `https://open.bigmodel.cn/api/paas/v4` with `/chat/completions`.
-- Defaults to `glm-4.7-flash`.
-- Disables Thinking for connection tests and reference analysis.
+- Defaults to `glm-4-flash-250414`, a free text model that avoids extra Thinking-parameter compatibility.
+- Sends the Thinking-disable parameter only to Zhipu model families that support it; the default `glm-4-flash-250414` receives no unsupported Thinking field.
 - Raises the connection-test output allowance from 12 to 64 tokens.
 - Reports a specific error when a service returns reasoning without final text.
+
+## Model choice and setup guidance
+
+- Updates the Google Gemini default to `gemini-3.1-flash-lite`.
+- Marks the model field as user-selectable rather than fixed.
+- Adds provider-specific model guidance beside the model field.
+- Adds an in-product “AI设置与调用说明” section with the complete setup and invocation flow.
+- Links to the selected provider's official API documentation.
+- Recommends ordinary non-Thinking text models when a free or reasoning model has extra parameter restrictions.
 
 ## Chinese-first reference analysis
 

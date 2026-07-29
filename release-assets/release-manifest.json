@@ -4,8 +4,8 @@
   "artifacts": [
     {
       "file": "writing-assistant-0.8.2-r1-static-site.zip",
-      "bytes": 22561093,
-      "sha256": "c303d39fbb13f6086c826ebba5e99c32996159792f15ff10a8dbe24f385fd192"
+      "bytes": 22562642,
+      "sha256": "214accc664652d343157c91a3c4f5ac89db9fe536851543d621b95baec0b8d87"
     },
     {
       "file": "WritingAssistant-Advanced-Local-OCR-macOS-Apple-Silicon-0.8.0.zip",
@@ -14,8 +14,8 @@
     },
     {
       "file": "RELEASE_NOTES_0.8.2-r1.md",
-      "bytes": 2488,
-      "sha256": "13082af70957206615a6675090f20e2d407c142993472984843260eb4f6a88c1"
+      "bytes": 3162,
+      "sha256": "0a8f3e76894803bf0865deb44955168666762d5d086e313625e9a60718aa4c6b"
     }
   ]
 }

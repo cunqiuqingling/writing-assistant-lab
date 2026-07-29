@@ -11,6 +11,10 @@
     "Zhipu GLM preset and Thinking compatibility",
     "Chinese-first reference analysis",
     "restricted Markdown result renderer",
-    "external AI feedback copy guidance"
+    "external AI feedback copy guidance",
+    "Zhipu glm-4-flash-250414 default",
+    "Gemini gemini-3.1-flash-lite default",
+    "user-selectable model guidance and official API documentation links",
+    "in-product AI setup and invocation instructions"
   ]
 }

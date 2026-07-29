@@ -43,14 +43,14 @@
       adapter: 'openai',
       baseUrl: 'https://open.bigmodel.cn/api/paas/v4',
       endpoint: '/chat/completions',
-      model: 'glm-4.7-flash'
+      model: 'glm-4-flash-250414'
     },
     gemini: {
       label: 'Google Gemini',
       adapter: 'gemini',
       baseUrl: 'https://generativelanguage.googleapis.com/v1beta',
       endpoint: '',
-      model: 'gemini-2.5-flash'
+      model: 'gemini-3.1-flash-lite'
     },
     anthropic: {
       label: 'Anthropic Claude',
@@ -67,6 +67,53 @@
       model: ''
     }
   };
+
+  var PROVIDER_DOCS = {
+    openai: 'https://platform.openai.com/docs/api-reference',
+    deepseek: 'https://api-docs.deepseek.com/',
+    siliconflow: 'https://docs.siliconflow.cn/',
+    zhipu: 'https://docs.bigmodel.cn/cn/guide/develop/http/introduction',
+    gemini: 'https://ai.google.dev/gemini-api/docs',
+    anthropic: 'https://docs.anthropic.com/en/api/overview'
+  };
+
+  function zhipuThinkingConfigSupported(model) {
+    var name = trimmed(model).toLowerCase();
+    return /^glm-(?:4\.(?:[5-9])|[5-9](?:\.|$))/.test(name);
+  }
+
+  function modelGuidance(provider, model) {
+    var name = trimmed(model);
+    if (provider === 'zhipu') {
+      if (zhipuThinkingConfigSupported(name)) {
+        return '模型ID可自行更换。当前模型属于可能支持Thinking参数的GLM系列，网站会尝试关闭Thinking；若仍出现无最终文本、参数限制或额度问题，请改用普通文本生成模型，并查看智谱官方API文档。';
+      }
+      return '默认推荐 glm-4-flash-250414：免费、适合普通文本生成，并避免额外Thinking参数兼容。模型ID可自行更换，具体可用模型与免费规则以智谱官方文档为准。';
+    }
+    if (provider === 'gemini') {
+      return '默认推荐 gemini-3.1-flash-lite：低延迟、适合轻量文本解析。模型ID可自行更换；不同Gemini模型的Thinking能力、免费额度和地区可用性可能不同，请以官方文档为准。';
+    }
+    if (provider === 'custom') {
+      return '请输入该服务商官方文档中的精确模型ID。若模型默认启用Thinking或要求专用参数，浏览器直连可能不兼容；优先选择普通文本生成模型。';
+    }
+    return '模型ID可以自行更换。请填写服务商控制台当前支持的精确名称；部分免费或推理模型可能有Thinking参数、额度、地区或调用方式限制。';
+  }
+
+  function updateModelGuidance() {
+    var provider = byId('aiProvider') ? byId('aiProvider').value : currentProvider();
+    var model = byId('aiModel') ? byId('aiModel').value : '';
+    var help = byId('aiModelHelp');
+    if (help) help.textContent = modelGuidance(provider, model);
+    var link = byId('aiProviderDocsLink');
+    if (link) {
+      var url = PROVIDER_DOCS[provider] || '';
+      link.hidden = !url;
+      if (url) {
+        link.href = url;
+        link.textContent = '查看' + providerPreset(provider).label + '官方API调用文档';
+      }
+    }
+  }
 
   var HEADING_SUBTITLES = {
     '简明释义': 'Meaning',
@@ -316,6 +363,18 @@
       '.ai-field input:focus,.ai-field select:focus{outline:none;border-color:#526fe8;box-shadow:0 0 0 3px rgba(82,111,232,.12)}',
       '.ai-help{font-size:12px;line-height:1.5;color:#7b8495}',
       '.ai-profile-help{display:block;margin-top:3px;color:#52627b}',
+      '.ai-model-label-note{font-size:11px;font-weight:500;color:#7b8495}',
+      '.ai-doc-link{display:inline-flex;align-items:center;width:max-content;max-width:100%;margin-top:3px;color:#405bd8;font-size:12px;text-decoration:none}',
+      '.ai-doc-link:hover{text-decoration:underline}',
+      '.ai-setup-guide{margin:18px 0 0;border:1px solid #dfe6f2;border-radius:14px;background:#fbfcff;overflow:hidden}',
+      '.ai-setup-guide summary{cursor:pointer;padding:13px 15px;color:#344054;font-size:13px;font-weight:750;list-style:none}',
+      '.ai-setup-guide summary::-webkit-details-marker{display:none}',
+      '.ai-setup-guide summary::after{content:"＋";float:right;color:#667085}',
+      '.ai-setup-guide[open] summary::after{content:"－"}',
+      '.ai-setup-guide-body{padding:0 15px 15px;color:#5b6679;font-size:12px;line-height:1.65}',
+      '.ai-setup-guide-body ol{margin:0 0 10px;padding-left:20px}',
+      '.ai-setup-guide-body li{margin:5px 0}',
+      '.ai-setup-guide-body p{margin:8px 0 0}',
       '.ai-secret-row{display:grid;grid-template-columns:1fr auto;gap:8px}',
       '.ai-modal-actions{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:20px}',
       '.ai-action-group{display:flex;gap:9px;flex-wrap:wrap}',
@@ -394,7 +453,7 @@
       '      <div class="ai-field"><label for="aiAdapter">接口协议</label><select id="aiAdapter"><option value="openai">OpenAI-compatible Chat Completions</option><option value="gemini">Google Gemini generateContent</option><option value="anthropic">Anthropic Messages</option></select></div>',
       '      <div class="ai-field full"><label for="aiBaseUrl">Base URL</label><input id="aiBaseUrl" autocomplete="off" placeholder="https://api.example.com" /></div>',
       '      <div class="ai-field"><label for="aiEndpoint">Endpoint path</label><input id="aiEndpoint" autocomplete="off" placeholder="/v1/chat/completions" /></div>',
-      '      <div class="ai-field"><label for="aiModel">模型名称</label><input id="aiModel" autocomplete="off" placeholder="model-name" /></div>',
+      '      <div class="ai-field"><label for="aiModel">模型名称 <span class="ai-model-label-note">（可自行选择）</span></label><input id="aiModel" autocomplete="off" placeholder="填写服务商支持的精确模型ID" /><span class="ai-help" id="aiModelHelp"></span><a class="ai-doc-link" id="aiProviderDocsLink" target="_blank" rel="noopener noreferrer" hidden>查看当前服务商官方API调用文档</a></div>',
       '      <div class="ai-field full"><label for="aiApiKey">API Key</label><div class="ai-secret-row"><input id="aiApiKey" type="password" autocomplete="off" placeholder="当前服务商的密钥；不会进入普通备份文件" /><button class="btn small" id="aiToggleKeyBtn" type="button">显示</button></div><span class="ai-help" id="aiKeyState">当前服务商尚未配置密钥。</span></div>',
       '      <div class="ai-field"><label for="aiStorageMode">密钥保存方式</label><select id="aiStorageMode"><option value="session">仅本次标签页（默认）</option><option value="encrypted">使用本地密码加密保存</option></select></div>',
       '      <div class="ai-field"><label for="aiFeedbackLanguage">解析语言</label><select id="aiFeedbackLanguage"><option value="zh-CN">中文为主，英文随文释义</option><option value="en">English</option></select></div>',
@@ -407,6 +466,7 @@
       '      <span class="ai-test-status" id="aiTestStatus">设置尚未测试。</span>',
       '      <div class="ai-action-group"><button class="btn" id="aiTestBtn" type="button">测试连接</button><button class="btn primary" id="aiSaveBtn" type="button">保存当前服务商</button></div>',
       '    </div>',
+      '    <details class="ai-setup-guide"><summary>AI设置与调用说明</summary><div class="ai-setup-guide-body"><ol><li>在所选服务商的官方控制台创建API Key，并建议使用低额度、可撤销的专用密钥。</li><li>选择服务商预设。Base URL和Endpoint通常会自动填写；模型名称只是默认推荐，可按官方文档填写其他精确模型ID。</li><li>部分免费模型或推理模型对Thinking参数、额度、地区及调用方式有额外限制。为提高浏览器直连稳定性，优先选择普通文本生成、无需额外Thinking配置的模型；智谱默认推荐 glm-4-flash-250414。</li><li>点击“测试连接”，成功后点击“保存当前服务商”。随后选择练习材料，在右侧点击“AI解析原文”。</li></ol><p>模型、免费额度和接口规则可能调整，详情请查看模型名称下方的服务商官方API调用文档。</p></div></details>',
       '    <div class="ai-local-data"><div><strong>本地AI数据</strong><p>“移除API Key”只移除当前服务商的密钥；“清除全部”才会删除所有服务商档案与密钥。两者都不会删除练习或解析记录。</p></div><div class="ai-local-data-actions"><button class="btn" id="aiRemoveKeyBtn" type="button">移除当前服务商API Key</button><button class="btn ai-danger-button" id="aiResetConfigBtn" type="button">清除全部AI配置与密钥</button></div></div>',
       '  </div>',
       '</div>'
@@ -424,6 +484,7 @@
     byId('aiCloseSettingsBtn').addEventListener('click', closeSettings);
     wrap.addEventListener('click', function (event) { if (event.target === wrap) closeSettings(); });
     byId('aiProvider').addEventListener('change', switchProviderFromForm);
+    byId('aiModel').addEventListener('input', updateModelGuidance);
     byId('aiAdapter').addEventListener('change', updateAdapterFields);
     byId('aiStorageMode').addEventListener('change', updateStorageFields);
     byId('aiToggleKeyBtn').addEventListener('click', toggleKeyVisibility);
@@ -513,6 +574,7 @@
     setTestStatus('当前档案：' + label + ' · ' + (config.model || '尚未设置模型'), '');
     updateAdapterFields();
     updateStorageFields();
+    updateModelGuidance();
     updateConnectionBadge();
   }
 
@@ -1253,7 +1315,9 @@
           max_tokens: options.maxTokens || next.maxTokens || 1800,
           stream: false
         };
-        if (next.provider === 'deepseek' || next.provider === 'zhipu') {
+        if (next.provider === 'deepseek') {
+          payload.thinking = { type: 'disabled' };
+        } else if (next.provider === 'zhipu' && zhipuThinkingConfigSupported(next.model)) {
           payload.thinking = { type: 'disabled' };
         }
         return payload;
