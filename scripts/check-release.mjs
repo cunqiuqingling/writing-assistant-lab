@@ -38,6 +38,7 @@ check(index.includes('external-ai-help'), 'practice views must explain how copie
 check(index.includes('复制本单元 · AI反馈'), 'sentence copy action must identify its external-AI purpose');
 check(index.includes('复制当前训练 · AI反馈'), 'paragraph copy action must identify its external-AI purpose');
 check(styles.includes('0.8.2-R1 · external AI feedback help'), 'external-AI help styling must exist');
+check(styles.includes('0.8.2-R1 · iPad/tablet sticky-panel containment'), 'tablet layout must prevent the sticky left panel from covering the full-width coach panel');
 check(app.includes("APP_VERSION = '0.8.2-r1'"), 'app version must be 0.8.2-r1');
 check(app.includes('请用简体中文反馈'), 'external-AI copy payload must request Chinese feedback');
 check(app.includes('可粘贴到外部AI平台'), 'copy success messages must explain the next step');

@@ -1741,3 +1741,17 @@
   .external-ai-help summary { font-size: 12px; }
   .external-ai-help-body { font-size: 11px; }
 }
+
+/* 0.8.2-R1 · iPad/tablet sticky-panel containment */
+@media (max-width: 1260px) {
+  .left-panel {
+    position: static;
+    top: auto;
+    max-height: none;
+  }
+}
+@media (min-width: 821px) and (max-width: 1260px) {
+  .left-panel .unit-list {
+    max-height: 360px;
+  }
+}
