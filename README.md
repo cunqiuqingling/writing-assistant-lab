@@ -77,6 +77,14 @@ The key is excluded from ordinary Writing Assistant backup files. Session-only k
 
 [Full AI configuration and troubleshooting guide](docs/AI_CONFIGURATION.md)
 
+## Copy practice for feedback from an external AI
+
+The **Copy … · AI feedback** actions in Sentence Lab and Paragraph Lab assemble the reference text, the learner's writing, notes and mode-specific feedback instructions. The copied material can be pasted into ChatGPT, Gemini, DeepSeek or another AI service to identify problems in logic, grammar, collocation and naturalness.
+
+Copying only writes to the system clipboard. It does not call the Writing Assistant BYOK API or send learner writing automatically. The text reaches an external service only after the visitor deliberately pastes and sends it. The built-in **AI reference analysis** continues to process reference text only.
+
+[External AI feedback copy guide](docs/EXTERNAL_AI_FEEDBACK.md)
+
 ## Privacy, legal and security
 
 There is no shared practice database, account system, advertising tracker or first-party behavior analytics. Ordinary delivery uses Cloudflare. External requests occur only for user-triggered AI, Wikimedia or optional OCR features.

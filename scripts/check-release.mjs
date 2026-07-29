@@ -13,6 +13,7 @@ async function exists(path, minBytes = 1) {
 }
 
 const index = await text('index.html');
+const styles = await text('assets/styles.css');
 const app = await text('js/app.js');
 const importer = await text('js/document-import.js');
 const browser = await text('js/browser-ocr.js');
@@ -27,24 +28,41 @@ const terms = await text('TERMS.md');
 const copyright = await text('COPYRIGHT_AND_TAKEDOWN.md');
 const contact = await text('CONTACT.md');
 
-check(index.includes('<span class="version-badge">0.8.2</span>'), 'public version badge must be 0.8.2');
+check(index.includes('<span class="version-badge">0.8.2-R1</span>'), 'public version badge must be 0.8.2-R1');
 check(index.includes('class="app-footer"'), 'main application must expose the policy footer');
 check(index.includes('legal/privacy.html'), 'main application must link to the privacy page');
 check(index.includes('about/philosophy.html'), 'main application must link to the writing philosophy');
 check(index.includes('Language is information, and information is everything.'), 'main footer must show the permanent philosophy line');
-check(app.includes("APP_VERSION = '0.8.2'"), 'app version must be 0.8.2');
-check(importer.includes("IMPORT_VERSION = '0.8.2'"), 'document import version must be 0.8.2');
-check(browser.includes("version: '0.8.2'"), 'browser OCR client version must be 0.8.2');
+check(index.includes('external-ai-help'), 'practice views must explain how copied feedback material is used');
+check(index.includes('复制本单元 · AI反馈'), 'sentence copy action must identify its external-AI purpose');
+check(index.includes('复制当前训练 · AI反馈'), 'paragraph copy action must identify its external-AI purpose');
+check(styles.includes('0.8.2-R1 · external AI feedback help'), 'external-AI help styling must exist');
+check(app.includes("APP_VERSION = '0.8.2-r1'"), 'app version must be 0.8.2-r1');
+check(app.includes('请用简体中文反馈'), 'external-AI copy payload must request Chinese feedback');
+check(app.includes('可粘贴到外部AI平台'), 'copy success messages must explain the next step');
+check(importer.includes("IMPORT_VERSION = '0.8.2-r1'"), 'document import version must be 0.8.2-r1');
+check(browser.includes("version: '0.8.2-r1'"), 'browser OCR client version must be 0.8.2-r1');
 check(browser.includes("engine: 'tesseract-english-fast'"), 'browser OCR must use the self-hosted English engine');
 check(!browser.includes('cdn.jsdelivr.net') && !browser.includes('@paddleocr/paddleocr-js'), 'browser OCR must not load its engine from a remote CDN');
-check(localOcr.includes("WritingAssistant/0.8.2"), 'advanced OCR client version must be 0.8.2');
-check(pkg.version === '0.8.2', 'package version must be 0.8.2');
+check(localOcr.includes("WritingAssistant/0.8.2-r1"), 'advanced OCR client version must be 0.8.2-r1');
+check(pkg.version === '0.8.2-r1', 'package version must be 0.8.2-r1');
 check(workspace.includes('data-workspace-manage'), 'library cards must expose a management entry');
 check(workspace.includes('deleteLibraryItem'), 'library deletion must use the coordinated deletion path');
 check(workspace.includes('clearLabsUsingDocument'), 'deleting an active material must clear affected labs');
-check(aiAddon.includes('aiResetConfigBtn'), 'AI settings must expose full configuration clearing');
-check(aiAddon.includes('clearAllAiConfiguration'), 'AI configuration clearing function must exist');
-check(aiAddon.includes('移除API Key'), 'AI settings must distinguish API-key removal');
+check(aiAddon.includes("PROFILE_KEY = 'writing-assistant-ai-profiles-v2'"), 'AI profiles must use provider-specific configuration storage');
+check(aiAddon.includes("SESSION_KEYS_KEY = 'writing-assistant-ai-session-keys-v2'"), 'session keys must be separated by provider');
+check(aiAddon.includes("ENCRYPTED_KEYS_KEY = 'writing-assistant-ai-encrypted-keys-v2'"), 'encrypted keys must be separated by provider');
+check(aiAddon.includes("zhipu: {"), 'Zhipu GLM must have a first-party preset');
+check(aiAddon.includes("endpoint: '/chat/completions'"), 'Zhipu GLM endpoint must omit the extra /v1 segment');
+check(aiAddon.includes("next.provider === 'deepseek' || next.provider === 'zhipu'"), 'thinking must be disabled for supported reasoning-model presets');
+check(aiAddon.includes('renderAnalysisMarkdown'), 'AI output must use the restricted Markdown renderer');
+check(aiAddon.includes("document.createTextNode"), 'AI result renderer must construct escaped DOM nodes');
+check(!aiAddon.includes('<pre class="ai-result"'), 'AI output must not be rendered as a raw preformatted block');
+check(aiAddon.includes('输出语言必须以简体中文为主'), 'Chinese-first analysis rules must be enforced');
+check(aiAddon.includes('没有“to + 动词原形”等不定式结构时'), 'grammar self-check rules must prevent false infinitive labels');
+check(aiAddon.includes('PROMPT_VERSION'), 'AI cache identity must include a prompt version');
+check(aiAddon.includes('移除当前服务商API Key'), 'credential removal must be scoped to the current provider');
+check(aiAddon.includes('清除全部AI配置与密钥'), 'full AI configuration clearing must remain available');
 check(!browser.includes('browserOcrMock') && !browser.includes('mockMode'), 'production query mock must be removed');
 check(!importer.includes('cdn.jsdelivr.net/npm/jszip') && !importer.includes('cdn.jsdelivr.net/npm/mammoth') && !importer.includes('workerRemote') && !importer.includes('LIBRARIES.pdf.remote'), 'document parsers must be local-only');
 check(importer.includes('vendor/jszip/jszip.min.js'), 'local JSZip path');
@@ -124,8 +142,8 @@ if (checkDist) {
 }
 
 if (failures.length) {
-  console.error('0.8.2 release checks failed:');
+  console.error('0.8.2-R1 release checks failed:');
   failures.forEach((failure) => console.error(' - ' + failure));
   process.exit(1);
 }
-console.log(`0.8.2 release checks passed${sourceOnly ? ' (source-only)' : checkDist ? ' (including dist/site)' : ''}.`);
+console.log(`0.8.2-R1 release checks passed${sourceOnly ? ' (source-only)' : checkDist ? ' (including dist/site)' : ''}.`);

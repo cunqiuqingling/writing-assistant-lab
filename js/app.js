@@ -1,7 +1,7 @@
 (function () {
       'use strict';
 
-      var APP_VERSION = '0.8.2';
+      var APP_VERSION = '0.8.2-r1';
       // Keep the v4 storage keys for backward compatibility with existing local practice data.
       var STORAGE_KEY = 'writing-assistant-v4';
       var LEGACY_STORAGE_KEY = 'writing-assistant-v1';
@@ -321,9 +321,93 @@
       function paragraphHasWork(){return state.paragraph.records.some(paragraphRecordStarted);}
 
       function commitVisibleFields(){if(state.activeLab==='sentence'&&state.sentence.segments.length){state.sentence.answers[state.sentence.current]=byId('sentenceWriter').value;state.sentence.notes[state.sentence.current]=byId('sentenceNote').value;}if(state.activeLab==='paragraph'&&state.paragraph.paragraphs.length){var rec=currentParagraphRecord();rec.breakdownNote=byId('breakdownNote').value;rec.transfer.topic=byId('transferTopic').value;rec.transfer.writing=byId('transferWriter').value;rec.independent.prompt=byId('independentPrompt').value;rec.independent.hintLevel=byId('hintLevelSelect').value;rec.independent.writing=byId('independentWriter').value;all('[data-guided]').forEach(function(area){rec.guided[area.dataset.guided]=area.value;});}}
+      function buildSentenceCopy(indices){
+        var s=state.sentence;
+        var intro=s.mode==='copy'
+          ?'请用简体中文反馈。比较参考原文与我的精准跟写，指出拼写、遗漏、大小写和标点问题；不要改写参考原文。'
+          :'请用简体中文反馈。根据参考原文检查我的英语仿写，先诊断逻辑、语法、搭配和自然度，优先指出两个最重要的问题；尽量保留我的原意，不要一开始就整段重写。';
+        var parts=[
+          'Writing Assistant · Sentence Lab · 外部AI反馈材料',
+          intro,
+          '反馈顺序：先指出问题及原因，再给出可执行的修改建议；确有必要时，最后提供一个参考修改版本。',
+          ''
+        ];
+        indices.forEach(function(index,order){
+          parts.push(
+            '--- 练习 '+(order+1)+'（原单元 '+(index+1)+'）---',
+            '参考原文 Original:',
+            s.segments[index]||'',
+            '',
+            '我的写作 My writing:',
+            String(s.answers[index]||'').trim()
+          );
+          var note=String(s.notes[index]||'').trim();
+          if(note)parts.push('','我的笔记 My analysis note:',note);
+          parts.push('');
+        });
+        return parts.join('\n').trim();
+      }
 
-      function buildSentenceCopy(indices){var s=state.sentence;var intro=s.mode==='copy'?'请比较原文与我的跟写，指出拼写、遗漏和标点问题，不要改写原文。':'请根据原文检查我的英语仿写。先诊断逻辑、语法、搭配和自然度，优先指出两个最重要的问题；尽量保留我的原意，不要立即整段重写。';var parts=['Sentence Lab · '+(s.mode==='copy'?'精准跟写':'结构仿写'),intro,''];indices.forEach(function(index,order){parts.push('--- 练习 '+(order+1)+'（原单元 '+(index+1)+'）---','Original:',s.segments[index]||'','','My writing:',String(s.answers[index]||'').trim());var note=String(s.notes[index]||'').trim();if(note)parts.push('','My analysis note:',note);parts.push('');});return parts.join('\n').trim();}
-      function currentParagraphCopy(index){var p=state.paragraph,rec=p.records[index],source=p.paragraphs[index]||'',parts=['Paragraph Lab · '+({breakdown:'段落拆解',guided:'引导式搭建',transfer:'骨架迁移',independent:'独立段落'}[p.mode]||p.mode),'Original paragraph:',source,''];if(p.mode==='breakdown'){parts.push('My sentence-function labels:');sentenceSplit(source).forEach(function(sentence,i){parts.push((i+1)+'. ['+roleLabel(rec.roles[i])+'] '+sentence);});parts.push('','My paragraph analysis:',rec.breakdownNote||'','', 'Please check whether my labels and explanation correctly describe how the paragraph develops. Do not rewrite the paragraph.');}else if(p.mode==='guided'){parts.push('My paragraph plan:');['claim','reason','mechanism','example','qualification','conclusion'].forEach(function(k){parts.push(k+': '+(rec.guided[k]||''));});parts.push('','Combined draft:',paragraphWritingForRecord(rec,'guided'),'','Please evaluate whether each planned step supports the main claim, identify missing logical links, and ask questions before rewriting.');}else if(p.mode==='transfer'){parts.push('Logical skeleton:',skeletonFromRecord(rec),'New topic:',rec.transfer.topic||'','My paragraph:',rec.transfer.writing||'','', 'Please evaluate whether I transferred the logical structure rather than merely replacing words. Check argument development, grammar and collocation, but do not immediately rewrite the whole paragraph.');}else{parts.push('Writing task:',rec.independent.prompt||'','My paragraph:',rec.independent.writing||'','', 'Please evaluate whether every sentence advances the argument, whether the example supports the claim, what logical step is missing, and then identify grammar and collocation problems. Do not immediately rewrite the whole paragraph.');}return parts.join('\n').trim();}
+      function currentParagraphCopy(index){
+        var p=state.paragraph,rec=p.records[index],source=p.paragraphs[index]||'';
+        var parts=[
+          'Writing Assistant · Paragraph Lab · 外部AI反馈材料',
+          '当前模式：'+({breakdown:'段落拆解',guided:'引导式搭建',transfer:'骨架迁移',independent:'独立段落'}[p.mode]||p.mode),
+          '请用简体中文反馈。先指出问题及原因，再给出修改方向；不要一开始就直接重写整个段落。',
+          '',
+          '参考段落 Original paragraph:',
+          source,
+          ''
+        ];
+        if(p.mode==='breakdown'){
+          parts.push('我的逐句功能标注 My sentence-function labels:');
+          sentenceSplit(source).forEach(function(sentence,i){
+            parts.push((i+1)+'. ['+roleLabel(rec.roles[i])+'] '+sentence);
+          });
+          parts.push(
+            '',
+            '我的段落分析 My paragraph analysis:',
+            rec.breakdownNote||'',
+            '',
+            '请检查我的功能标注和分析是否准确描述了段落推进；指出判断错误及理由，不要改写参考段落。'
+          );
+        }else if(p.mode==='guided'){
+          parts.push('我的段落计划 My paragraph plan:');
+          ['claim','reason','mechanism','example','qualification','conclusion'].forEach(function(k){
+            parts.push(k+': '+(rec.guided[k]||''));
+          });
+          parts.push(
+            '',
+            '组合草稿 Combined draft:',
+            paragraphWritingForRecord(rec,'guided'),
+            '',
+            '请检查每一步是否支持中心观点、哪些逻辑连接缺失，以及语法和搭配问题。'
+          );
+        }else if(p.mode==='transfer'){
+          parts.push(
+            '原段落逻辑骨架 Logical skeleton:',
+            skeletonFromRecord(rec),
+            '新主题 New topic:',
+            rec.transfer.topic||'',
+            '',
+            '我的段落 My paragraph:',
+            rec.transfer.writing||'',
+            '',
+            '请检查我是否真正迁移了逻辑结构，而不只是替换词语；同时检查论证推进、语法和搭配。'
+          );
+        }else{
+          parts.push(
+            '写作任务 Writing task:',
+            rec.independent.prompt||'',
+            '',
+            '我的段落 My paragraph:',
+            rec.independent.writing||'',
+            '',
+            '请检查每句话是否推动论证、例子是否支持观点、缺少哪个逻辑步骤，并指出语法、搭配和自然度问题。'
+          );
+        }
+        return parts.join('\n').trim();
+      }
       function fallbackCopy(text){var area=document.createElement('textarea');area.value=text;area.style.position='fixed';area.style.opacity='0';document.body.appendChild(area);area.select();var ok=document.execCommand('copy');document.body.removeChild(area);return ok;}
       function copyText(text,message){if(!text){showToast('没有可复制的内容');return;}if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(text).then(function(){showToast(message);}).catch(function(){showToast(fallbackCopy(text)?message:'复制失败，请手动选择文本');});}else showToast(fallbackCopy(text)?message:'复制失败，请手动选择文本');}
 
@@ -390,7 +474,7 @@
         byId('splitModeSelect').addEventListener('change',function(){state.sentence.splitMode=this.value;scheduleSave();});
         byId('resplitBtn').addEventListener('click',function(){if(!state.sentence.text)return;if(sentenceHasWork()&&!window.confirm('重新拆分会清空当前句子答案和笔记，是否继续？'))return;var segments=splitSentenceMaterial(state.sentence.text,state.sentence.splitMode,state.sentence.targetWords).filter(function(v){return wordCount(v)>0;}).slice(0,300);state.sentence.segments=segments;state.sentence.answers=new Array(segments.length).fill('');state.sentence.notes=new Array(segments.length).fill('');state.sentence.current=0;persistNow();renderAll();showToast('已重新拆分为 '+segments.length+' 个单元');});
         byId('sentencePrevBtn').addEventListener('click',function(){if(state.sentence.current<=0)return;commitVisibleFields();state.sentence.current--;scheduleSave();renderAll();});byId('sentenceNextBtn').addEventListener('click',function(){if(state.sentence.current>=state.sentence.segments.length-1)return;commitVisibleFields();state.sentence.current++;scheduleSave();renderAll();});
-        byId('copySentenceOriginalBtn').addEventListener('click',function(){copyText(state.sentence.segments[state.sentence.current]||'','原文已复制');});byId('copySentenceCurrentBtn').addEventListener('click',function(){commitVisibleFields();if(!String(state.sentence.answers[state.sentence.current]||'').trim()){showToast('本单元还没有输入');return;}copyText(buildSentenceCopy([state.sentence.current]),'本单元已复制');});byId('copySentenceAllBtn').addEventListener('click',function(){commitVisibleFields();var indices=[];state.sentence.answers.forEach(function(v,i){if(String(v||'').trim())indices.push(i);});copyText(buildSentenceCopy(indices),'已复制 '+indices.length+' 个练习单元');});
+        byId('copySentenceOriginalBtn').addEventListener('click',function(){copyText(state.sentence.segments[state.sentence.current]||'','原文已复制');});byId('copySentenceCurrentBtn').addEventListener('click',function(){commitVisibleFields();if(!String(state.sentence.answers[state.sentence.current]||'').trim()){showToast('本单元还没有输入');return;}copyText(buildSentenceCopy([state.sentence.current]),'已复制反馈材料，可粘贴到外部AI平台');});byId('copySentenceAllBtn').addEventListener('click',function(){commitVisibleFields();var indices=[];state.sentence.answers.forEach(function(v,i){if(String(v||'').trim())indices.push(i);});copyText(buildSentenceCopy(indices),'已复制 '+indices.length+' 个练习单元，可粘贴到外部AI平台');});
 
         all('.mode-tab').forEach(function(btn){btn.addEventListener('click',function(){commitVisibleFields();state.paragraph.mode=this.dataset.paragraphMode;scheduleSave();renderAll();});});
         byId('breakdownNote').addEventListener('input',function(){currentParagraphRecord().breakdownNote=this.value;scheduleSave();renderParagraphCoach();});
@@ -398,7 +482,7 @@
         byId('transferTopic').addEventListener('input',function(){currentParagraphRecord().transfer.topic=this.value;scheduleSave();});byId('transferWriter').addEventListener('input',function(){currentParagraphRecord().transfer.writing=this.value;scheduleSave();renderParagraphCoach();renderLeftPanel();});
         byId('independentPrompt').addEventListener('input',function(){currentParagraphRecord().independent.prompt=this.value;scheduleSave();});byId('hintLevelSelect').addEventListener('change',function(){currentParagraphRecord().independent.hintLevel=this.value;scheduleSave();renderIndependent();});byId('independentWriter').addEventListener('input',function(){currentParagraphRecord().independent.writing=this.value;scheduleSave();renderParagraphCoach();renderLeftPanel();});
         byId('paragraphPrevBtn').addEventListener('click',function(){if(state.paragraph.current<=0)return;commitVisibleFields();state.paragraph.current--;scheduleSave();renderAll();});byId('paragraphNextBtn').addEventListener('click',function(){if(state.paragraph.current>=state.paragraph.paragraphs.length-1)return;commitVisibleFields();state.paragraph.current++;scheduleSave();renderAll();});
-        byId('copySourceParagraphBtn').addEventListener('click',function(){copyText(state.paragraph.paragraphs[state.paragraph.current]||'','原段落已复制');});byId('copyParagraphCurrentBtn').addEventListener('click',function(){commitVisibleFields();copyText(currentParagraphCopy(state.paragraph.current),'当前段落训练已复制');});byId('copyParagraphAllBtn').addEventListener('click',function(){commitVisibleFields();var parts=[];state.paragraph.records.forEach(function(rec,index){if(paragraphRecordStarted(rec))parts.push(currentParagraphCopy(index));});copyText(parts.join('\n\n====================\n\n'),'已复制 '+parts.length+' 个段落训练');});
+        byId('copySourceParagraphBtn').addEventListener('click',function(){copyText(state.paragraph.paragraphs[state.paragraph.current]||'','原段落已复制');});byId('copyParagraphCurrentBtn').addEventListener('click',function(){commitVisibleFields();copyText(currentParagraphCopy(state.paragraph.current),'已复制当前段落反馈材料，可粘贴到外部AI平台');});byId('copyParagraphAllBtn').addEventListener('click',function(){commitVisibleFields();var parts=[];state.paragraph.records.forEach(function(rec,index){if(paragraphRecordStarted(rec))parts.push(currentParagraphCopy(index));});copyText(parts.join('\n\n====================\n\n'),'已复制 '+parts.length+' 个段落训练，可粘贴到外部AI平台');});
 
         byId('chooseFolderBtn').addEventListener('click',function(){setDataMenu(false);chooseBackupDirectory();});byId('saveBackupBtn').addEventListener('click',function(){setDataMenu(false);saveBackup().catch(function(){showToast('备份保存失败');});});byId('importBackupBtn').addEventListener('click',function(){setDataMenu(false);byId('backupFileInput').click();});byId('backupFileInput').addEventListener('change',function(e){var file=e.target.files&&e.target.files[0];if(file)importBackupFile(file).catch(function(){showToast('备份导入失败');});e.target.value='';});
         document.addEventListener('keydown',function(e){if(e.key==='Escape')closeMaterialModal();if((e.metaKey||e.ctrlKey)&&e.key==='Enter'){e.preventDefault();if(state.activeLab==='sentence')byId('copySentenceAllBtn').click();else if(state.activeLab==='paragraph')byId('copyParagraphCurrentBtn').click();}});

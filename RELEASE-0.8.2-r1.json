@@ -1,0 +1,16 @@
+{
+  "version": "0.8.2-r1",
+  "displayVersion": "0.8.2-R1",
+  "date": "2026-07-29",
+  "type": "acceptance-hotfix",
+  "storageSchema": 5,
+  "preservesExistingPracticeData": true,
+  "migratesLegacyAiConfiguration": true,
+  "features": [
+    "provider-specific profiles and API keys",
+    "Zhipu GLM preset and Thinking compatibility",
+    "Chinese-first reference analysis",
+    "restricted Markdown result renderer",
+    "external AI feedback copy guidance"
+  ]
+}

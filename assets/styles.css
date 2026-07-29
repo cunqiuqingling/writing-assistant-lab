@@ -1698,3 +1698,46 @@
   font-size: 10px;
   line-height: 1.65;
 }
+
+/* 0.8.2-R1 · external AI feedback help */
+.external-ai-help {
+  margin-top: 13px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fafbff;
+}
+.external-ai-help summary {
+  padding: 11px 13px;
+  color: #40506c;
+  font-size: 11px;
+  font-weight: 750;
+  cursor: pointer;
+  user-select: none;
+}
+.external-ai-help[open] summary {
+  border-bottom: 1px solid var(--line);
+}
+.external-ai-help-body {
+  padding: 12px 14px 14px;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.7;
+}
+.external-ai-help-body strong {
+  color: var(--text);
+  font-size: 11px;
+}
+.external-ai-help-body ol {
+  margin: 8px 0 9px;
+  padding-left: 19px;
+}
+.external-ai-help-body li {
+  margin: 4px 0;
+}
+.external-ai-help-body p {
+  margin: 0;
+}
+@media (max-width: 760px) {
+  .external-ai-help summary { font-size: 12px; }
+  .external-ai-help-body { font-size: 11px; }
+}

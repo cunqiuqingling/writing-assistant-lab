@@ -183,3 +183,23 @@ Open **AI Settings** and click **移除本地密钥**. This removes both the cur
 - **清除全部AI配置与密钥**：删除密钥、服务商、Base URL、Endpoint、模型和其他AI参数，恢复为未配置状态。
 
 两种操作都不会删除练习库、写作、笔记、文件夹、进度或已保存的AI原文解析结果。Writing Assistant不保存复制历史，因此没有“清除复制缓存”操作。
+
+## Provider profiles and provider-specific keys / 服务商独立档案与密钥
+
+Writing Assistant 0.8.2-R1 stores the Base URL, endpoint, model and API key separately for each provider. Switching from Zhipu GLM to Google Gemini restores the saved Gemini profile and never reuses the GLM key. The encrypted-key unlock action also applies only to the currently selected provider.
+
+0.8.2-R1会分别保存各服务商的Base URL、Endpoint、模型和API Key。从智谱GLM切换到Google Gemini时，会恢复Gemini自己的档案，绝不会继续调用GLM密钥；输入本地密码时，也只会解锁当前所选服务商的密钥。
+
+Zhipu GLM is now a built-in preset:
+
+```text
+Base URL: https://open.bigmodel.cn/api/paas/v4
+Endpoint: /chat/completions
+Model: glm-4.7-flash
+```
+
+The preset disables Thinking for connection tests and reference analysis so that the service returns final displayable text instead of consuming the short test response in reasoning output.
+
+## Chinese-first analysis layout / 中文优先解析与排版
+
+When “中文为主，英文随文释义” is selected, headings and explanations are written in Simplified Chinese. Necessary English quotations, terms and templates remain in English and are followed by Chinese meanings. The result panel uses a restricted Markdown renderer that supports headings, lists, quotations and code blocks without accepting arbitrary HTML or scripts.

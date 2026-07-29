@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.8.2-R1 — Provider profiles, Chinese-first AI analysis and copy guidance
+
+- Saved API configuration and credentials independently for every provider.
+- Migrated the former single provider configuration and key to the detected provider profile.
+- Added a first-party Zhipu GLM preset and disabled Thinking for final-text responses.
+- Increased connection-test output allowance and added clearer reasoning-only diagnostics.
+- Made Chinese the dominant explanation language when Chinese analysis is selected.
+- Added grammar self-check requirements for main clauses, clause boundaries and phrase types.
+- Replaced raw preformatted AI output with a restricted, escaped Markdown renderer.
+- Added in-product guidance for copying learner writing to an external AI for voluntary feedback.
+- Preserved practice storage schema 5 and existing local practice data.
+
+
 ## 0.8.2 — Library deletion and AI credential controls
 
 - Added a visible card management dialog for user-added and imported materials.

@@ -18,7 +18,7 @@
         <div>
           <div class="brand-title-row">
             <div class="brand-title">Writing Assistant</div>
-            <span class="version-badge">0.8.2</span>
+            <span class="version-badge">0.8.2-R1</span>
           </div>
           <div class="brand-sub">Sentence → Paragraph → Independent Writing</div>
         </div>
@@ -123,8 +123,20 @@
             </div>
             <div class="actions">
               <div><button class="btn" id="sentencePrevBtn">← 上一单元</button><button class="btn" id="sentenceNextBtn">下一单元 →</button></div>
-              <div><button class="btn soft" id="copySentenceCurrentBtn">复制本单元</button><button class="btn primary" id="copySentenceAllBtn">复制全部已练习</button></div>
+              <div><button class="btn soft" id="copySentenceCurrentBtn">复制本单元 · AI反馈</button><button class="btn primary" id="copySentenceAllBtn">复制全部 · AI反馈</button></div>
             </div>
+            <details class="external-ai-help" id="sentenceExternalAiHelp">
+              <summary>复制后怎么用？</summary>
+              <div class="external-ai-help-body">
+                <strong>使用外部AI协助改进</strong>
+                <ol>
+                  <li>先完成当前跟写或结构仿写。</li>
+                  <li>点击“复制本单元 · AI反馈”或“复制全部 · AI反馈”。</li>
+                  <li>打开你常用的AI平台，粘贴并发送。</li>
+                </ol>
+                <p>复制内容已经包含参考原文、你的写作和反馈要求。它只进入系统剪贴板，不会自动调用站内API；只有你主动粘贴并发送时，写作内容才会提交给外部平台。</p>
+              </div>
+            </details>
           </div>
         </section>
 
@@ -192,8 +204,20 @@
 
             <div class="actions">
               <div><button class="btn" id="paragraphPrevBtn">← 上一段</button><button class="btn" id="paragraphNextBtn">下一段 →</button></div>
-              <div><button class="btn soft" id="copyParagraphCurrentBtn">复制当前训练</button><button class="btn primary" id="copyParagraphAllBtn">复制全部已练习</button></div>
+              <div><button class="btn soft" id="copyParagraphCurrentBtn">复制当前训练 · AI反馈</button><button class="btn primary" id="copyParagraphAllBtn">复制全部 · AI反馈</button></div>
             </div>
+            <details class="external-ai-help" id="paragraphExternalAiHelp">
+              <summary>复制后怎么用？</summary>
+              <div class="external-ai-help-body">
+                <strong>使用外部AI检查段落</strong>
+                <ol>
+                  <li>完成段落拆解、引导式搭建、骨架迁移或独立写作。</li>
+                  <li>复制当前训练或全部练习。</li>
+                  <li>粘贴到你常用的AI平台，让它检查逻辑推进、语法、搭配和自然度。</li>
+                </ol>
+                <p>复制材料不会包含站内“AI原文解析”结果，也不会自动发送。外部AI会接触你主动粘贴的写作，请同时留意对应平台的隐私政策。</p>
+              </div>
+            </details>
           </div>
         </section>
         <section class="view" id="libraryView">
@@ -278,7 +302,7 @@
     <footer class="app-footer">
       <p class="app-footer-motto"><a href="about/philosophy.html">Language is information, and information is everything.</a></p>
       <div class="app-footer-main">
-        <span><strong>Writing Assistant 0.8.2</strong> · 本地优先英语写作练习</span>
+        <span><strong>Writing Assistant 0.8.2-R1</strong> · 本地优先英语写作练习</span>
         <nav aria-label="政策与项目链接">
           <a href="about/philosophy.html">理念</a>
           <a href="legal/privacy.html">隐私</a>

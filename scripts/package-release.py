@@ -38,13 +38,13 @@ if not (SITE / "index.html").exists():
     raise SystemExit("dist/site is missing. Run npm run build:release first.")
 
 OUT.mkdir(parents=True, exist_ok=True)
-site_zip = OUT / "writing-assistant-0.8.2-static-site.zip"
+site_zip = OUT / "writing-assistant-0.8.2-r1-static-site.zip"
 companion_zip = OUT / "WritingAssistant-Advanced-Local-OCR-macOS-Apple-Silicon-0.8.0.zip"
 
-zip_folder(SITE, site_zip, "writing-assistant-0.8.2-static-site")
+zip_folder(SITE, site_zip, "writing-assistant-0.8.2-r1-static-site")
 zip_folder(COMPANION, companion_zip, "WritingAssistant-Advanced-Local-OCR-macOS-Apple-Silicon-0.8.0")
 
-notes = ROOT / "RELEASE_NOTES_0.8.2.md"
+notes = ROOT / "RELEASE_NOTES_0.8.2-r1.md"
 if notes.exists():
     shutil.copy2(notes, OUT / notes.name)
 
@@ -58,7 +58,7 @@ if (OUT / notes.name).exists():
 )
 
 manifest = {
-    "version": "0.8.2",
+    "version": "0.8.2-r1",
     "advancedOcrCompanionVersion": "0.8.0",
     "artifacts": [
         {"file": path.name, "bytes": path.stat().st_size, "sha256": sha256(path)}
