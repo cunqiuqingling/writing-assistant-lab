@@ -16,6 +16,8 @@
   var currentMoveItemId = '';
   var currentEditFolderId = '';
   var currentManageItemId = '';
+  var currentManageFolderId = '';
+  var folderCreationContext = '';
 
   var SYSTEM_FOLDERS = [
     { id: 'folder-all', name: '全部材料', parentId: '', icon: '⌂', system: true, order: 0 },
@@ -53,6 +55,15 @@
     { id: 'folder-my-custom', name: 'Custom Materials', parentId: 'folder-my-library', icon: '•', system: true, order: 53 }
   ];
 
+  var PROTECTED_SYSTEM_FOLDER_IDS = [
+    'folder-all',
+    'folder-ielts',
+    'folder-academic',
+    'folder-pharmacy',
+    'folder-literature',
+    'folder-my-library'
+  ];
+
   var BUILTIN_FOLDER_MAP = {
     'builtin-ielts-ai-learning': 'folder-ielts-technology',
     'builtin-ielts-health': 'folder-ielts-healthcare',
@@ -65,17 +76,47 @@
   function state() { return core.getState(); }
   function byId(id) { return h.byId(id); }
   function all(selector) { return h.all(selector); }
-  function folderList() { return SYSTEM_FOLDERS.concat(customFolders).slice().sort(function (a, b) { return Number(a.order || 0) - Number(b.order || 0) || String(a.name).localeCompare(String(b.name)); }); }
+  function folderPreferences() {
+    var appState = state();
+    appState.library = appState.library || {};
+    appState.library.hiddenDefaultFolderIds = Array.isArray(appState.library.hiddenDefaultFolderIds) ? appState.library.hiddenDefaultFolderIds : [];
+    return appState.library;
+  }
+  function hiddenDefaultFolderIds() { return folderPreferences().hiddenDefaultFolderIds; }
+  function rawFolderList() { return SYSTEM_FOLDERS.concat(customFolders); }
+  function rawFolderById(id) { return rawFolderList().find(function (folder) { return folder.id === id; }) || null; }
+  function visibleFolderId(id) {
+    var hidden = hiddenDefaultFolderIds();
+    var current = rawFolderById(id);
+    var guard = 0;
+    while (current && hidden.indexOf(current.id) >= 0 && guard < 20) {
+      current = current.parentId ? rawFolderById(current.parentId) : null;
+      guard++;
+    }
+    return current ? current.id : 'folder-all';
+  }
+  function folderList() {
+    var hidden = hiddenDefaultFolderIds();
+    return rawFolderList().filter(function (folder) {
+      return !folder.system || hidden.indexOf(folder.id) < 0;
+    }).slice().sort(function (a, b) {
+      return Number(a.order || 0) - Number(b.order || 0) || String(a.name).localeCompare(String(b.name));
+    });
+  }
   function folderById(id) { return folderList().find(function (folder) { return folder.id === id; }) || null; }
   function childrenOf(parentId) { return folderList().filter(function (folder) { return folder.parentId === parentId; }); }
-  function isSystemFolder(id) { var folder = folderById(id); return Boolean(folder && folder.system); }
+  function isSystemFolder(id) { var folder = rawFolderById(id); return Boolean(folder && folder.system); }
+  function isProtectedSystemFolder(id) { return PROTECTED_SYSTEM_FOLDER_IDS.indexOf(id) >= 0; }
+  function canManageFolder(folder) { return Boolean(folder && (!folder.system || !isProtectedSystemFolder(folder.id))); }
   function defaultFolderForCategory(category) {
     if (category === 'IELTS') return 'folder-ielts';
     if (category === 'Academic') return 'folder-academic';
     if (category === 'Literature') return 'folder-literature';
     return 'folder-my-custom';
   }
-  function itemFolderId(item) { return item.folderId || BUILTIN_FOLDER_MAP[item.id] || defaultFolderForCategory(item.category); }
+  function itemFolderId(item) {
+    return visibleFolderId(item.folderId || BUILTIN_FOLDER_MAP[item.id] || defaultFolderForCategory(item.category));
+  }
 
   function titleOverrides() {
     var appState = state();
@@ -185,6 +226,45 @@
       ? '这是内置练习材料，不能删除或移动；你仍然可以修改本机显示的标题。'
       : '这些操作只影响当前浏览器中的本地材料。删除操作无法撤销。';
     showModal('workspaceManageModal');
+  }
+
+  function ensureFolderManageModal() {
+    if (byId('workspaceFolderManageModal')) return;
+    var modal = document.createElement('div');
+    modal.id = 'workspaceFolderManageModal';
+    modal.className = 'modal-backdrop';
+    modal.innerHTML = '<div class="modal compact-modal folder-manage-modal"><div class="modal-head"><div><h2>管理文件夹</h2><p class="modal-helper" id="workspaceFolderManageSubtitle"></p></div><button class="icon-close-button" id="closeWorkspaceFolderManageModal" type="button" aria-label="关闭">×</button></div><div class="modal-body"><div class="library-manage-actions"><button class="library-manage-action" id="workspaceFolderRenameBtn" type="button"><strong>重命名文件夹</strong><span>修改当前文件夹的显示名称</span></button><button class="library-manage-action" id="workspaceFolderCreateChildBtn" type="button"><strong>新建子文件夹</strong><span>在当前文件夹中继续分类材料</span></button><button class="library-manage-action danger" id="workspaceFolderDeleteBtn" type="button"><strong>删除文件夹</strong><span>材料和子文件夹会移动到上一级，不会被删除</span></button></div><p class="library-manage-note" id="workspaceFolderManageNote">删除只移除文件夹本身，不会删除其中的材料、章节或练习进度。</p></div></div>';
+    document.body.appendChild(modal);
+  }
+
+  function closeFolderManageModal() {
+    closeModal('workspaceFolderManageModal');
+    currentManageFolderId = '';
+  }
+
+  function openFolderManageModal(folderId) {
+    var folder = folderById(folderId);
+    if (!folder || !canManageFolder(folder)) {
+      actions.showToast('顶层目录用于维持练习库结构，不能删除');
+      return;
+    }
+    ensureFolderManageModal();
+    currentManageFolderId = folderId;
+    var isDefaultFolder = Boolean(folder.system);
+    byId('workspaceFolderManageSubtitle').textContent = folder.name || 'Untitled folder';
+    byId('workspaceFolderRenameBtn').hidden = isDefaultFolder;
+    byId('workspaceFolderCreateChildBtn').hidden = false;
+    var deleteButton = byId('workspaceFolderDeleteBtn');
+    var deleteTitle = deleteButton.querySelector('strong');
+    var deleteHelp = deleteButton.querySelector('span');
+    if (deleteTitle) deleteTitle.textContent = isDefaultFolder ? '删除默认文件夹' : '删除文件夹';
+    if (deleteHelp) deleteHelp.textContent = isDefaultFolder
+      ? '从当前浏览器移除；其中内容移至上一级，并可恢复默认目录'
+      : '材料和子文件夹会移动到上一级，不会被删除';
+    byId('workspaceFolderManageNote').textContent = isDefaultFolder
+      ? '这是项目预置的细分类目录，不是必须保留的练习内容。删除后只会在当前浏览器中隐藏，可通过“恢复默认目录”重新显示。'
+      : '删除只移除文件夹本身，不会删除其中的材料、章节或练习进度。';
+    showModal('workspaceFolderManageModal');
   }
 
   function clearLabUsingDocument(lab, documentId) {
@@ -629,7 +709,7 @@
       var moveModal = document.createElement('div');
       moveModal.id = 'workspaceMoveModal';
       moveModal.className = 'modal-backdrop';
-      moveModal.innerHTML = '<div class="modal compact-modal"><div class="modal-head"><h2>移动材料</h2><button class="btn small" id="closeWorkspaceMoveModal">关闭</button></div><div class="modal-body"><div class="field"><label for="workspaceMoveFolder">目标文件夹</label><select id="workspaceMoveFolder" style="width:100%"></select></div><div class="modal-actions"><button class="btn primary" id="confirmWorkspaceMove">移动</button></div></div></div>';
+      moveModal.innerHTML = '<div class="modal compact-modal"><div class="modal-head"><h2>移动材料</h2><button class="btn small" id="closeWorkspaceMoveModal">关闭</button></div><div class="modal-body"><div class="field"><label for="workspaceMoveFolder">目标文件夹</label><select id="workspaceMoveFolder" style="width:100%"></select></div><div class="folder-move-create-row"><button class="btn quiet" id="createFolderFromMoveBtn" type="button">＋ 新建文件夹</button><span>创建后会返回这里，并自动选中新文件夹。</span></div><div class="modal-actions"><button class="btn primary" id="confirmWorkspaceMove">移动</button></div></div></div>';
       document.body.appendChild(moveModal);
     }
     if (!byId('batchCompletionModal')) {
@@ -640,6 +720,7 @@
       document.body.appendChild(batchModal);
     }
     ensureManageModal();
+    ensureFolderManageModal();
   }
 
   function ensureTitleModal() {
@@ -666,21 +747,33 @@
     }).join('');
   }
 
-  function openFolderModal(folderId) {
+  function openFolderModal(folderId, preferredParentId, context) {
     currentEditFolderId = folderId || '';
+    folderCreationContext = folderId ? '' : (context || '');
     var folder = folderId ? folderById(folderId) : null;
     byId('workspaceFolderModalTitle').textContent = folder ? '重命名文件夹' : '新建文件夹';
     byId('workspaceFolderName').value = folder ? folder.name : '';
-    var selectedParent = folder ? folder.parentId : (state().library.selectedFolderId === 'folder-all' ? 'folder-my-library' : state().library.selectedFolderId);
+    var fallbackParent = state().library.selectedFolderId === 'folder-all' ? 'folder-my-library' : state().library.selectedFolderId;
+    var selectedParent = folder ? folder.parentId : (preferredParentId && folderById(preferredParentId) ? preferredParentId : fallbackParent);
     byId('workspaceFolderParent').innerHTML = folderSelectOptions(selectedParent, true, folderId);
     byId('workspaceFolderParent').disabled = Boolean(folder);
     showModal('workspaceFolderModal');
     setTimeout(function () { byId('workspaceFolderName').focus(); }, 20);
   }
 
+  function closeFolderModal(returnToMove) {
+    closeModal('workspaceFolderModal');
+    currentEditFolderId = '';
+    var shouldReturn = folderCreationContext === 'move' && returnToMove !== false && currentMoveItemId;
+    folderCreationContext = '';
+    if (shouldReturn) showModal('workspaceMoveModal');
+  }
+
   async function saveFolder() {
     var name = String(byId('workspaceFolderName').value || '').trim();
     if (!name) { actions.showToast('请填写文件夹名称'); return; }
+    var returnToMove = folderCreationContext === 'move' && !currentEditFolderId;
+    var createdFolderId = '';
     if (currentEditFolderId) {
       var existing = folderById(currentEditFolderId);
       if (!existing || existing.system) return;
@@ -690,36 +783,93 @@
     } else {
       var parentId = byId('workspaceFolderParent').value || 'folder-my-library';
       var folder = { id: 'folder-custom-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 7), name: name, parentId: parentId, icon: '•', system: false, order: Date.now(), createdAt: new Date().toISOString() };
+      createdFolderId = folder.id;
       await db.put(stores.folders, folder);
       revealFolderPath(parentId, true);
-      state().library.selectedFolderId = folder.id;
+      if (!returnToMove) state().library.selectedFolderId = folder.id;
       actions.persistNow();
     }
     customFolders = await db.getAll(stores.folders);
     closeModal('workspaceFolderModal');
+    currentEditFolderId = '';
+    folderCreationContext = '';
     renderLibrary();
-    actions.showToast('文件夹已保存');
+    if (returnToMove && createdFolderId) {
+      byId('workspaceMoveFolder').innerHTML = folderSelectOptions(createdFolderId, true, '');
+      byId('workspaceMoveFolder').value = createdFolderId;
+      showModal('workspaceMoveModal');
+      actions.showToast('文件夹已创建并选中');
+    } else {
+      actions.showToast('文件夹已保存');
+    }
   }
 
   async function deleteFolder(folderId) {
     var folder = folderById(folderId);
-    if (!folder || folder.system) return;
-    if (!window.confirm('删除文件夹后，其中的材料和子文件夹会移动到上一级，是否继续？')) return;
+    if (!folder || isProtectedSystemFolder(folderId)) {
+      actions.showToast('顶层目录不能删除');
+      return;
+    }
+    var isDefaultFolder = Boolean(folder.system);
     var parent = folder.parentId || 'folder-my-library';
+    var message = isDefaultFolder
+      ? '删除默认文件夹《' + folder.name + '》？\n\n它会从当前浏览器的练习库中移除，其中材料和自建子文件夹会移动到上一级。材料、章节和练习进度不会被删除；之后可以使用“恢复默认目录”重新显示预置目录。'
+      : '删除文件夹《' + folder.name + '》？\n\n其中的材料和子文件夹会移动到上一级，不会删除材料、章节或练习进度。文件夹本身无法恢复。';
+    if (!window.confirm(message)) return;
+
     var customItems = await db.getAll(stores.library);
     for (var i = 0; i < customItems.length; i++) {
-      if (customItems[i].folderId === folderId) { customItems[i].folderId = parent; await db.put(stores.library, customItems[i]); }
+      if (customItems[i].folderId === folderId) {
+        customItems[i].folderId = parent;
+        customItems[i].updatedAt = new Date().toISOString();
+        await db.put(stores.library, customItems[i]);
+      }
     }
+
     var children = customFolders.filter(function (entry) { return entry.parentId === folderId; });
-    for (var j = 0; j < children.length; j++) { children[j].parentId = parent; await db.put(stores.folders, children[j]); }
-    await db.delete(stores.folders, folderId);
+    for (var j = 0; j < children.length; j++) {
+      children[j].parentId = parent;
+      children[j].updatedAt = new Date().toISOString();
+      await db.put(stores.folders, children[j]);
+    }
+
+    if (isDefaultFolder) {
+      var hidden = hiddenDefaultFolderIds();
+      if (hidden.indexOf(folderId) < 0) hidden.push(folderId);
+    } else {
+      await db.delete(stores.folders, folderId);
+    }
+
     customFolders = await db.getAll(stores.folders);
     state().library.collapsedFolderIds = collapsedFolderIds().filter(function (value) { return value !== folderId; });
     if (state().library.selectedFolderId === folderId) state().library.selectedFolderId = parent;
     revealFolderPath(parent, false);
     actions.persistNow();
     await actions.refreshLibrary();
-    actions.showToast('文件夹已删除');
+    closeFolderManageModal();
+    actions.showToast(isDefaultFolder
+      ? '默认文件夹已删除；可通过“恢复默认目录”重新显示'
+      : '文件夹已删除；其中内容已移动到上一级');
+  }
+
+  function updateRestoreDefaultFoldersButton() {
+    var button = byId('restoreDefaultFoldersBtn');
+    if (!button) return;
+    var count = hiddenDefaultFolderIds().length;
+    button.hidden = count === 0;
+    button.textContent = count ? '恢复默认目录（' + count + '）' : '恢复默认目录';
+  }
+
+  function restoreDefaultFolders() {
+    var hidden = hiddenDefaultFolderIds();
+    if (!hidden.length) {
+      actions.showToast('没有需要恢复的默认目录');
+      return;
+    }
+    state().library.hiddenDefaultFolderIds = [];
+    actions.persistNow();
+    renderLibrary();
+    actions.showToast('默认目录已恢复');
   }
 
   function openMoveModal(itemId) {
@@ -727,6 +877,12 @@
     var item = libraryCache.find(function (entry) { return entry.id === itemId; });
     byId('workspaceMoveFolder').innerHTML = folderSelectOptions(item ? itemFolderId(item) : 'folder-my-custom', true, '');
     showModal('workspaceMoveModal');
+  }
+
+  function createFolderFromMove() {
+    var parentId = byId('workspaceMoveFolder').value || 'folder-my-library';
+    closeModal('workspaceMoveModal');
+    openFolderModal('', parentId, 'move');
   }
 
   async function confirmMoveItem() {
@@ -759,7 +915,7 @@
     layout.className = 'library-browser-layout';
     var sidebar = document.createElement('aside');
     sidebar.className = 'folder-sidebar';
-    sidebar.innerHTML = '<div class="folder-sidebar-head"><strong>练习库目录</strong><span>本地虚拟文件夹</span></div><div id="folderTree" class="folder-tree"></div>';
+    sidebar.innerHTML = '<div class="folder-sidebar-head"><div class="folder-sidebar-title"><strong>练习库目录</strong><span>本地虚拟文件夹</span></div><button class="folder-sidebar-restore" id="restoreDefaultFoldersBtn" type="button" hidden>恢复默认目录</button></div><div id="folderTree" class="folder-tree"></div>';
     var content = document.createElement('div');
     content.className = 'library-folder-content';
     var breadcrumb = document.createElement('div');
@@ -775,6 +931,7 @@
     content.appendChild(toolbar);
     content.appendChild(childGrid);
     content.appendChild(grid);
+    byId('restoreDefaultFoldersBtn').addEventListener('click', restoreDefaultFolders);
     if (byId('libraryCategory')) byId('libraryCategory').style.display = 'none';
   }
 
@@ -790,7 +947,7 @@
       row.className = 'folder-tree-row' + (isRoot ? ' root' : '') + (state().library.selectedFolderId === folder.id ? ' active' : '') + (hasChildren ? ' has-children' : ' leaf') + (expanded ? ' expanded' : ' collapsed');
       row.style.setProperty('--folder-depth', depth);
       var count = folder.id === 'folder-all' ? libraryCache.length : folderMaterialCount(folder.id, true);
-      row.innerHTML = folderToggleMarkup(folder, expanded) + '<button class="folder-tree-main" data-folder-open="' + h.escapeHtml(folder.id) + '" type="button"><span class="folder-tree-icon">' + h.escapeHtml(folder.icon || '•') + '</span><span>' + h.escapeHtml(folder.name) + '</span><small>' + count + '</small></button>' + (!folder.system ? '<button class="folder-tree-more" data-folder-edit="' + h.escapeHtml(folder.id) + '" type="button" title="重命名">•••</button>' : '');
+      row.innerHTML = folderToggleMarkup(folder, expanded) + '<button class="folder-tree-main" data-folder-open="' + h.escapeHtml(folder.id) + '" type="button"><span class="folder-tree-icon">' + h.escapeHtml(folder.icon || '•') + '</span><span>' + h.escapeHtml(folder.name) + '</span><small>' + count + '</small></button>' + (canManageFolder(folder) ? '<button class="folder-tree-more" data-folder-edit="' + h.escapeHtml(folder.id) + '" type="button" title="重命名">•••</button>' : '');
       tree.appendChild(row);
       return expanded;
     }
@@ -820,11 +977,7 @@
     all('[data-folder-edit]').forEach(function (button) {
       button.addEventListener('click', function (event) {
         event.stopPropagation();
-        var id = this.dataset.folderEdit;
-        var action = window.prompt('输入 R 重命名，输入 D 删除此文件夹：', 'R');
-        if (!action) return;
-        if (action.toLowerCase() === 'd') deleteFolder(id).catch(function () { actions.showToast('文件夹删除失败'); });
-        else openFolderModal(id);
+        openFolderManageModal(this.dataset.folderEdit);
       });
     });
   }
@@ -836,9 +989,9 @@
     container.innerHTML = path.map(function (folder, index) {
       return '<button data-breadcrumb-folder="' + h.escapeHtml(folder.id) + '">' + h.escapeHtml(folder.name) + '</button>' + (index < path.length - 1 ? '<span>›</span>' : '');
     }).join('');
-    if (!selected.system) container.innerHTML += '<button class="breadcrumb-danger" data-delete-current-folder="' + h.escapeHtml(selected.id) + '">删除文件夹</button>';
+    if (canManageFolder(selected)) container.innerHTML += '<button class="breadcrumb-manage" data-manage-current-folder="' + h.escapeHtml(selected.id) + '">管理文件夹</button>';
     all('[data-breadcrumb-folder]').forEach(function (button) { button.addEventListener('click', function () { selectFolderInLibrary(this.dataset.breadcrumbFolder, true); }); });
-    all('[data-delete-current-folder]').forEach(function (button) { button.addEventListener('click', function () { deleteFolder(this.dataset.deleteCurrentFolder).catch(function () { actions.showToast('文件夹删除失败'); }); }); });
+    all('[data-manage-current-folder]').forEach(function (button) { button.addEventListener('click', function () { openFolderManageModal(this.dataset.manageCurrentFolder); }); });
   }
 
   function renderChildFolders() {
@@ -850,9 +1003,10 @@
     container.innerHTML = folders.map(function (folder) {
       var totalMaterials = folderMaterialCount(folder.id, true);
       var childFolders = folderChildCount(folder.id);
-      return '<button class="folder-tile" data-child-folder="' + h.escapeHtml(folder.id) + '"><span class="folder-tile-icon">' + h.escapeHtml(folder.icon || '•') + '</span><span><strong>' + h.escapeHtml(folder.name) + '</strong><small>' + totalMaterials + ' 份材料' + (childFolders ? ' · ' + childFolders + ' 个子文件夹' : '') + '</small></span><span>→</span></button>';
+      return '<div class="folder-tile-shell"><button class="folder-tile" data-child-folder="' + h.escapeHtml(folder.id) + '"><span class="folder-tile-icon">' + h.escapeHtml(folder.icon || '•') + '</span><span><strong>' + h.escapeHtml(folder.name) + '</strong><small>' + totalMaterials + ' 份材料' + (childFolders ? ' · ' + childFolders + ' 个子文件夹' : '') + '</small></span><span>→</span></button>' + (canManageFolder(folder) ? '<button class="folder-tile-manage" data-folder-manage="' + h.escapeHtml(folder.id) + '" type="button" aria-label="管理' + h.escapeHtml(folder.name) + '">•••</button>' : '') + '</div>';
     }).join('');
     all('[data-child-folder]').forEach(function (button) { button.addEventListener('click', function () { selectFolderInLibrary(this.dataset.childFolder, true); }); });
+    all('[data-folder-manage]').forEach(function (button) { button.addEventListener('click', function (event) { event.stopPropagation(); openFolderManageModal(this.dataset.folderManage); }); });
   }
 
   function renderCards(items) {
@@ -884,6 +1038,7 @@
       if (!state().library) state().library = { selectedFolderId: 'folder-all', collapsedFolderIds: [] };
       if (!Array.isArray(state().library.collapsedFolderIds)) state().library.collapsedFolderIds = [];
       if (!folderById(state().library.selectedFolderId)) state().library.selectedFolderId = 'folder-all';
+      updateRestoreDefaultFoldersButton();
       renderFolderTree();
       renderBreadcrumb();
       renderChildFolders();
@@ -1080,6 +1235,7 @@
     document.body.dataset.workspaceEventsBound = '1';
     ensureTitleModal();
     ensureManageModal();
+    ensureFolderManageModal();
     byId('closeWorkspaceTitleModal').addEventListener('click', closeTitleModal);
     byId('saveWorkspaceTitleBtn').addEventListener('click', function () { saveCardTitle().catch(function () { actions.showToast('标题保存失败'); }); });
     byId('restoreWorkspaceTitleBtn').addEventListener('click', function () { restoreCardTitle().catch(function () { actions.showToast('标题恢复失败'); }); });
@@ -1090,13 +1246,29 @@
     byId('workspaceManageEditBtn').addEventListener('click', function () { var id = currentManageItemId; closeManageModal(); var api = window.WritingAssistantDocumentImport; if (id && api && api.editItem) api.editItem(id); else actions.showToast('文档编辑器尚未载入'); });
     byId('workspaceManageMoveBtn').addEventListener('click', function () { var id = currentManageItemId; closeManageModal(); if (id) openMoveModal(id); });
     byId('workspaceManageDeleteBtn').addEventListener('click', function () { var id = currentManageItemId; if (id) deleteLibraryItem(id); });
-    byId('closeWorkspaceFolderModal').addEventListener('click', function () { closeModal('workspaceFolderModal'); });
+    byId('closeWorkspaceFolderModal').addEventListener('click', function () { closeFolderModal(true); });
     byId('saveWorkspaceFolder').addEventListener('click', function () { saveFolder().catch(function () { actions.showToast('文件夹保存失败'); }); });
     byId('closeWorkspaceMoveModal').addEventListener('click', function () { closeModal('workspaceMoveModal'); });
+    byId('createFolderFromMoveBtn').addEventListener('click', createFolderFromMove);
     byId('confirmWorkspaceMove').addEventListener('click', function () { confirmMoveItem().catch(function () { actions.showToast('材料移动失败'); }); });
+    byId('closeWorkspaceFolderManageModal').addEventListener('click', closeFolderManageModal);
+    byId('workspaceFolderManageModal').addEventListener('click', function (event) { if (event.target === this) closeFolderManageModal(); });
+    byId('workspaceFolderRenameBtn').addEventListener('click', function () { var id = currentManageFolderId; closeFolderManageModal(); if (id) openFolderModal(id); });
+    byId('workspaceFolderCreateChildBtn').addEventListener('click', function () { var id = currentManageFolderId; closeFolderManageModal(); if (id) openFolderModal('', id, 'library'); });
+    byId('workspaceFolderDeleteBtn').addEventListener('click', function () { var id = currentManageFolderId; if (id) deleteFolder(id).catch(function () { actions.showToast('文件夹删除失败'); }); });
     byId('closeBatchCompletionModal').addEventListener('click', function () { closeModal('batchCompletionModal'); });
-    ['workspaceFolderModal', 'workspaceMoveModal', 'batchCompletionModal'].forEach(function (id) { byId(id).addEventListener('click', function (event) { if (event.target === this) closeModal(id); }); });
-    document.addEventListener('keydown', function (event) { if (event.key === 'Escape') { closeModal('workspaceFolderModal'); closeModal('workspaceMoveModal'); closeModal('batchCompletionModal'); closeTitleModal(); closeManageModal(); } });
+    byId('workspaceFolderModal').addEventListener('click', function (event) { if (event.target === this) closeFolderModal(true); });
+    ['workspaceMoveModal', 'batchCompletionModal'].forEach(function (id) { byId(id).addEventListener('click', function (event) { if (event.target === this) closeModal(id); }); });
+    document.addEventListener('keydown', function (event) {
+      if (event.key !== 'Escape') return;
+      closeModal('workspaceFolderModal');
+      folderCreationContext = '';
+      closeModal('workspaceMoveModal');
+      closeModal('batchCompletionModal');
+      closeTitleModal();
+      closeManageModal();
+      closeFolderManageModal();
+    });
     var observer = new MutationObserver(function () { if (byId('materialModal').classList.contains('show')) refreshMaterialFolderSelect(); });
     observer.observe(byId('materialModal'), { attributes: true, attributeFilter: ['class'] });
   }
