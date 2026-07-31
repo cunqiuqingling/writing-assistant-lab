@@ -1,0 +1,24 @@
+name: Temporary main baseline export
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/upload-artifact@v4
+        with:
+          name: writing-assistant-main-baseline-files
+          path: |
+            data/online-resource-catalog.js
+            index.html
+            data/library-import-template.json
+          retention-days: 1
