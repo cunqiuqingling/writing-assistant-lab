@@ -67,15 +67,12 @@ jobs:
               doc=BeautifulSoup(page.text,'lxml')
               h1=next((node for node in doc.find_all('h1') if 'Drug Trials Snapshot' in clean(node.get_text(' ',strip=True))),None)
               assert h1, resolved
-              main=h1.find_parent('main') or h1.find_parent('article') or doc.find('main') or doc.find('article') or doc
-              for node in main.select('script,style,noscript,svg,nav,header,footer,form,button,.share,.fda-footer'):
-                  node.decompose()
-              blocks=[]; started=False; total=0
-              for node in main.find_all(['h1','h2','h3','h4','p','li','blockquote','caption','tr']):
+              blocks=[('h1',clean(h1.get_text(' ',strip=True)))]; total=len(blocks[0][1])
+              for node in h1.find_all_next(['h1','h2','h3','h4','p','li','blockquote','caption','tr']):
+                  if node is h1: continue
+                  if node.find_parent('footer') is not None: break
                   val=clean(node.get_text(' ',strip=True))
                   if not val: continue
-                  if node.name=='h1' and 'Drug Trials Snapshot' in val: started=True
-                  if not started: continue
                   if val.startswith(('Content current as of:','Page Last Updated:')): break
                   if val.lower() in {'share','post','email','print','back to top','more info'}: continue
                   if val.startswith('Image: '): continue
