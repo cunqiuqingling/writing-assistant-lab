@@ -1,0 +1,131 @@
+name: Temporary FDA library validation
+
+on:
+  push:
+    branches:
+      - build/fda-snapshot-library-validation
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --disable-pip-version-check requests beautifulsoup4 lxml
+      - name: Fetch 50 current FDA Drug Trials Snapshots
+        run: |
+          cat > /tmp/build_fda.py <<'PY'
+          import json, re, time
+          from pathlib import Path
+          from urllib.parse import urljoin, urlparse
+          import requests
+          from bs4 import BeautifulSoup
+
+          INDEX='https://www.fda.gov/drugs/drug-approvals-and-databases/drug-trials-snapshots'
+          session=requests.Session()
+          session.headers.update({'User-Agent':'WritingAssistantLab/0.8.2-R1 (+https://writing-assistant.ccwu.cc/)','Accept':'text/html'})
+
+          def clean(value):
+              return re.sub(r'\n{3,}','\n\n',re.sub(r'[ \t]+',' ',str(value or '').replace('\xa0',' '))).strip()
+
+          def folder(area):
+              a=area.lower()
+              if any(x in a for x in ['infect','vaccine','immun']): return 'folder-pharmacy-public-health'
+              if any(x in a for x in ['cardio','pain','metabolic','ophthalm','diagnostic']): return 'folder-pharmacy-pharmacology'
+              if any(x in a for x in ['cancer','tumor','leuk','lymph','myeloma','hemat','neurolog','schizoph']): return 'folder-pharmacy-clinical'
+              return 'folder-pharmacy-drug-development'
+
+          r=session.get(INDEX,timeout=45); r.raise_for_status()
+          soup=BeautifulSoup(r.text,'lxml')
+          rows=[]
+          for tr in soup.select('table tbody tr'):
+              cells=[clean(c.get_text(' ',strip=True)) for c in tr.find_all(['th','td'])]
+              link=tr.find('a',href=True)
+              if not link or not cells: continue
+              href=urljoin(INDEX,link['href'])
+              if 'drug-trials-snapshot' not in href: continue
+              brand=clean(link.get_text(' ',strip=True)).replace('(Drug Trials Snapshot)','').strip()
+              generic=cells[1] if len(cells)>1 else ''
+              approval=cells[2] if len(cells)>2 else ''
+              indication=cells[3] if len(cells)>3 else ''
+              rows.append({'brandName':brand,'genericName':generic,'approvalDate':approval,'indication':indication,'url':href})
+              if len(rows)==50: break
+          assert len(rows)==50, len(rows)
+
+          items=[]
+          for idx,source in enumerate(rows,1):
+              print(f"[{idx:02d}/50] {source['brandName']}",flush=True)
+              page=session.get(source['url'],timeout=45); page.raise_for_status()
+              resolved=page.url
+              assert urlparse(resolved).hostname in {'www.fda.gov','fda.gov'}
+              doc=BeautifulSoup(page.text,'lxml')
+              main=doc.find('main') or doc.find('article') or doc
+              for node in main.select('script,style,noscript,svg,nav,header,footer,form,button,.share,.fda-footer'):
+                  node.decompose()
+              h1=main.find('h1')
+              assert h1 and 'Drug Trials Snapshot' in clean(h1.get_text(' ',strip=True)), resolved
+              blocks=[]; started=False; total=0
+              for node in main.find_all(['h1','h2','h3','h4','p','li','blockquote','caption','tr']):
+                  val=clean(node.get_text(' ',strip=True))
+                  if not val: continue
+                  if node.name=='h1' and 'Drug Trials Snapshot' in val: started=True
+                  if not started: continue
+                  if val.startswith(('Content current as of:','Page Last Updated:')): break
+                  if val.lower() in {'share','post','email','print','back to top','more info'}: continue
+                  if val.startswith('Image: '): continue
+                  if blocks and blocks[-1][1]==val: continue
+                  if total+len(val)>100000:
+                      blocks.append(('p','[Technical content truncated at the local library safety limit. Open the FDA source for the complete page.]'))
+                      break
+                  blocks.append((node.name,val)); total+=len(val)
+              chapters=[]; title='Snapshot overview'; parts=[]
+              def flush():
+                  nonlocal_parts='\n\n'.join(parts).strip()
+                  if nonlocal_parts: chapters.append({'title':title,'text':nonlocal_parts})
+                  parts.clear()
+              for tag,val in blocks:
+                  if tag in {'h1','h2','h3','h4'}:
+                      if tag=='h1':
+                          if not parts: parts.append(val)
+                          continue
+                      if parts: flush()
+                      title=val.replace('MORE INFO','Technical details').strip(' :') or 'Snapshot section'
+                  else: parts.append(val)
+              flush()
+              text='\n\n'.join((c['title']+'\n\n'+c['text']).strip() for c in chapters)
+              assert len(text)>=500, (source['brandName'],len(text))
+              slug=re.sub(r'[^a-z0-9]+','-',source['brandName'].lower()).strip('-')
+              lower=(source['indication']+' '+source['brandName']).lower()
+              area='clinical research'
+              for name,terms in [('oncology',['cancer','tumor','leuk','lymph','myeloma']),('infectious disease',['infection','bacteria','gonorr','respiratory syncytial']),('cardiology',['cardio','tachy','cholesterol']),('hematology',['hemophilia','bleeding','hematopoietic','thrombo']),('neurology',['myasthenia','schizophrenia','pain']),('rare disease',['syndrome','hereditary','deficiency']),('respiratory',['asthma','bronchiectasis','cystic fibrosis'])]:
+                  if any(term in lower for term in terms): area=name; break
+              items.append({
+                'id':'builtin-fda-snapshot-'+slug,'builtin':True,'title':'FDA Drug Trials Snapshot · '+source['brandName'],
+                'category':'Pharmacy','folderId':folder(area),'materialType':'fda-drug-trials-snapshot',
+                'source':'U.S. Food and Drug Administration · '+source['brandName']+' Drug Trials Snapshot',
+                'license':'FDA source · U.S. government work; check separately credited material',
+                'tags':['FDA','Drug Trials Snapshot',area,source['genericName']],
+                'text':text,'chapters':chapters[:80],'chapterMode':'chapters',
+                'sourceMeta':{'publisher':'U.S. Food and Drug Administration','title':'Drug Trials Snapshot: '+source['brandName'],'url':resolved,'accessedAt':'2026-08-01','reuseStatus':'public-domain-us-government','rightsNote':'Check the source page for separately credited third-party material.'},
+                'professionalMeta':{'brandName':source['brandName'],'genericName':source['genericName'],'indication':source['indication'],'approvalDate':source['approvalDate'],'documentType':'Drug Trials Snapshot','therapeuticArea':area},
+                'remoteSource':{'provider':'fda','url':resolved,'fetchedAt':'2026-08-01'}
+              })
+              time.sleep(.15)
+          assert len(items)==50
+          out=Path('generated'); out.mkdir(exist_ok=True)
+          payload={'schemaVersion':2,'format':'writing-assistant-library','generatedAt':'2026-08-01T00:00:00Z','items':items}
+          (out/'fda-snapshot-library.json').write_text(json.dumps(payload,ensure_ascii=False,indent=2)+'\n')
+          js="(function(){\n  'use strict';\n  var items = "+json.dumps(items,ensure_ascii=False,indent=2)+";\n  var library = Array.isArray(window.WRITING_ASSISTANT_STARTER_LIBRARY) ? window.WRITING_ASSISTANT_STARTER_LIBRARY : [];\n  var ids = {}; library.forEach(function(item){ ids[item.id]=true; });\n  items.forEach(function(item){ if(!ids[item.id]) { library.push(item); ids[item.id]=true; } });\n  window.WRITING_ASSISTANT_STARTER_LIBRARY = library;\n  window.WRITING_ASSISTANT_FDA_SNAPSHOT_SOURCES = items.map(function(item){ return {id:item.id,title:item.title,url:item.sourceMeta.url,brandName:item.professionalMeta.brandName,genericName:item.professionalMeta.genericName,approvalDate:item.professionalMeta.approvalDate,indication:item.professionalMeta.indication}; });\n})();\n"
+          (out/'fda-snapshot-library.js').write_text(js)
+          print('items',len(items),'characters',sum(len(i['text']) for i in items))
+          PY
+          python3 /tmp/build_fda.py
+          node --check generated/fda-snapshot-library.js
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fda-snapshot-library-50-full-articles
+          path: generated
+          retention-days: 7
