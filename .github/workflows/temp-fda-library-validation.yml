@@ -65,11 +65,11 @@ jobs:
               resolved=page.url
               assert urlparse(resolved).hostname in {'www.fda.gov','fda.gov'}
               doc=BeautifulSoup(page.text,'lxml')
-              main=doc.find('main') or doc.find('article') or doc
+              h1=next((node for node in doc.find_all('h1') if 'Drug Trials Snapshot' in clean(node.get_text(' ',strip=True))),None)
+              assert h1, resolved
+              main=h1.find_parent('main') or h1.find_parent('article') or doc.find('main') or doc.find('article') or doc
               for node in main.select('script,style,noscript,svg,nav,header,footer,form,button,.share,.fda-footer'):
                   node.decompose()
-              h1=main.find('h1')
-              assert h1 and 'Drug Trials Snapshot' in clean(h1.get_text(' ',strip=True)), resolved
               blocks=[]; started=False; total=0
               for node in main.find_all(['h1','h2','h3','h4','p','li','blockquote','caption','tr']):
                   val=clean(node.get_text(' ',strip=True))
