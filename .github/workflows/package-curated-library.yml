@@ -1,0 +1,78 @@
+name: Package curated library preview
+
+on:
+  push:
+    branches:
+      - feature/curated-ielts-pharmacy-library
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install pinned dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Build and validate release site
+        run: |
+          npm run vendor
+          npm run build:release
+
+      - name: Assemble Mac deployment package
+        run: |
+          mkdir -p package/writing-assistant-lab
+          rsync -a \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='node_modules' \
+            --exclude='release-assets' \
+            --exclude='package' \
+            ./ package/writing-assistant-lab/
+          cat > package/writing-assistant-lab/DEPLOY_ON_MAC.md <<'EOF'
+          # Deploy on macOS with Wrangler
+
+          This package already contains the validated `dist/site` build and the complete source needed to rebuild it.
+
+          ## Recommended update flow
+
+          1. Back up the folder currently used to deploy Writing Assistant.
+          2. Extract this ZIP to a new folder. Do not overwrite the old folder until local testing passes.
+          3. Open Terminal and enter the extracted project folder.
+          4. Run:
+
+             ```bash
+             npm install --no-audit --no-fund
+             npm run vendor
+             npm run build:release
+             npm run dev
+             ```
+
+          5. Open the local address printed by Wrangler and test the Practice Library, previews, imports, Sentence Lab, Paragraph Lab, AI settings and backup restore.
+          6. Stop the local server with Control-C, then deploy:
+
+             ```bash
+             npm run deploy
+             ```
+
+          The deployment target is defined in `wrangler.jsonc`. Existing browser-local materials and progress are not stored in the deployed files, but making a Data & Backup export before deployment is still recommended.
+          EOF
+
+      - name: Upload complete deployment ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: writing-assistant-curated-library-mac-deploy
+          path: package/writing-assistant-lab
+          if-no-files-found: error
+          retention-days: 14
