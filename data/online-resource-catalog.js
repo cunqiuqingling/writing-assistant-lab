@@ -1,525 +1,143 @@
-(function () {
+(function(){
   'use strict';
-  window.WRITING_ASSISTANT_ONLINE_RESOURCE_CATALOG = [
-  {
-    "id": "ielts-education",
-    "group": "IELTS Writing",
-    "source": "wikipedia",
-    "query": "Education",
-    "title": "Education",
-    "description": "教育制度、学习机会与社会发展相关议题。",
-    "folderId": "folder-ielts-education",
-    "tags": [
-      "education",
-      "society"
-    ]
-  },
-  {
-    "id": "ielts-edtech",
-    "group": "IELTS Writing",
-    "source": "wikipedia",
-    "query": "Educational technology",
-    "title": "Educational technology",
-    "description": "数字工具、课堂技术与学习效率。",
-    "folderId": "folder-ielts-technology",
-    "tags": [
-      "technology",
-      "education"
-    ]
-  },
-  {
-    "id": "ielts-ai",
-    "group": "IELTS Writing",
-    "source": "wikipedia",
-    "query": "Artificial intelligence",
-    "title": "Artificial intelligence",
-    "description": "人工智能的应用、风险与社会影响。",
-    "folderId": "folder-ielts-technology",
-    "tags": [
-      "AI",
-      "technology"
-    ]
-  },
-  {
-    "id": "ielts-preventive-health",
-    "group": "IELTS Writing",
-    "source": "wikipedia",
-    "query": "Preventive healthcare",
-    "title": "Preventive healthcare",
-    "description": "预防、筛查和公共卫生投入。",
-    "folderId": "folder-ielts-healthcare",
-    "tags": [
-      "health",
-      "prevention"
-    ]
-  },
-  {
-    "id": "ielts-public-health",
-    "group": "IELTS Writing",
-    "source": "wikipedia",
-    "query": "Public health",
-    "title": "Public health",
-    "description": "群体健康、政策与医疗资源配置。",
-    "folderId": "folder-ielts-healthcare",
-    "tags": [
-      "health",
-      "government"
-    ]
-  },
-  {
-    "id": "ielts-climate",
-    "group": "IELTS Writing",
-    "source": "wikipedia",
-    "query": "Climate change",
-    "title": "Climate change",
-    "description": "气候变化成因、影响和治理。",
-    "folderId": "folder-ielts-environment",
-    "tags": [
-      "environment",
-      "climate"
-    ]
-  },
-  {
-    "id": "ielts-renewable",
-    "group": "IELTS Writing",
-    "source": "wikipedia",
-    "query": "Renewable energy",
-    "title": "Renewable energy",
-    "description": "能源转型、成本与环境效益。",
-    "folderId": "folder-ielts-environment",
-    "tags": [
-      "energy",
-      "environment"
-    ]
-  },
-  {
-    "id": "ielts-employment",
-    "group": "IELTS Writing",
-    "source": "wikipedia",
-    "query": "Employment",
-    "title": "Employment",
-    "description": "就业、劳动力市场与工作方式。",
-    "folderId": "folder-ielts-work",
-    "tags": [
-      "work",
-      "economy"
-    ]
-  },
-  {
-    "id": "ielts-inequality",
-    "group": "IELTS Writing",
-    "source": "wikipedia",
-    "query": "Economic inequality",
-    "title": "Economic inequality",
-    "description": "收入差距、机会与社会政策。",
-    "folderId": "folder-ielts-work",
-    "tags": [
-      "economy",
-      "inequality"
-    ]
-  },
-  {
-    "id": "ielts-policy",
-    "group": "IELTS Writing",
-    "source": "wikipedia",
-    "query": "Public policy",
-    "title": "Public policy",
-    "description": "政府决策、公共服务与社会治理。",
-    "folderId": "folder-ielts-society",
-    "tags": [
-      "government",
-      "policy"
-    ]
-  },
-  {
-    "id": "academic-method",
-    "group": "Academic Writing",
-    "source": "wikipedia",
-    "query": "Scientific method",
-    "title": "Scientific method",
-    "description": "研究问题、假设、证据与推理。",
-    "folderId": "folder-academic-introduction",
-    "tags": [
-      "research",
-      "method"
-    ]
-  },
-  {
-    "id": "academic-literature-review",
-    "group": "Academic Writing",
-    "source": "wikipedia",
-    "query": "Literature review",
-    "title": "Literature review",
-    "description": "文献综述的目的、结构与综合。",
-    "folderId": "folder-academic-introduction",
-    "tags": [
-      "literature review",
-      "introduction"
-    ]
-  },
-  {
-    "id": "academic-design",
-    "group": "Academic Writing",
-    "source": "wikipedia",
-    "query": "Research design",
-    "title": "Research design",
-    "description": "研究设计与方法选择。",
-    "folderId": "folder-academic-methods",
-    "tags": [
-      "methods",
-      "design"
-    ]
-  },
-  {
-    "id": "academic-experiment",
-    "group": "Academic Writing",
-    "source": "wikipedia",
-    "query": "Experiment",
-    "title": "Experiment",
-    "description": "实验变量、控制与因果推断。",
-    "folderId": "folder-academic-methods",
-    "tags": [
-      "experiment",
-      "methods"
-    ]
-  },
-  {
-    "id": "academic-hypothesis",
-    "group": "Academic Writing",
-    "source": "wikipedia",
-    "query": "Statistical hypothesis testing",
-    "title": "Statistical hypothesis testing",
-    "description": "假设检验、显著性与结果解释。",
-    "folderId": "folder-academic-results",
-    "tags": [
-      "statistics",
-      "results"
-    ]
-  },
-  {
-    "id": "academic-data-analysis",
-    "group": "Academic Writing",
-    "source": "wikipedia",
-    "query": "Data analysis",
-    "title": "Data analysis",
-    "description": "数据整理、分析和解释。",
-    "folderId": "folder-academic-results",
-    "tags": [
-      "data",
-      "analysis"
-    ]
-  },
-  {
-    "id": "academic-peer-review",
-    "group": "Academic Writing",
-    "source": "wikipedia",
-    "query": "Peer review",
-    "title": "Peer review",
-    "description": "同行评议与学术质量控制。",
-    "folderId": "folder-academic-discussion",
-    "tags": [
-      "peer review",
-      "publishing"
-    ]
-  },
-  {
-    "id": "academic-reproducibility",
-    "group": "Academic Writing",
-    "source": "wikipedia",
-    "query": "Reproducibility",
-    "title": "Reproducibility",
-    "description": "研究复现、透明度与可靠性。",
-    "folderId": "folder-academic-discussion",
-    "tags": [
-      "reproducibility",
-      "limitations"
-    ]
-  },
-  {
-    "id": "academic-ethics",
-    "group": "Academic Writing",
-    "source": "wikipedia",
-    "query": "Research ethics",
-    "title": "Research ethics",
-    "description": "受试者保护、诚信和利益冲突。",
-    "folderId": "folder-academic-limitations",
-    "tags": [
-      "ethics",
-      "limitations"
-    ]
-  },
-  {
-    "id": "academic-open-access",
-    "group": "Academic Writing",
-    "source": "wikipedia",
-    "query": "Open access",
-    "title": "Open access",
-    "description": "开放获取、出版模式与知识传播。",
-    "folderId": "folder-academic-discussion",
-    "tags": [
-      "open access",
-      "publishing"
-    ]
-  },
-  {
-    "id": "pharmacy-pharmacology",
-    "group": "Pharmacy & Biomedicine",
-    "source": "wikipedia",
-    "query": "Pharmacology",
-    "title": "Pharmacology",
-    "description": "药物作用与生物系统之间的关系。",
-    "folderId": "folder-pharmacy-pharmacology",
-    "tags": [
-      "pharmacology",
-      "drug"
-    ]
-  },
-  {
-    "id": "pharmacy-development",
-    "group": "Pharmacy & Biomedicine",
-    "source": "wikipedia",
-    "query": "Drug development",
-    "title": "Drug development",
-    "description": "发现、临床前研究和上市流程。",
-    "folderId": "folder-pharmacy-drug-development",
-    "tags": [
-      "drug development",
-      "research"
-    ]
-  },
-  {
-    "id": "pharmacy-trial",
-    "group": "Pharmacy & Biomedicine",
-    "source": "wikipedia",
-    "query": "Clinical trial",
-    "title": "Clinical trial",
-    "description": "临床试验阶段、设计与监管。",
-    "folderId": "folder-pharmacy-clinical",
-    "tags": [
-      "clinical trial",
-      "research"
-    ]
-  },
-  {
-    "id": "pharmacy-pk",
-    "group": "Pharmacy & Biomedicine",
-    "source": "wikipedia",
-    "query": "Pharmacokinetics",
-    "title": "Pharmacokinetics",
-    "description": "吸收、分布、代谢和排泄。",
-    "folderId": "folder-pharmacy-pharmacology",
-    "tags": [
-      "pharmacokinetics",
-      "ADME"
-    ]
-  },
-  {
-    "id": "pharmacy-pd",
-    "group": "Pharmacy & Biomedicine",
-    "source": "wikipedia",
-    "query": "Pharmacodynamics",
-    "title": "Pharmacodynamics",
-    "description": "剂量、作用机制与药效。",
-    "folderId": "folder-pharmacy-pharmacology",
-    "tags": [
-      "pharmacodynamics",
-      "mechanism"
-    ]
-  },
-  {
-    "id": "pharmacy-amr",
-    "group": "Pharmacy & Biomedicine",
-    "source": "wikipedia",
-    "query": "Antimicrobial resistance",
-    "title": "Antimicrobial resistance",
-    "description": "耐药机制、公共卫生与合理用药。",
-    "folderId": "folder-pharmacy-public-health",
-    "tags": [
-      "AMR",
-      "public health"
-    ]
-  },
-  {
-    "id": "pharmacy-hiv",
-    "group": "Pharmacy & Biomedicine",
-    "source": "wikipedia",
-    "query": "HIV/AIDS",
-    "title": "HIV/AIDS",
-    "description": "疾病机制、治疗与公共卫生。",
-    "folderId": "folder-pharmacy-hiv",
-    "tags": [
-      "HIV",
-      "therapy"
-    ]
-  },
-  {
-    "id": "pharmacy-vaccine",
-    "group": "Pharmacy & Biomedicine",
-    "source": "wikipedia",
-    "query": "Vaccine",
-    "title": "Vaccine",
-    "description": "免疫原理、研发与接种策略。",
-    "folderId": "folder-pharmacy-public-health",
-    "tags": [
-      "vaccine",
-      "immunology"
-    ]
-  },
-  {
-    "id": "pharmacy-precision",
-    "group": "Pharmacy & Biomedicine",
-    "source": "wikipedia",
-    "query": "Precision medicine",
-    "title": "Precision medicine",
-    "description": "生物标志物、分层治疗与个体差异。",
-    "folderId": "folder-pharmacy-drug-development",
-    "tags": [
-      "precision medicine",
-      "biomarker"
-    ]
-  },
-  {
-    "id": "pharmacy-adr",
-    "group": "Pharmacy & Biomedicine",
-    "source": "wikipedia",
-    "query": "Adverse drug reaction",
-    "title": "Adverse drug reaction",
-    "description": "药物不良反应、监测和风险管理。",
-    "folderId": "folder-pharmacy-clinical",
-    "tags": [
-      "ADR",
-      "safety"
-    ]
-  },
-  {
-    "id": "literature-austen",
-    "group": "Literature",
-    "source": "wikisource",
-    "query": "Pride and Prejudice Chapter 1",
-    "title": "Pride and Prejudice · Chapter 1",
-    "description": "对话、人物关系和讽刺性叙述。",
-    "folderId": "folder-literature-novels",
-    "tags": [
-      "novel",
-      "dialogue"
-    ]
-  },
-  {
-    "id": "literature-holmes",
-    "group": "Literature",
-    "source": "wikisource",
-    "query": "A Scandal in Bohemia",
-    "title": "A Scandal in Bohemia",
-    "description": "叙事节奏、观察与推理。",
-    "folderId": "folder-literature-novels",
-    "tags": [
-      "novel",
-      "narrative"
-    ]
-  },
-  {
-    "id": "literature-frankenstein",
-    "group": "Literature",
-    "source": "wikisource",
-    "query": "Frankenstein Letter 1",
-    "title": "Frankenstein · Letter 1",
-    "description": "书信体开篇与氛围建立。",
-    "folderId": "folder-literature-novels",
-    "tags": [
-      "novel",
-      "letter"
-    ]
-  },
-  {
-    "id": "literature-dorian",
-    "group": "Literature",
-    "source": "wikisource",
-    "query": "The Picture of Dorian Gray Chapter 1",
-    "title": "The Picture of Dorian Gray · Chapter 1",
-    "description": "人物描写、审美语言与场景。",
-    "folderId": "folder-literature-novels",
-    "tags": [
-      "novel",
-      "description"
-    ]
-  },
-  {
-    "id": "literature-wallpaper",
-    "group": "Literature",
-    "source": "wikisource",
-    "query": "The Yellow Wallpaper",
-    "title": "The Yellow Wallpaper",
-    "description": "第一人称叙述与心理变化。",
-    "folderId": "folder-literature-essays",
-    "tags": [
-      "short story",
-      "narrative"
-    ]
-  },
-  {
-    "id": "literature-modest-proposal",
-    "group": "Literature",
-    "source": "wikisource",
-    "query": "A Modest Proposal",
-    "title": "A Modest Proposal",
-    "description": "反讽、论证结构与修辞。",
-    "folderId": "folder-literature-essays",
-    "tags": [
-      "satire",
-      "argument"
-    ]
-  },
-  {
-    "id": "literature-self-reliance",
-    "group": "Literature",
-    "source": "wikisource",
-    "query": "Self-Reliance",
-    "title": "Self-Reliance",
-    "description": "散文论述、格言式表达与推进。",
-    "folderId": "folder-literature-essays",
-    "tags": [
-      "essay",
-      "argument"
-    ]
-  },
-  {
-    "id": "literature-gettysburg",
-    "group": "Literature",
-    "source": "wikisource",
-    "query": "Gettysburg Address",
-    "title": "Gettysburg Address",
-    "description": "短篇演说的节奏与平行结构。",
-    "folderId": "folder-literature-speeches",
-    "tags": [
-      "speech",
-      "rhetoric"
-    ]
-  },
-  {
-    "id": "literature-souls",
-    "group": "Literature",
-    "source": "wikisource",
-    "query": "The Souls of Black Folk Chapter I",
-    "title": "The Souls of Black Folk · Chapter I",
-    "description": "议论、叙述与社会观察。",
-    "folderId": "folder-literature-essays",
-    "tags": [
-      "essay",
-      "society"
-    ]
-  },
-  {
-    "id": "literature-walden",
-    "group": "Literature",
-    "source": "wikisource",
-    "query": "Walden Economy",
-    "title": "Walden · Economy",
-    "description": "描述性散文、反思与社会批评。",
-    "folderId": "folder-literature-description",
-    "tags": [
-      "essay",
-      "description"
-    ]
-  }
-];
+  var groups={I:'IELTS Writing',A:'Academic Writing',P:'Pharmacy & Biomedicine',L:'Literature'};
+  var sources={w:'wikipedia',s:'wikisource'};
+  var rows=[
+    ["ielts-education","I","w","Education","Education","教育制度、学习机会与社会发展。","folder-ielts-education","education,society"],
+    ["ielts-edtech","I","w","Educational technology","Educational technology","数字工具、课堂技术与学习效率。","folder-ielts-education","technology,education"],
+    ["ielts-distance-learning","I","w","Distance education","Distance education","远程教育的可及性、互动和学习自主性。","folder-ielts-education","distance learning,access"],
+    ["ielts-lifelong-learning","I","w","Lifelong learning","Lifelong learning","终身学习、职业变化与个人发展。","folder-ielts-education","learning,work"],
+    ["ielts-early-childhood","I","w","Early childhood education","Early childhood education","学前教育、发展机会与公共投入。","folder-ielts-education","children,education"],
+    ["ielts-vocational","I","w","Vocational education","Vocational education","职业教育、技能培训与就业衔接。","folder-ielts-education","skills,employment"],
+    ["ielts-higher-education","I","w","Higher education","Higher education","大学教育、学费与社会流动。","folder-ielts-education","university,opportunity"],
+    ["ielts-literacy","I","w","Literacy","Literacy","读写能力、教育公平与社会参与。","folder-ielts-education","literacy,development"],
+    ["ielts-ai","I","w","Artificial intelligence","Artificial intelligence","人工智能的应用、风险与社会影响。","folder-ielts-technology","AI,technology"],
+    ["ielts-internet-privacy","I","w","Internet privacy","Internet privacy","网络隐私、个人数据与平台责任。","folder-ielts-technology","privacy,internet"],
+    ["ielts-social-media","I","w","Social media","Social media","社交媒体、信息传播与心理影响。","folder-ielts-technology","media,society"],
+    ["ielts-digital-divide","I","w","Digital divide","Digital divide","数字接入差距与教育、就业机会。","folder-ielts-technology","inequality,technology"],
+    ["ielts-automation","I","w","Automation","Automation","自动化、生产效率与岗位变化。","folder-ielts-technology","automation,work"],
+    ["ielts-cybersecurity","I","w","Computer security","Computer security","网络安全、公共基础设施与个人责任。","folder-ielts-technology","cybersecurity,risk"],
+    ["ielts-telecommuting","I","w","Remote work","Remote work","远程工作、通勤、协作与生活边界。","folder-ielts-technology","remote work,work"],
+    ["ielts-information-society","I","w","Information society","Information society","信息社会中的知识、平台和公共生活。","folder-ielts-technology","information,society"],
+    ["ielts-preventive-health","I","w","Preventive healthcare","Preventive healthcare","预防、筛查和公共卫生投入。","folder-ielts-healthcare","health,prevention"],
+    ["ielts-public-health","I","w","Public health","Public health","群体健康、政策与医疗资源配置。","folder-ielts-healthcare","health,government"],
+    ["ielts-universal-healthcare","I","w","Universal health care","Universal health care","全民医疗、筹资公平与服务可及性。","folder-ielts-healthcare","healthcare,equality"],
+    ["ielts-mental-health","I","w","Mental health","Mental health","心理健康、污名与社会支持。","folder-ielts-healthcare","mental health,society"],
+    ["ielts-obesity","I","w","Obesity","Obesity","肥胖、生活方式与公共政策。","folder-ielts-healthcare","health,lifestyle"],
+    ["ielts-vaccination","I","w","Vaccination","Vaccination","疫苗接种、公共信任与群体保护。","folder-ielts-healthcare","vaccination,public health"],
+    ["ielts-health-education","I","w","Health education","Health education","健康教育、行为改变与预防。","folder-ielts-healthcare","education,health"],
+    ["ielts-ageing","I","w","Population ageing","Population ageing","人口老龄化、照护与财政压力。","folder-ielts-healthcare","ageing,healthcare"],
+    ["ielts-climate","I","w","Climate change","Climate change","气候变化成因、影响和治理。","folder-ielts-environment","environment,climate"],
+    ["ielts-renewable","I","w","Renewable energy","Renewable energy","能源转型、成本与环境效益。","folder-ielts-environment","energy,environment"],
+    ["ielts-air-pollution","I","w","Air pollution","Air pollution","空气污染、健康损失与监管。","folder-ielts-environment","pollution,health"],
+    ["ielts-water-pollution","I","w","Water pollution","Water pollution","水污染、生态系统与公共治理。","folder-ielts-environment","water,pollution"],
+    ["ielts-waste-management","I","w","Waste management","Waste management","垃圾减量、回收和城市管理。","folder-ielts-environment","waste,cities"],
+    ["ielts-biodiversity","I","w","Biodiversity","Biodiversity","生物多样性、生态服务与保护。","folder-ielts-environment","biodiversity,conservation"],
+    ["ielts-deforestation","I","w","Deforestation","Deforestation","森林砍伐、土地利用与气候。","folder-ielts-environment","forest,climate"],
+    ["ielts-sustainable-development","I","w","Sustainable development","Sustainable development","经济发展、社会公平与环境承载力。","folder-ielts-environment","sustainability,development"],
+    ["ielts-employment","I","w","Employment","Employment","就业、劳动力市场与工作方式。","folder-ielts-work","work,economy"],
+    ["ielts-inequality","I","w","Economic inequality","Economic inequality","收入差距、机会与社会政策。","folder-ielts-work","economy,inequality"],
+    ["ielts-unemployment","I","w","Unemployment","Unemployment","失业、技能错配与社会保障。","folder-ielts-work","unemployment,policy"],
+    ["ielts-minimum-wage","I","w","Minimum wage","Minimum wage","最低工资、企业成本与劳动保障。","folder-ielts-work","wages,employment"],
+    ["ielts-gig-economy","I","w","Gig worker","Gig worker","平台用工、灵活性与劳动权益。","folder-ielts-work","gig economy,rights"],
+    ["ielts-work-life-balance","I","w","Work–life balance","Work–life balance","工作时间、幸福感与组织责任。","folder-ielts-work","work,wellbeing"],
+    ["ielts-globalization","I","w","Globalization","Globalization","全球贸易、文化交流与本地产业。","folder-ielts-work","globalization,economy"],
+    ["ielts-consumerism","I","w","Consumerism","Consumerism","消费文化、广告与环境代价。","folder-ielts-work","consumerism,society"],
+    ["ielts-economic-growth","I","w","Economic growth","Economic growth","经济增长、生活水平与分配问题。","folder-ielts-work","growth,economy"],
+    ["ielts-policy","I","w","Public policy","Public policy","政府决策、公共服务与社会治理。","folder-ielts-society","government,policy"],
+    ["ielts-urbanization","I","w","Urbanization","Urbanization","城市化、住房、交通与公共服务。","folder-ielts-society","cities,development"],
+    ["ielts-immigration","I","w","Immigration","Immigration","移民、劳动力、融合与公共讨论。","folder-ielts-society","migration,society"],
+    ["ielts-crime-prevention","I","w","Crime prevention","Crime prevention","犯罪预防、社区环境与刑事政策。","folder-ielts-society","crime,policy"],
+    ["ielts-gender-equality","I","w","Gender equality","Gender equality","性别平等、教育、就业与制度安排。","folder-ielts-society","equality,society"],
+    ["ielts-freedom-speech","I","w","Freedom of speech","Freedom of speech","表达自由、公共安全与平台治理。","folder-ielts-society","rights,media"],
+    ["ielts-public-transport","I","w","Public transport","Public transport","公共交通、拥堵与城市公平。","folder-ielts-society","transport,cities"],
+    ["ielts-housing-affordability","I","w","Affordable housing","Affordable housing","住房可负担性、土地与公共政策。","folder-ielts-society","housing,policy"],
+    ["ielts-social-welfare","I","w","Welfare state","Welfare state","社会福利、税收与风险分担。","folder-ielts-society","welfare,government"],
+    ["academic-method","A","w","Scientific method","Scientific method","研究问题、假设、证据与推理。","folder-academic-introduction","research,method"],
+    ["academic-literature-review","A","w","Literature review","Literature review","文献综述的目的、结构与综合。","folder-academic-introduction","literature review,introduction"],
+    ["academic-design","A","w","Research design","Research design","研究设计与方法选择。","folder-academic-methods","methods,design"],
+    ["academic-experiment","A","w","Experiment","Experiment","实验变量、控制与因果推断。","folder-academic-methods","experiment,methods"],
+    ["academic-hypothesis","A","w","Statistical hypothesis testing","Statistical hypothesis testing","假设检验、显著性与结果解释。","folder-academic-results","statistics,results"],
+    ["academic-data-analysis","A","w","Data analysis","Data analysis","数据整理、分析和解释。","folder-academic-results","data,analysis"],
+    ["academic-peer-review","A","w","Peer review","Peer review","同行评议与学术质量控制。","folder-academic-discussion","peer review,publishing"],
+    ["academic-reproducibility","A","w","Reproducibility","Reproducibility","研究复现、透明度与可靠性。","folder-academic-discussion","reproducibility,limitations"],
+    ["academic-ethics","A","w","Research ethics","Research ethics","受试者保护、诚信和利益冲突。","folder-academic-limitations","ethics,limitations"],
+    ["academic-open-access","A","w","Open access","Open access","开放获取、出版模式与知识传播。","folder-academic-discussion","open access,publishing"],
+    ["pharmacy-hiv","P","w","HIV/AIDS","HIV/AIDS","HIV感染、疾病进程与综合防治。","folder-pharmacy-hiv","HIV,public health"],
+    ["pharmacy-art","P","w","Management of HIV/AIDS","Management of HIV/AIDS","抗逆转录病毒治疗与长期疾病管理。","folder-pharmacy-hiv","ART,therapy"],
+    ["pharmacy-hiv-vaccine","P","w","HIV vaccine development","HIV vaccine development","HIV疫苗研发的科学挑战与临床路径。","folder-pharmacy-hiv","HIV,vaccine"],
+    ["pharmacy-hiv-resistance","P","w","HIV drug resistance","HIV drug resistance","病毒耐药、治疗失败与监测。","folder-pharmacy-hiv","HIV,resistance"],
+    ["pharmacy-prep","P","w","Pre-exposure prophylaxis","Pre-exposure prophylaxis","暴露前预防的药物方案与公共卫生意义。","folder-pharmacy-hiv","PrEP,prevention"],
+    ["pharmacy-pep","P","w","Post-exposure prophylaxis","Post-exposure prophylaxis","暴露后预防的时效性与用药管理。","folder-pharmacy-hiv","PEP,prevention"],
+    ["pharmacy-viral-load","P","w","Viral load","Viral load","病毒载量检测与疗效评估。","folder-pharmacy-hiv","viral load,monitoring"],
+    ["pharmacy-cd4","P","w","CD4","CD4","CD4细胞、免疫状态与临床判断。","folder-pharmacy-hiv","CD4,immunology"],
+    ["pharmacy-development","P","w","Drug development","Drug development","药物发现、临床前研究和上市流程。","folder-pharmacy-drug-development","drug development,research"],
+    ["pharmacy-discovery","P","w","Drug discovery","Drug discovery","靶点识别、先导化合物与候选药物。","folder-pharmacy-drug-development","drug discovery,target"],
+    ["pharmacy-preclinical","P","w","Preclinical development","Preclinical development","临床前药效、毒理与剂量研究。","folder-pharmacy-drug-development","preclinical,toxicology"],
+    ["pharmacy-trial","P","w","Clinical trial","Clinical trial","临床试验阶段、设计与监管。","folder-pharmacy-drug-development","clinical trial,research"],
+    ["pharmacy-phase-one","P","w","Phase I clinical trial","Phase I clinical trial","首次人体研究、安全性与剂量探索。","folder-pharmacy-drug-development","phase I,safety"],
+    ["pharmacy-phase-two","P","w","Phase II clinical trial","Phase II clinical trial","初步疗效、剂量选择与目标人群。","folder-pharmacy-drug-development","phase II,efficacy"],
+    ["pharmacy-phase-three","P","w","Phase III clinical trial","Phase III clinical trial","确证性试验、比较治疗与上市证据。","folder-pharmacy-drug-development","phase III,evidence"],
+    ["pharmacy-nda","P","w","New drug application","New drug application","新药申请、监管审评与证据提交。","folder-pharmacy-drug-development","regulation,approval"],
+    ["pharmacy-gmp","P","w","Good manufacturing practice","Good manufacturing practice","药品生产质量、验证与持续控制。","folder-pharmacy-drug-development","GMP,quality"],
+    ["pharmacy-medicinal-chemistry","P","w","Medicinal chemistry","Medicinal chemistry","分子设计、构效关系与性质优化。","folder-pharmacy-drug-development","medicinal chemistry,SAR"],
+    ["pharmacy-screening","P","w","High-throughput screening","High-throughput screening","高通量筛选、命中化合物与自动化。","folder-pharmacy-drug-development","screening,discovery"],
+    ["pharmacy-biomarker","P","w","Biomarker","Biomarker","生物标志物、分层治疗与试验设计。","folder-pharmacy-drug-development","biomarker,precision medicine"],
+    ["pharmacy-pharmacology","P","w","Pharmacology","Pharmacology","药物作用与生物系统之间的关系。","folder-pharmacy-pharmacology","pharmacology,drug"],
+    ["pharmacy-pk","P","w","Pharmacokinetics","Pharmacokinetics","吸收、分布、代谢和排泄。","folder-pharmacy-pharmacology","pharmacokinetics,ADME"],
+    ["pharmacy-pd","P","w","Pharmacodynamics","Pharmacodynamics","剂量、作用机制与药效。","folder-pharmacy-pharmacology","pharmacodynamics,mechanism"],
+    ["pharmacy-adme","P","w","ADME","ADME","药物体内过程与开发决策。","folder-pharmacy-pharmacology","ADME,drug"],
+    ["pharmacy-metabolism","P","w","Drug metabolism","Drug metabolism","药物代谢、活化与清除。","folder-pharmacy-pharmacology","metabolism,enzyme"],
+    ["pharmacy-cyp450","P","w","Cytochrome P450","Cytochrome P450","CYP酶系、个体差异与相互作用。","folder-pharmacy-pharmacology","CYP450,interaction"],
+    ["pharmacy-antagonist","P","w","Receptor antagonist","Receptor antagonist","受体拮抗、阻断作用与临床应用。","folder-pharmacy-pharmacology","receptor,antagonist"],
+    ["pharmacy-agonist","P","w","Agonist","Agonist","受体激动、效能与内在活性。","folder-pharmacy-pharmacology","receptor,agonist"],
+    ["pharmacy-therapeutic-index","P","w","Therapeutic index","Therapeutic index","治疗窗、安全范围与剂量监测。","folder-pharmacy-pharmacology","therapeutic index,safety"],
+    ["pharmacy-dose-response","P","w","Dose–response relationship","Dose–response relationship","剂量反应曲线、效价与最大效应。","folder-pharmacy-pharmacology","dose response,efficacy"],
+    ["pharmacy-bioavailability","P","w","Bioavailability","Bioavailability","生物利用度、制剂与给药途径。","folder-pharmacy-pharmacology","bioavailability,formulation"],
+    ["pharmacy-interaction","P","w","Drug interaction","Drug interaction","药物相互作用、机制与风险控制。","folder-pharmacy-pharmacology","interaction,safety"],
+    ["pharmacy-rct","P","w","Randomized controlled trial","Randomized controlled trial","随机对照试验、偏倚控制与因果推断。","folder-pharmacy-clinical","RCT,evidence"],
+    ["pharmacy-placebo","P","w","Placebo","Placebo","安慰剂、对照设计与伦理问题。","folder-pharmacy-clinical","placebo,trial design"],
+    ["pharmacy-double-blind","P","w","Blinded experiment","Blinded experiment","盲法、测量偏倚与试验执行。","folder-pharmacy-clinical","blinding,bias"],
+    ["pharmacy-consent","P","w","Informed consent","Informed consent","知情同意、风险沟通与受试者权利。","folder-pharmacy-clinical","ethics,consent"],
+    ["pharmacy-endpoint","P","w","Clinical endpoint","Clinical endpoint","临床终点、替代终点与证据解释。","folder-pharmacy-clinical","endpoint,outcome"],
+    ["pharmacy-adr","P","w","Adverse drug reaction","Adverse drug reaction","药物不良反应、识别和风险管理。","folder-pharmacy-clinical","ADR,safety"],
+    ["pharmacy-pharmacovigilance","P","w","Pharmacovigilance","Pharmacovigilance","上市后安全监测与信号管理。","folder-pharmacy-clinical","pharmacovigilance,safety"],
+    ["pharmacy-ebm","P","w","Evidence-based medicine","Evidence-based medicine","证据等级、临床判断与患者价值。","folder-pharmacy-clinical","EBM,clinical"],
+    ["pharmacy-systematic-review","P","w","Systematic review","Systematic review","系统检索、证据综合与偏倚评价。","folder-pharmacy-clinical","systematic review,evidence"],
+    ["pharmacy-meta-analysis","P","w","Meta-analysis","Meta-analysis","效应量合并、异质性与结果解释。","folder-pharmacy-clinical","meta-analysis,statistics"],
+    ["pharmacy-amr","P","w","Antimicrobial resistance","Antimicrobial resistance","耐药机制、公共卫生与合理用药。","folder-pharmacy-public-health","AMR,public health"],
+    ["pharmacy-vaccine","P","w","Vaccine","Vaccine","免疫原理、研发与接种策略。","folder-pharmacy-public-health","vaccine,immunology"],
+    ["pharmacy-immunization","P","w","Immunization","Immunization","免疫接种计划、覆盖率与群体保护。","folder-pharmacy-public-health","immunization,prevention"],
+    ["pharmacy-epidemiology","P","w","Epidemiology","Epidemiology","疾病分布、危险因素与群体研究。","folder-pharmacy-public-health","epidemiology,population"],
+    ["pharmacy-essential-medicines","P","w","Essential medicines","Essential medicines","基本药物、可及性与卫生体系。","folder-pharmacy-public-health","essential medicines,access"],
+    ["pharmacy-adherence","P","w","Medication adherence","Medication adherence","用药依从性、行为因素与干预。","folder-pharmacy-public-health","adherence,patient"],
+    ["pharmacy-rational-use","P","w","Rational use of medicines","Rational use of medicines","合理用药、处方质量与资源配置。","folder-pharmacy-public-health","rational use,policy"],
+    ["pharmacy-hta","P","w","Health technology assessment","Health technology assessment","卫生技术评估、成本效果与决策。","folder-pharmacy-public-health","HTA,policy"],
+    ["literature-austen","L","s","Pride and Prejudice Chapter 1","Pride and Prejudice · Chapter 1","对话、人物关系和讽刺性叙述。","folder-literature-novels","novel,dialogue"],
+    ["literature-holmes","L","s","A Scandal in Bohemia","A Scandal in Bohemia","叙事节奏、观察与推理。","folder-literature-novels","novel,narrative"],
+    ["literature-frankenstein","L","s","Frankenstein Letter 1","Frankenstein · Letter 1","书信体开篇与氛围建立。","folder-literature-novels","novel,letter"],
+    ["literature-dorian","L","s","The Picture of Dorian Gray Chapter 1","The Picture of Dorian Gray · Chapter 1","人物描写、审美语言与场景。","folder-literature-novels","novel,description"],
+    ["literature-wallpaper","L","s","The Yellow Wallpaper","The Yellow Wallpaper","第一人称叙述与心理变化。","folder-literature-essays","short story,narrative"],
+    ["literature-modest-proposal","L","s","A Modest Proposal","A Modest Proposal","反讽、论证结构与修辞。","folder-literature-essays","satire,argument"],
+    ["literature-self-reliance","L","s","Self-Reliance","Self-Reliance","散文论述、格言式表达与推进。","folder-literature-essays","essay,argument"],
+    ["literature-gettysburg","L","s","Gettysburg Address","Gettysburg Address","短篇演说的节奏与平行结构。","folder-literature-speeches","speech,rhetoric"],
+    ["literature-souls","L","s","The Souls of Black Folk Chapter I","The Souls of Black Folk · Chapter I","议论、叙述与社会观察。","folder-literature-essays","essay,society"],
+    ["literature-walden","L","s","Walden Economy","Walden · Economy","描述性散文、反思与社会批评。","folder-literature-description","essay,description"]
+  ];
+  var catalog=rows.map(function(r){return{id:r[0],group:groups[r[1]],source:sources[r[2]],query:r[3],title:r[4],description:r[5],folderId:r[6],tags:r[7]?r[7].split(','):[]};});
+  window.WRITING_ASSISTANT_ONLINE_RESOURCE_CATALOG=catalog;
+  var starters=Array.isArray(window.WRITING_ASSISTANT_STARTER_LIBRARY)?window.WRITING_ASSISTANT_STARTER_LIBRARY:[];
+  var existing={};starters.forEach(function(item){existing[item.id]=true;});
+  var omit={'ielts-ai':1,'ielts-preventive-health':1,'pharmacy-hiv':1};
+  function label(source){return source==='wikisource'?'Wikisource':'Wikipedia';}
+  function license(source){return source==='wikisource'?'Online public resource; verify the source page and local copyright law before redistribution.':'CC BY-SA 4.0 · fetched only after the user opens the source preview.';}
+  catalog.forEach(function(entry){
+    if(entry.group!=='IELTS Writing'&&entry.group!=='Pharmacy & Biomedicine'||omit[entry.id])return;
+    var id='curated-'+entry.id;if(existing[id])return;
+    starters.push({id:id,builtin:true,title:entry.title,category:entry.group==='IELTS Writing'?'IELTS':'Pharmacy',source:label(entry.source)+' · curated online resource',license:license(entry.source),tags:(entry.tags||[]).concat(['online-resource']),text:entry.description,folderId:entry.folderId,chapterMode:'single',remoteResource:{catalogId:entry.id,group:entry.group,source:entry.source,query:entry.query,description:entry.description}});
+    existing[id]=true;
+  });
+  window.WRITING_ASSISTANT_STARTER_LIBRARY=starters;
+  if(!document.querySelector('link[data-library-preview-style]')){var link=document.createElement('link');link.rel='stylesheet';link.href='assets/library-preview.css';link.dataset.libraryPreviewStyle='1';document.head.appendChild(link);}
+  if(!document.querySelector('script[data-library-preview-script]')){var script=document.createElement('script');script.src='js/library-preview.js';script.async=false;script.dataset.libraryPreviewScript='1';document.head.appendChild(script);}
 })();
