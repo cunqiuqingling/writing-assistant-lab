@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - feature/curated-ielts-pharmacy-library
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
