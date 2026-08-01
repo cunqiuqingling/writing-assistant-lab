@@ -193,7 +193,14 @@
 
   function ensureBatchToolbar() {
     var grid = byId('libraryGrid');
-    if (!grid || byId('libraryBatchToolbar')) return;
+    if (!grid) return;
+    var existing = byId('libraryBatchToolbar');
+    if (existing) {
+      if (existing.parentNode !== grid.parentNode || existing.nextElementSibling !== grid) {
+        grid.parentNode.insertBefore(existing, grid);
+      }
+      return;
+    }
     var bar = document.createElement('div');
     bar.id = 'libraryBatchToolbar';
     bar.className = 'library-batch-toolbar';
