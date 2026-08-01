@@ -41,7 +41,8 @@
       backdrop-filter: blur(16px);
     }
     .brand { display: flex; align-items: center; gap: 10px; min-width: 205px; }
-    .logo { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 12px; background: var(--primary); color: #fff; font-weight: 900; box-shadow: 0 10px 24px rgba(53,89,224,.22); }
+    .logo { width: 38px; height: 38px; display: grid; place-items: center; overflow: hidden; border-radius: 12px; background: #fff; box-shadow: 0 10px 24px rgba(53,89,224,.18); }
+    .logo img { display: block; width: 100%; height: 100%; object-fit: cover; }
     .brand-title { font-size: 15px; font-weight: 850; }
     .brand-sub { margin-top: 2px; color: var(--muted); font-size: 11px; }
     .lab-tabs { display: flex; gap: 5px; padding: 4px; border: 1px solid var(--line); border-radius: 13px; background: #fff; }
