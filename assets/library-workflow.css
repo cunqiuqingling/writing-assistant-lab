@@ -183,3 +183,14 @@ body[data-lab-active="library"] .main-panel {
     width: 100%;
   }
 }
+
+/* library-count-alignment-fix */
+.library-toolbar #libraryCount {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  padding: 7px 12px;
+  white-space: nowrap;
+  text-align: center;
+}
