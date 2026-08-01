@@ -1,15 +1,45 @@
 {
+  "schemaVersion": 2,
+  "format": "writing-assistant-library",
+  "generatedAt": "2026-08-01T00:00:00Z",
   "items": [
     {
-      "title": "My IELTS paragraph",
+      "id": "ielts-sample-example",
+      "title": "IELTS Writing Sample · Example",
       "category": "IELTS",
-      "source": "Personal notes",
-      "license": "Personal study",
-      "tags": [
-        "education",
-        "argument"
+      "folderPath": [
+        "IELTS Writing",
+        "Education"
       ],
-      "text": "Paste the practice text here."
+      "materialType": "scored-writing-sample",
+      "taskPrompt": "Insert the exact writing task here.",
+      "sourceMeta": {
+        "publisher": "Verified source publisher",
+        "title": "Original source title",
+        "url": "https://example.org/source",
+        "accessedAt": "2026-08-01",
+        "reuseStatus": "personal-study-only",
+        "rightsNote": "Check the original source before redistribution."
+      },
+      "license": "Personal study only",
+      "tags": [
+        "IELTS",
+        "writing sample"
+      ],
+      "text": "Insert the complete practice text here.",
+      "assessment": {
+        "status": "unscored",
+        "overallBand": null,
+        "criteria": {
+          "taskResponse": null,
+          "coherenceCohesion": null,
+          "lexicalResource": null,
+          "grammaticalRangeAccuracy": null
+        },
+        "examinerComments": "",
+        "sourceLabel": "",
+        "sourceUrl": "https://example.org/source"
+      }
     }
   ]
 }

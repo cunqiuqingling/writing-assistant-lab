@@ -1,0 +1,88 @@
+/* Writing Assistant · Library Schema v2, material details and AI packaging guide */
+.library-schema-detail-button {
+  flex: 0 0 auto;
+  margin-top: -2px;
+  padding: 3px 5px;
+  border: 0;
+  border-radius: 7px;
+  color: #667085;
+  background: transparent;
+  font-size: 9px;
+  font-weight: 850;
+  cursor: pointer;
+}
+.library-schema-detail-button:hover,
+.library-schema-detail-button:focus-visible {
+  color: var(--primary);
+  background: var(--primary-soft);
+  outline: none;
+}
+.library-card-title-row h3 { flex: 1; min-width: 0; }
+.library-schema-modal { width: min(940px, calc(100vw - 28px)); max-height: min(90vh, 940px); overflow: hidden; }
+.library-schema-modal .modal-body { max-height: calc(90vh - 92px); overflow: auto; }
+.library-detail-body { display: grid; gap: 12px; }
+.library-detail-section { border: 1px solid var(--line); border-radius: 14px; padding: 14px; background: #fff; }
+.library-detail-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+.library-detail-heading h3 { margin: 0; font-size: 12px; }
+.library-detail-heading > div { display: flex; align-items: center; flex-wrap: wrap; justify-content: flex-end; gap: 7px; }
+.library-detail-heading a { font-size: 10px; font-weight: 800; text-decoration: none; }
+.library-detail-text { max-height: 50vh; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; font-family: var(--exam-font); font-size: 15px; line-height: 1.72; color: #344054; }
+.library-detail-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px; }
+.task-prompt { margin: 0; white-space: pre-wrap; color: #344054; line-height: 1.68; }
+.schema-status { display: inline-flex; align-items: center; min-height: 24px; padding: 4px 8px; border-radius: 999px; color: #354bb3; background: var(--primary-soft); font-size: 9px; font-weight: 850; }
+.schema-status.official, .schema-status.official-source { color: #166534; background: #ecfdf3; }
+.schema-status.aiEstimated { color: #9a6700; background: var(--warn-soft); }
+.schema-status.unscored, .schema-status.neutral { color: #596579; background: #f0f2f6; }
+.schema-band { font-size: 15px; }
+.schema-criteria { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 7px; }
+.schema-criteria > div { min-width: 0; padding: 9px; border: 1px solid var(--line); border-radius: 10px; background: #fbfcff; }
+.schema-criteria span, .schema-criteria strong { display: block; }
+.schema-criteria span { min-height: 30px; color: var(--muted); font-size: 9px; line-height: 1.45; }
+.schema-criteria strong { margin-top: 4px; font-size: 13px; }
+.schema-comment { margin-top: 10px; padding: 11px 12px; border-radius: 11px; background: #fbfcff; }
+.schema-comment strong { font-size: 10px; }
+.schema-comment p, .schema-note { margin: 5px 0 0; color: #596579; font-size: 11px; line-height: 1.65; }
+.professional-meta { display: grid; gap: 7px; margin: 0; }
+.professional-meta > div { display: grid; grid-template-columns: 92px 1fr; gap: 10px; align-items: start; }
+.professional-meta dt { color: var(--muted); font-size: 10px; font-weight: 800; }
+.professional-meta dd { margin: 0; color: #344054; font-size: 11px; line-height: 1.55; }
+.ai-library-wizard .modal-body { display: grid; gap: 12px; }
+.ai-wizard-grid { display: grid; grid-template-columns: 1fr 0.45fr 1.4fr; gap: 10px; }
+.ai-wizard-grid .text-input, .ai-wizard-grid select { width: 100%; }
+.ai-material-input { min-height: 120px; }
+.ai-prompt-output { min-height: 260px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 11px; line-height: 1.55; }
+.ai-official-links { padding: 12px 14px; border: 1px solid var(--line); border-radius: 13px; background: #fbfcff; }
+.ai-official-links > strong { display: block; margin-bottom: 7px; font-size: 10px; }
+.ai-official-links div { display: flex; flex-wrap: wrap; gap: 8px 14px; }
+.ai-official-links a, .ai-official-links span { font-size: 10px; line-height: 1.5; }
+.ai-wizard-actions { flex-wrap: wrap; }
+.import-preflight-list { display: grid; gap: 8px; }
+.import-preflight-item { padding: 11px 12px; border: 1px solid var(--line); border-radius: 12px; background: #fff; }
+.import-preflight-item.valid { border-color: #bbefcf; }
+.import-preflight-item.warning { border-color: #f0d48a; background: #fffcf3; }
+.import-preflight-item.invalid { border-color: #f5b9b9; background: #fff7f7; }
+.import-preflight-item label { display: flex; align-items: flex-start; gap: 9px; }
+.import-preflight-item label span { display: grid; gap: 3px; }
+.import-preflight-item strong { font-size: 11px; }
+.import-preflight-item small { color: var(--muted); font-size: 9px; }
+.import-preflight-item ul { margin: 8px 0 0 26px; padding: 0; }
+.import-preflight-item li, .import-preflight-item p { margin: 3px 0; font-size: 10px; line-height: 1.5; }
+.import-preflight-item li.error { color: #b42318; }
+.import-preflight-item li.warning { color: #9a6700; }
+.import-preflight-item p { color: #18794e; }
+.material-assessment-details { margin: 11px 0; border: 1px solid var(--line); border-radius: 13px; background: #fbfcff; }
+.material-assessment-details > summary { cursor: pointer; padding: 12px 14px; color: #485469; font-size: 11px; font-weight: 850; }
+.material-assessment-body { padding: 0 14px 14px; }
+.material-assessment-body > p { margin: 0 0 12px; color: var(--muted); font-size: 10px; line-height: 1.6; }
+.schema-criteria-input { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.schema-criteria-input label { display: grid; gap: 5px; color: var(--muted); font-size: 9px; }
+.schema-criteria-input .text-input { width: 100%; }
+@media (max-width: 760px) {
+  .library-schema-modal { width: calc(100vw - 18px); max-height: 93vh; }
+  .library-schema-modal .modal-body { max-height: calc(93vh - 88px); }
+  .ai-wizard-grid, .schema-criteria, .schema-criteria-input { grid-template-columns: 1fr; }
+  .library-detail-heading { flex-direction: column; }
+  .library-detail-heading > div { justify-content: flex-start; }
+  .professional-meta > div { grid-template-columns: 78px 1fr; }
+  .library-detail-actions .btn, .ai-wizard-actions .btn { flex: 1 1 100%; }
+}
