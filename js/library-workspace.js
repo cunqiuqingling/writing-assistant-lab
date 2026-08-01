@@ -80,6 +80,9 @@
     var appState = state();
     appState.library = appState.library || {};
     appState.library.hiddenDefaultFolderIds = Array.isArray(appState.library.hiddenDefaultFolderIds) ? appState.library.hiddenDefaultFolderIds : [];
+    appState.library.hiddenBuiltinItemIds = Array.isArray(appState.library.hiddenBuiltinItemIds) ? appState.library.hiddenBuiltinItemIds : [];
+    appState.library.builtinFolderOverrides = appState.library.builtinFolderOverrides && typeof appState.library.builtinFolderOverrides === 'object'
+      ? appState.library.builtinFolderOverrides : {};
     return appState.library;
   }
   function hiddenDefaultFolderIds() { return folderPreferences().hiddenDefaultFolderIds; }
@@ -115,7 +118,9 @@
     return 'folder-my-custom';
   }
   function itemFolderId(item) {
-    return visibleFolderId(item.folderId || BUILTIN_FOLDER_MAP[item.id] || defaultFolderForCategory(item.category));
+    var preferences = folderPreferences();
+    var override = item && item.builtin ? preferences.builtinFolderOverrides[item.id] : '';
+    return visibleFolderId(override || item.folderId || BUILTIN_FOLDER_MAP[item.id] || defaultFolderForCategory(item.category));
   }
 
   function titleOverrides() {
@@ -130,7 +135,12 @@
     if (copy.builtin && titleOverrides()[copy.id]) copy.title = titleOverrides()[copy.id];
     return copy;
   }
-  function displayedItems(items) { return (items || []).map(displayedItem); }
+  function displayedItems(items) {
+    var hidden = folderPreferences().hiddenBuiltinItemIds;
+    return (items || []).filter(function (item) {
+      return !item.builtin || hidden.indexOf(item.id) < 0;
+    }).map(displayedItem);
+  }
   function getLibraryItem(id) { return libraryCache.find(function (item) { return item.id === id; }) || null; }
   async function syncDocumentTitle(documentId, title) {
     var appState = state();

@@ -1,0 +1,185 @@
+/* Writing Assistant · library workflow improvements · 0.8.2-R1 */
+body[data-lab-active="library"] .workspace {
+  width: 100%;
+  max-width: none;
+  padding: 14px;
+}
+body[data-lab-active="library"] .main-panel {
+  width: 100%;
+}
+.library-package-hub-button {
+  min-width: 176px;
+}
+.library-package-hub-modal {
+  width: min(680px, calc(100vw - 28px));
+}
+.library-package-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.library-package-option {
+  display: grid;
+  gap: 6px;
+  min-height: 132px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  background: #fff;
+  color: var(--text);
+  text-align: left;
+}
+.library-package-option:hover,
+.library-package-option:focus-visible {
+  border-color: #aebcf3;
+  background: #f8faff;
+  outline: none;
+}
+.library-package-option strong {
+  font-size: 14px;
+}
+.library-package-option span {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.65;
+}
+.library-batch-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-height: 40px;
+  margin: -4px 0 12px;
+}
+.library-batch-toolbar .library-batch-summary {
+  margin-right: auto;
+  color: var(--muted);
+  font-size: 11px;
+}
+.library-batch-toolbar:not(.active) [data-batch-active-only] {
+  display: none;
+}
+.library-card {
+  position: relative;
+}
+.library-batch-check {
+  position: absolute;
+  top: 11px;
+  left: 11px;
+  z-index: 3;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 27px;
+  height: 27px;
+  border: 1px solid #d8dfeb;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, .96);
+  box-shadow: 0 4px 12px rgba(24, 39, 75, .08);
+}
+.library-card.library-batch-mode {
+  padding-top: 49px;
+}
+.library-card.library-batch-mode .library-batch-check {
+  display: flex;
+}
+.library-card.library-batch-selected {
+  border-color: #8ea4f4;
+  box-shadow: 0 0 0 3px rgba(53, 89, 224, .08);
+}
+.library-batch-check input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--primary);
+}
+.library-batch-modal {
+  width: min(560px, calc(100vw - 28px));
+}
+.library-batch-folder-select {
+  width: 100%;
+}
+.library-batch-warning {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  color: #7a5600;
+  background: var(--warn-soft);
+  font-size: 11px;
+  line-height: 1.65;
+}
+.ielts-reference-score .ielts-score-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 9px;
+}
+.ielts-reference-score .ielts-score-head h3 {
+  margin: 0;
+}
+.ielts-score-overall {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  margin: 4px 0 10px;
+}
+.ielts-score-overall strong {
+  font-size: 22px;
+}
+.ielts-score-overall span {
+  color: var(--muted);
+  font-size: 10px;
+}
+.ielts-score-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+.ielts-score-grid div {
+  min-width: 0;
+  padding: 8px;
+  border-radius: 10px;
+  background: #f6f8fc;
+}
+.ielts-score-grid span,
+.ielts-score-grid strong {
+  display: block;
+}
+.ielts-score-grid span {
+  min-height: 27px;
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.4;
+}
+.ielts-score-grid strong {
+  margin-top: 3px;
+  font-size: 13px;
+}
+.ielts-score-note {
+  margin: 9px 0 0;
+  color: #7a8495;
+  font-size: 9px;
+  line-height: 1.6;
+}
+@media (max-width: 760px) {
+  body[data-lab-active="library"] .workspace {
+    padding: 9px;
+  }
+  .library-package-options {
+    grid-template-columns: 1fr;
+  }
+  .library-package-hub-button {
+    width: 100%;
+  }
+  .library-batch-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .library-batch-toolbar .library-batch-summary {
+    margin-right: 0;
+  }
+  .library-batch-toolbar .btn {
+    width: 100%;
+  }
+}

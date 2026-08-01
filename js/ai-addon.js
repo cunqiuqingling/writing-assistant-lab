@@ -9,7 +9,7 @@
   var LEGACY_SESSION_KEY = 'writing-assistant-ai-session-key-v1';
   var LEGACY_ENCRYPTED_KEY = 'writing-assistant-ai-encrypted-key-v1';
   var ANALYSIS_KEY = 'writing-assistant-ai-reference-analysis-v1';
-  var PROMPT_VERSION = '0.8.2-r1-zh-first-layout-v1';
+  var PROMPT_VERSION = '0.8.2-r1-ielts-scoring-v2';
   var MAX_ANALYSIS_RECORDS = 80;
   var MAX_CONTEXT_CHARS = 20000;
   var activeRequest = null;
@@ -128,7 +128,9 @@
     '推进链': 'Development chain',
     '衔接与连贯': 'Cohesion and coherence',
     '关键表达': 'High-value language',
-    '可迁移骨架': 'Transferable skeleton'
+    '可迁移骨架': 'Transferable skeleton',
+    'IELTS评分关联': 'IELTS scoring relevance',
+    'IELTS模拟评分': 'IELTS simulated scoring'
   };
 
   var SYSTEM_PROMPT = [
@@ -851,16 +853,74 @@
     return '<<<' + label + '>>>\n' + content + '\n<<<END ' + label + '>>>';
   }
 
+  function currentIeltsReferenceMeta(kind) {
+    var app = window.WritingAssistantCore;
+    var library = window.WritingAssistantWorkspace;
+    if (!app || !library || typeof library.getItem !== 'function') return null;
+    var appState = app.getState();
+    var current = appState[kind] || {};
+    var itemId = current.documentId || current.materialId || '';
+    var item = itemId ? library.getItem(itemId) : null;
+    if (!item) return null;
+    var tags = Array.isArray(item.tags) ? item.tags.join(' ') : '';
+    var isIelts = item.category === 'IELTS'
+      || /^folder-ielts(?:-|$)/.test(text(item.folderId))
+      || /ielts/i.test(text(item.materialType))
+      || /ielts/i.test(tags);
+    if (!isIelts) return null;
+    return {
+      title: text(item.title),
+      taskPrompt: text(item.taskPrompt),
+      assessment: item.assessment || null
+    };
+  }
+
+  function ieltsReferencePromptLines(ctx, kind, english) {
+    if (!ctx || !ctx.ielts) return [];
+    var assessment = ctx.ielts.assessment || null;
+    var context = assessment ? JSON.stringify(assessment) : 'No verified score metadata is attached.';
+    if (english) {
+      if (kind === 'sentence') {
+        return [
+          '## IELTS scoring relevance',
+          'Explain how this reference sentence may contribute to Task Response, Coherence and Cohesion, Lexical Resource, and Grammatical Range and Accuracy.',
+          'Do not assign a whole-essay band score from one sentence. State only observable strengths, risks, and transferable exam-writing value.',
+          'Existing material score metadata is context only and must not be copied blindly: ' + context
+        ];
+      }
+      return [
+        '## IELTS simulated scoring',
+        'Give paragraph-level simulated scores from 0 to 9 for Task Response, Coherence and Cohesion, Lexical Resource, and Grammatical Range and Accuracy, plus one approximate overall score.',
+        'Cite observable evidence for every score. Clearly state that this is an AI paragraph-level estimate, not an official whole-essay IELTS result.',
+        'Existing material score metadata is context only and must not be copied blindly: ' + context
+      ];
+    }
+    if (kind === 'sentence') {
+      return [
+        '## IELTS评分关联',
+        '说明这个参考句子可能如何影响Task Response（任务回应）、Coherence and Cohesion（连贯与衔接）、Lexical Resource（词汇资源）和Grammatical Range and Accuracy（语法多样性与准确性）。',
+        '不得仅凭一个句子给整篇作文Band分；只给出有原文证据的优点、风险和可迁移考试价值。',
+        '材料已有评分仅作为背景，不得照抄：' + context
+      ];
+    }
+    return [
+      '## IELTS模拟评分',
+      '对当前参考段落分别给出Task Response、Coherence and Cohesion、Lexical Resource、Grammatical Range and Accuracy的0–9分模拟分，并给出一个综合参考分。',
+      '每项必须引用可观察证据，并明确这是AI段落级估分，不是官方整篇IELTS成绩。',
+      '材料已有评分仅作为背景，不得照抄：' + context
+    ];
+  }
+
   function gatherSentenceContext() {
     var original = trimmed(byId('sentenceTarget') && byId('sentenceTarget').textContent);
-    return { kind: 'sentence', original: original };
+    return { kind: 'sentence', original: original, ielts: currentIeltsReferenceMeta('sentence') };
   }
 
   function gatherParagraphContext() {
     var original = all('#roleRows .sentence-text').map(function (node) {
       return node.textContent.replace(/^\s*\d+\.\s*/, '').trim();
     }).join(' ');
-    return { kind: 'paragraph', original: original };
+    return { kind: 'paragraph', original: original, ielts: currentIeltsReferenceMeta('paragraph') };
   }
 
   function buildSentencePrompt(ctx) {
@@ -887,7 +947,7 @@
         'Provide one abstract template with placeholders.',
         '## Imitation checklist',
         'Give three concise points. Do not assess learner writing.'
-      ].join('\n');
+      ].concat(ieltsReferencePromptLines(ctx, 'sentence', true)).join('\n');
     }
 
     return [
@@ -913,7 +973,7 @@
       '给出一个抽象英文模板，并紧跟中文使用说明。不要改写整句。',
       '## 仿写提醒',
       '用中文给出三条简洁提醒，不评价学习者作品。'
-    ].join('\n');
+    ].concat(ieltsReferencePromptLines(ctx, 'sentence', false)).join('\n');
   }
 
   function buildParagraphPrompt(ctx) {
@@ -933,7 +993,7 @@
         '## High-value language',
         '## Transferable skeleton',
         '## Imitation checklist'
-      ].join('\n');
+      ].concat(ieltsReferencePromptLines(ctx, 'paragraph', true)).join('\n');
     }
 
     return [
@@ -957,7 +1017,7 @@
       '给出可用于新主题的抽象推进顺序，并补充中文使用说明。',
       '## 仿写提醒',
       '用中文给出四条简洁提醒，不评价学习者作品。'
-    ].join('\n');
+    ].concat(ieltsReferencePromptLines(ctx, 'paragraph', false)).join('\n');
   }
 
   function contextFor(kind) { return kind === 'sentence' ? gatherSentenceContext() : gatherParagraphContext(); }
