@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#fff7ef" />
+  <title>今天干嘛呢</title>
+  <style>
+    :root{
+      --bg:#fff7ef;--card:#ffffff;--text:#2f2a26;--muted:#8b7d72;--accent:#ff8d6b;
+      --shadow:0 18px 50px rgba(80,52,35,.12)
+    }
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    html,body{margin:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;background:linear-gradient(180deg,#fff7ef 0%,#fffdf9 100%);color:var(--text)}
+    body{display:flex;justify-content:center}
+    .app{width:min(100%,460px);padding:28px 20px 34px;min-height:100vh}
+    .head{text-align:center;margin:8px 0 20px}
+    .head h1{margin:0;font-size:30px;letter-spacing:.5px}
+    .head p{margin:8px 0 0;color:var(--muted);font-size:14px}
+    .card{background:var(--card);border-radius:28px;padding:24px 18px 22px;box-shadow:var(--shadow)}
+    .wheel-wrap{position:relative;width:min(82vw,340px);aspect-ratio:1;margin:0 auto 22px}
+    .pointer{position:absolute;z-index:4;top:-8px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:16px solid transparent;border-right:16px solid transparent;border-top:0;border-bottom:30px solid #2f2a26;filter:drop-shadow(0 4px 4px rgba(0,0,0,.12))}
+    .wheel{
+      width:100%;height:100%;border-radius:50%;position:relative;overflow:hidden;
+      border:10px solid #fff;box-shadow:0 10px 30px rgba(70,45,30,.16), inset 0 0 0 1px rgba(0,0,0,.04);
+      background:conic-gradient(
+        #ffd8c9 0deg 45deg,
+        #ffe6a8 45deg 90deg,
+        #d7efce 90deg 135deg,
+        #cfe9ff 135deg 180deg,
+        #e3dcff 180deg 225deg,
+        #ffd7e8 225deg 270deg,
+        #d8f2ed 270deg 315deg,
+        #ffe0bd 315deg 360deg
+      );
+      transition:transform 3.2s cubic-bezier(.12,.68,.2,1);
+    }
+    .wheel:after{content:"";position:absolute;inset:50%;width:64px;height:64px;transform:translate(-50%,-50%);border-radius:50%;background:#fff;box-shadow:0 3px 14px rgba(0,0,0,.12)}
+    .label{position:absolute;left:50%;top:50%;width:90px;margin-left:-45px;text-align:center;font-weight:700;font-size:15px;line-height:1.15;transform-origin:45px 0;color:#3b332e}
+    .l0{transform:rotate(22.5deg) translateY(-132px) rotate(-22.5deg)}
+    .l1{transform:rotate(67.5deg) translateY(-132px) rotate(-67.5deg)}
+    .l2{transform:rotate(112.5deg) translateY(-132px) rotate(-112.5deg)}
+    .l3{transform:rotate(157.5deg) translateY(-132px) rotate(-157.5deg)}
+    .l4{transform:rotate(202.5deg) translateY(-132px) rotate(-202.5deg)}
+    .l5{transform:rotate(247.5deg) translateY(-132px) rotate(-247.5deg)}
+    .l6{transform:rotate(292.5deg) translateY(-132px) rotate(-292.5deg)}
+    .l7{transform:rotate(337.5deg) translateY(-132px) rotate(-337.5deg)}
+    .result{min-height:64px;border-radius:18px;background:#fff7ef;display:flex;align-items:center;justify-content:center;text-align:center;padding:12px 16px;margin-bottom:14px;font-size:19px;font-weight:700}
+    .result small{display:block;font-size:12px;font-weight:500;color:var(--muted);margin-top:5px}
+    button{width:100%;border:0;border-radius:18px;padding:16px 18px;font-size:18px;font-weight:800;background:var(--accent);color:white;box-shadow:0 8px 18px rgba(255,141,107,.25);cursor:pointer}
+    button:active{transform:scale(.99)}
+    button:disabled{opacity:.65}
+    .mini{margin-top:12px;text-align:center;color:var(--muted);font-size:12px}
+  </style>
+</head>
+<body>
+  <main class="app">
+    <div class="head">
+      <h1>今天干嘛呢 🎡</h1>
+      <p>想不到就交给命运，转到什么就去做什么。</p>
+    </div>
+    <section class="card">
+      <div class="wheel-wrap">
+        <div class="pointer"></div>
+        <div class="wheel" id="wheel">
+          <div class="label l0">按摩</div>
+          <div class="label l1">吃点好吃的</div>
+          <div class="label l2">奶茶</div>
+          <div class="label l3">逛一逛</div>
+          <div class="label l4">看电影</div>
+          <div class="label l5">电玩城</div>
+          <div class="label l6">散步</div>
+          <div class="label l7">看夜景</div>
+        </div>
+      </div>
+      <div class="result" id="result">准备好了吗 👀</div>
+      <button id="spin">转一下</button>
+      <div class="mini">不满意？可以理直气壮地再转一次。</div>
+    </section>
+  </main>
+<script>
+(function(){
+  const items = [
+    ["按摩","去放松一下，今天辛苦了。"],
+    ["吃点好吃的","随便挑一家顺眼的，先把肚子哄开心。"],
+    ["奶茶","点杯想喝的，甜一点也没关系。"],
+    ["逛一逛","不设目的地，走到哪算哪。"],
+    ["看电影","选一部顺眼的，坐着发会儿呆也行。"],
+    ["电玩城","去玩点不用动脑子的。"],
+    ["散步","找个舒服的地方慢慢走。"],
+    ["看夜景","吹吹风，看看灯，今天就这样。"]
+  ];
+  const wheel = document.getElementById("wheel");
+  const result = document.getElementById("result");
+  const btn = document.getElementById("spin");
+  let total = 0, spinning = false;
+
+  function rand(max){
+    if (window.crypto && crypto.getRandomValues) {
+      const a = new Uint32Array(1);
+      crypto.getRandomValues(a);
+      return a[0] % max;
+    }
+    return Math.floor(Math.random()*max);
+  }
+
+  btn.addEventListener("click", function(){
+    if (spinning) return;
+    spinning = true;
+    btn.disabled = true;
+    result.textContent = "命运加载中…";
+    const idx = rand(items.length);
+    const center = idx * 45 + 22.5;
+    const current = ((total % 360) + 360) % 360;
+    const target = (360 - center + 360) % 360;
+    const delta = (target - current + 360) % 360;
+    total += 360 * 6 + delta;
+    wheel.style.transform = "rotate(" + total + "deg)";
+    setTimeout(function(){
+      result.innerHTML = items[idx][0] + "<small>" + items[idx][1] + "</small>";
+      btn.textContent = "再转一次";
+      btn.disabled = false;
+      spinning = false;
+    }, 3250);
+  });
+})();
+</script>
+</body>
+</html>
